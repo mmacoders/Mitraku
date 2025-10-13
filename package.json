@@ -1,0 +1,35 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vue-tsc && vite build",
+        "dev": "vite",
+        "serve": "concurrently \"php artisan serve\" \"npm run dev\""
+    },
+    "devDependencies": {
+        "@inertiajs/vue3": "^2.0.0",
+        "@tailwindcss/forms": "^0.5.3",
+        "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-vue": "^6.0.1",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.11.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.2.1",
+        "typescript": "^5.6.3",
+        "vite": "^7.1.9",
+        "vue": "^3.4.0",
+        "vue-tsc": "^2.0.24"
+    },
+    "dependencies": {
+        "@headlessui/vue": "^1.7.23",
+        "apexcharts": "^5.3.5",
+        "googleapis": "^162.0.0",
+        "lucide-vue-next": "^0.545.0",
+        "vue3-apexcharts": "^1.8.0",
+        "vue3-avatar": "^3.1.0",
+        "ziggy-js": "^2.6.0"
+    }
+}

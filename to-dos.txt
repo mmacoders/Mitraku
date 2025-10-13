@@ -1,0 +1,682 @@
+<template>
+  <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Background overlay -->
+      <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeModal"></div>
+
+      <!-- Modal container -->
+      <div class="inline-block w-full align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full dark:bg-gray-800"
+           :class="{ 'max-w-3xl': !isMobile, 'fixed inset-0': isMobile }">
+        <!-- Modal header -->
+        <div class="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-2xl mr-3 text-blue-600">📑</span>
+              <div>
+                <h3 class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
+                  Form Pengajuan PKS
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Isi data mitra dan unggah dokumen pendukung dengan lengkap
+                </p>
+              </div>
+            </div>
+            <button @click="closeModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+              <span class="text-2xl">&times;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal body -->
+        <div class="px-4 pt-2 pb-4 sm:px-6 sm:pb-6" :class="{ 'h-[calc(100vh-120px)] overflow-y-auto': isMobile }">
+          <form @submit.prevent="submitForm" class="space-y-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <!-- Nama Mitra -->
+              <div class="relative">
+                <TextInput
+                  id="partnerName"
+                  v-model="form.partnerName"
+                  type="text"
+                  class="block w-full mt-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  :class="{ 'pt-5 pb-1': form.partnerName, 'py-3': !form.partnerName }"
+                  required
+                  :disabled="form.processing"
+                />
+                <label 
+                  for="partnerName" 
+                  class="absolute left-3 transition-all duration-200 ease-in-out text-gray-500 dark:text-gray-400 pointer-events-none"
+                  :class="{
+                    'top-1.5 text-xs': form.partnerName,
+                    'top-3.5 text-sm': !form.partnerName
+                  }"
+                >
+                  Nama Mitra
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Pastikan nama mitra sesuai dokumen resmi
+                </p>
+                <InputError class="mt-1" :message="form.errors.partnerName" />
+              </div>
+
+              <!-- No. Telp -->
+              <div class="relative">
+                <TextInput
+                  id="phone"
+                  v-model="form.phone"
+                  type="tel"
+                  class="block w-full mt-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  :class="{ 'pt-5 pb-1': form.phone, 'py-3': !form.phone }"
+                  :disabled="form.processing"
+                />
+                <label 
+                  for="phone" 
+                  class="absolute left-3 transition-all duration-200 ease-in-out text-gray-500 dark:text-gray-400 pointer-events-none"
+                  :class="{
+                    'top-1.5 text-xs': form.phone,
+                    'top-3.5 text-sm': !form.phone
+                  }"
+                >
+                  No. Telp (Opsional)
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Nomor telepon mitra yang dapat dihubungi
+                </p>
+                <InputError class="mt-1" :message="form.errors.phone" />
+              </div>
+            </div>
+
+            <!-- Judul Pengajuan -->
+            <div class="relative">
+              <TextInput
+                id="title"
+                v-model="form.title"
+                type="text"
+                class="block w-full mt-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                :class="{ 'pt-5 pb-1': form.title, 'py-3': !form.title }"
+                required
+                :disabled="form.processing"
+              />
+              <label 
+                for="title" 
+                class="absolute left-3 transition-all duration-200 ease-in-out text-gray-500 dark:text-gray-400 pointer-events-none"
+                :class="{
+                  'top-1.5 text-xs': form.title,
+                  'top-3.5 text-sm': !form.title
+                }"
+              >
+                Judul Pengajuan
+              </label>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Judul kerjasama yang diajukan
+              </p>
+              <InputError class="mt-1" :message="form.errors.title" />
+            </div>
+
+            <!-- Tujuan Pengajuan -->
+            <div class="relative">
+              <label 
+                for="purpose" 
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Tujuan Pengajuan
+              </label>
+              <textarea
+                id="purpose"
+                v-model="form.purpose"
+                class="block w-full mt-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                rows="4"
+                required
+                :disabled="form.processing"
+              ></textarea>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Jelaskan tujuan dan manfaat kerjasama ini
+              </p>
+              <InputError class="mt-1" :message="form.errors.purpose" />
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4"></div>
+
+            <!-- Upload Dokumen Grid -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <!-- Upload Dokumen KAK -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 -mt-5 sm:-mt-5 lg:-mt-5">
+                  Upload Dokumen KAK
+                </label>
+                <div 
+                  class="mt-1 flex flex-col items-center justify-center h-20 px-4 border-2 border-dashed rounded-lg transition-colors duration-200 cursor-pointer"
+                  :class="{
+                    'border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-600': isDraggingKAK,
+                    'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700': !isDraggingKAK
+                  }"
+                  @dragover.prevent="handleDragOverKAK"
+                  @dragleave.prevent="handleDragLeaveKAK"
+                  @drop.prevent="handleDropKAK"
+                  @click="triggerKAKFileInput"
+                >
+                  <div class="flex flex-col items-center text-center">
+                    <div class="text-gray-600 dark:text-gray-400">
+                      <span class="text-2xl">📂</span>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p>Tarik file atau klik</p>
+                      <p class="text-xs mt-1">PDF/DOCX</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Preview for KAK document -->
+                <div v-if="form.kakDocument" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
+                  <div class="flex items-center">
+                    <span class="text-lg mr-2">
+                      {{ form.kakDocument.type.includes('pdf') ? '📄' : '📝' }}
+                    </span>
+                    <div class="text-xs">
+                      <p class="font-medium text-gray-900 dark:text-white truncate max-w-[120px]">
+                        {{ form.kakDocument.name }}
+                      </p>
+                      <p class="text-gray-500 dark:text-gray-400">
+                        {{ formatFileSize(form.kakDocument.size) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex space-x-1">
+                    <button 
+                      type="button"
+                      @click.stop="viewKAKFile"
+                      class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      title="Lihat file"
+                    >
+                      👁
+                    </button>
+                    <button 
+                      type="button"
+                      @click.stop="removeKAKFile"
+                      class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                      title="Hapus file"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                </div>
+                
+                <input
+                  ref="kakFileInput"
+                  type="file"
+                  class="hidden"
+                  accept=".pdf,.docx"
+                  @change="e => handleKAKFileChange(e)"
+                  :disabled="form.processing"
+                />
+                <InputError class="mt-1" :message="form.errors.kakDocument" />
+              </div>
+
+              <!-- Upload Dokumen MoU -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 -mt-5 sm:-mt-5 lg:-mt-5">
+                  Upload Dokumen MoU
+                </label>  
+                <div 
+                  class="mt-1 flex flex-col items-center justify-center h-20 px-4 border-2 border-dashed rounded-lg transition-colors duration-200 cursor-pointer"
+                  :class="{
+                    'border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-600': isDraggingMoU,
+                    'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700': !isDraggingMoU
+                  }"
+                  @dragover.prevent="handleDragOverMoU"
+                  @dragleave.prevent="handleDragLeaveMoU"
+                  @drop.prevent="handleDropMoU"
+                  @click="triggerMoUFileInput"
+                >
+                  <div class="flex flex-col items-center text-center">
+                    <div class="text-gray-600 dark:text-gray-400">
+                      <span class="text-2xl">📂</span>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p>Tarik file atau klik</p>
+                      <p class="text-xs mt-1">PDF/DOCX</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Preview for MoU document -->
+                <div v-if="form.mouDocument" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
+                  <div class="flex items-center">
+                    <span class="text-lg mr-2">
+                      {{ form.mouDocument.type.includes('pdf') ? '📄' : '📝' }}
+                    </span>
+                    <div class="text-xs">
+                      <p class="font-medium text-gray-900 dark:text-white truncate max-w-[120px]">
+                        {{ form.mouDocument.name }}
+                      </p>
+                      <p class="text-gray-500 dark:text-gray-400">
+                        {{ formatFileSize(form.mouDocument.size) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex space-x-1">
+                    <button 
+                      type="button"
+                      @click.stop="viewMoUFile"
+                      class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      title="Lihat file"
+                    >
+                      👁
+                    </button>
+                    <button 
+                      type="button"
+                      @click.stop="removeMoUFile"
+                      class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                      title="Hapus file"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                </div>
+                
+                <input
+                  ref="mouFileInput"
+                  type="file"
+                  class="hidden"
+                  accept=".pdf,.docx"
+                  @change="e => handleMoUFileChange(e)"
+                  :disabled="form.processing"
+                />
+                <InputError class="mt-1" :message="form.errors.mouDocument" />
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse bg-gray-50 dark:bg-gray-700/50">
+          <PrimaryButton
+            class="w-full sm:ml-3 sm:w-auto"
+            :class="{ 'opacity-25': form.processing }"
+            :disabled="form.processing"
+            @click="submitForm"
+          >
+            <span v-if="form.processing" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Mengajukan...
+            </span>
+            <span v-else>Ajukan</span>
+          </PrimaryButton>
+          
+          <SecondaryButton 
+            class="w-full mt-3 sm:mt-0 sm:w-auto" 
+            :disabled="form.processing"
+            @click="closeModal"
+          >
+            Batal
+          </SecondaryButton>
+        </div>
+      </div>
+    </div>
+    
+    <!-- File Viewer Modal -->
+    <div v-if="fileViewer.isOpen" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeFileViewer"></div>
+        <div class="inline-block w-full align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full dark:bg-gray-800">
+          <div class="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                {{ fileViewer.fileName }}
+              </h3>
+              <button @click="closeFileViewer" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                <span class="text-2xl">&times;</span>
+              </button>
+            </div>
+          </div>
+          <div class="px-4 py-4 sm:px-6">
+            <div class="flex justify-center">
+              <embed 
+                v-if="fileViewer.fileUrl" 
+                :src="fileViewer.fileUrl" 
+                type="application/pdf" 
+                class="w-full h-[70vh] object-contain rounded-md border border-gray-300 dark:border-gray-600"
+              >
+              <div v-else class="text-center py-10">
+                <p class="text-gray-500 dark:text-gray-400">File tidak dapat dipreview. <a :href="fileViewer.fileUrl" target="_blank" class="text-blue-500 hover:text-blue-700">Klik untuk membuka di tab baru</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import TextInput from '@/Components/TextInput.vue'
+import InputError from '@/Components/InputError.vue'
+import PrimaryButton from '@/Components/PrimaryButton.vue'
+import SecondaryButton from '@/Components/SecondaryButton.vue'
+
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true
+  }
+})
+
+const emit = defineEmits(['close', 'success'])
+
+// Form data
+const form = useForm({
+  partnerName: '',
+  phone: '',
+  title: '',
+  purpose: '',
+  kakDocument: null,
+  mouDocument: null
+})
+
+// File input references
+const kakFileInput = ref(null)
+const mouFileInput = ref(null)
+
+// Drag state
+const isDraggingKAK = ref(false)
+const isDraggingMoU = ref(false)
+
+// File viewer state
+const fileViewer = ref({
+  isOpen: false,
+  fileUrl: null,
+  fileName: ''
+})
+
+// Mobile detection
+const isMobile = ref(window.innerWidth < 640)
+window.addEventListener('resize', () => {
+  isMobile.value = window.innerWidth < 640
+})
+
+// Helper functions
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// File input triggers
+const triggerKAKFileInput = () => {
+  if (!form.processing) {
+    kakFileInput.value.click()
+  }
+}
+
+const triggerMoUFileInput = () => {
+  if (!form.processing) {
+    mouFileInput.value.click()
+  }
+}
+
+// File change handlers with proper event binding
+const handleKAKFileChange = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    // Validate file type - accept PDF and DOCX files
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    const validExtensions = ['.pdf', '.docx']
+    const isFileTypeValid = validTypes.includes(file.type)
+    const isFileExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+    
+    if (!isFileTypeValid && !isFileExtensionValid) {
+      form.errors.kakDocument = 'Format file tidak valid. Hanya PDF dan DOCX yang diterima.'
+      return
+    }
+    // Clear any previous errors when a valid file is selected
+    form.kakDocument = file
+    form.errors.kakDocument = ''
+  }
+}
+
+const handleMoUFileChange = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    // Validate file type - accept PDF and DOCX files
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    const validExtensions = ['.pdf', '.docx']
+    const isFileTypeValid = validTypes.includes(file.type)
+    const isFileExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+    
+    if (!isFileTypeValid && !isFileExtensionValid) {
+      form.errors.mouDocument = 'Format file tidak valid. Hanya PDF dan DOCX yang diterima.'
+      return
+    }
+    // Clear any previous errors when a valid file is selected
+    form.mouDocument = file
+    form.errors.mouDocument = ''
+  }
+}
+
+// Drag and drop handlers for KAK
+const handleDragOverKAK = () => {
+  if (!form.processing) {
+    isDraggingKAK.value = true
+  }
+}
+
+const handleDragLeaveKAK = () => {
+  isDraggingKAK.value = false
+}
+
+const handleDropKAK = (event) => {
+  isDraggingKAK.value = false
+  const file = event.dataTransfer.files[0]
+  if (file) {
+    // Validate file type - accept PDF and DOCX files
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    const validExtensions = ['.pdf', '.docx']
+    const isFileTypeValid = validTypes.includes(file.type)
+    const isFileExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+    
+    if (!isFileTypeValid && !isFileExtensionValid) {
+      form.errors.kakDocument = 'Format file tidak valid. Hanya PDF dan DOCX yang diterima.'
+      return
+    }
+    // Clear any previous errors when a valid file is selected
+    form.kakDocument = file
+    form.errors.kakDocument = ''
+  }
+}
+
+// Drag and drop handlers for MoU
+const handleDragOverMoU = () => {
+  if (!form.processing) {
+    isDraggingMoU.value = true
+  }
+}
+
+const handleDragLeaveMoU = () => {
+  isDraggingMoU.value = false
+}
+
+const handleDropMoU = (event) => {
+  isDraggingMoU.value = false
+  const file = event.dataTransfer.files[0]
+  if (file) {
+    // Validate file type - accept PDF and DOCX files
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    const validExtensions = ['.pdf', '.docx']
+    const isFileTypeValid = validTypes.includes(file.type)
+    const isFileExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+    
+    if (!isFileTypeValid && !isFileExtensionValid) {
+      form.errors.mouDocument = 'Format file tidak valid. Hanya PDF dan DOCX yang diterima.'
+      return
+    }
+    // Clear any previous errors when a valid file is selected
+    form.mouDocument = file
+    form.errors.mouDocument = ''
+  }
+}
+
+// Remove file handlers
+const removeKAKFile = () => {
+  form.kakDocument = null
+  if (kakFileInput.value) {
+    kakFileInput.value.value = ''
+  }
+  form.errors.kakDocument = ''
+}
+
+const removeMoUFile = () => {
+  form.mouDocument = null
+  if (mouFileInput.value) {
+    mouFileInput.value.value = ''
+  }
+  form.errors.mouDocument = ''
+}
+
+// View file handlers
+const viewKAKFile = () => {
+  if (form.kakDocument) {
+    const fileUrl = URL.createObjectURL(form.kakDocument)
+    fileViewer.value = {
+      isOpen: true,
+      fileUrl: fileUrl,
+      fileName: form.kakDocument.name
+    }
+  }
+}
+
+const viewMoUFile = () => {
+  if (form.mouDocument) {
+    const fileUrl = URL.createObjectURL(form.mouDocument)
+    fileViewer.value = {
+      isOpen: true,
+      fileUrl: fileUrl,
+      fileName: form.mouDocument.name
+    }
+  }
+}
+
+// Close file viewer
+const closeFileViewer = () => {
+  fileViewer.value = {
+    isOpen: false,
+    fileUrl: null,
+    fileName: ''
+  }
+}
+
+// Form submission with proper file handling
+const submitForm = () => {
+  // Clear previous general errors but keep field-specific errors until validation runs
+  if (form.errors.general) {
+    delete form.errors.general
+  }
+  
+  const formData = new FormData()
+  formData.append('partner_name', form.partnerName)
+  formData.append('phone', form.phone)
+  formData.append('title', form.title)
+  formData.append('purpose', form.purpose)
+  
+  // Append files with proper field names
+  if (form.kakDocument) {
+    formData.append('kak_document', form.kakDocument)
+  }
+  
+  if (form.mouDocument) {
+    formData.append('mou_document', form.mouDocument)
+  }
+
+  form.post(route('pks.store'), {
+    data: formData,
+    forceFormData: true,
+    onSuccess: () => {
+      // Reset form
+      form.reset()
+      form.errors = {}
+      
+      // Reset file inputs
+      if (kakFileInput.value) kakFileInput.value.value = ''
+      if (mouFileInput.value) mouFileInput.value.value = ''
+      
+      // Close modal and emit success event
+      emit('success')
+      closeModal()
+    },
+    onError: (errors) => {
+      // Handle validation errors - they are automatically set on form.errors
+      // and will be displayed by the InputError components
+      console.error('Validation errors:', errors)
+      
+      // Scroll to the first error field for better UX
+      setTimeout(() => {
+        const firstErrorElement = document.querySelector('.text-red-600, .text-red-500')
+        if (firstErrorElement) {
+          firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
+    }
+  })
+}
+
+// Close modal
+const closeModal = () => {
+  // Reset form
+  form.reset()
+  form.errors = {}
+  
+  // Reset file inputs
+  if (kakFileInput.value) kakFileInput.value.value = ''
+  if (mouFileInput.value) mouFileInput.value.value = ''
+  
+  // Reset drag states
+  isDraggingKAK.value = false
+  isDraggingMoU.value = false
+  
+  // Close file viewer if open
+  closeFileViewer()
+  
+  // Emit close event
+  emit('close')
+}
+
+// Watch for modal open/close to reset form if needed
+watch(() => props.isOpen, (newValue) => {
+  if (!newValue) {
+    // Modal is closing, reset form
+    form.reset()
+    form.errors = {}
+    
+    // Reset file inputs
+    if (kakFileInput.value) kakFileInput.value.value = ''
+    if (mouFileInput.value) mouFileInput.value.value = ''
+    
+    // Reset drag states
+    isDraggingKAK.value = false
+    isDraggingMoU.value = false
+    
+    // Close file viewer if open
+    closeFileViewer()
+  }
+})
+</script>
+
+<style scoped>
+/* Custom styles for the modal */
+input[type="file"]::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+/* Floating label effect */
+input:focus + label,
+input:not(:placeholder-shown) + label {
+  top: 0.5rem;
+  font-size: 0.75rem;
+}
+</style>
