@@ -2,34 +2,34 @@
   <Head title="Daftar Pengajuan PKS" />
   <AdminLayout>
     <template #header>
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 mb-6">
-        <h2 class="font-bold text-2xl text-gray-900 dark:text-white leading-tight">
+      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 sm:p-6 mb-6">
+        <h2 class="font-bold text-xl sm:text-2xl text-gray-900 dark:text-white leading-tight">
           {{ user.role === 'admin' ? 'Daftar Pengajuan PKS' : 'Pengajuan PKS Saya' }}
         </h2>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
+        <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
           Kelola semua pengajuan PKS dengan mudah dan terorganisir.
         </p>
       </div>
     </template>
 
-    <div class="py-6">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Main Content -->
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6 text-gray-900 dark:text-gray-100">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
               <div>
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Semua Pengajuan PKS
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Kelola semua pengajuan PKS Anda
                 </p>
               </div>
             </div>
 
             <!-- Filter and Search -->
-            <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <div class="mb-6 flex flex-col sm:flex-row gap-3">
               <div class="flex-1">
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -48,11 +48,11 @@
                 </div>
               </div>
               
-              <div class="w-full sm:w-48">
+              <div class="w-full sm:w-40">
                 <select
                   id="status"
                   v-model="statusFilter"
-                  class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3"
+                  class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-2 text-sm"
                   @change="filterSubmissions"
                 >
                   <option value="">Semua Status</option>
@@ -63,12 +63,12 @@
                 </select>
               </div>
               
-              <div class="w-full sm:w-48">
+              <div class="w-full sm:w-40">
                 <input
                   id="date"
                   v-model="dateFilter"
                   type="date"
-                  class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3"
+                  class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-2 text-sm"
                   @change="filterSubmissions"
                 />
               </div>
@@ -79,34 +79,34 @@
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Judul PKS
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Nama Mitra
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Waktu Pengajuan
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Aksi
                     </th>
                   </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="submission in filteredSubmissions" :key="submission.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-4 py-3 whitespace-normal">
                       <div class="text-sm font-medium text-gray-900 dark:text-white">
                         {{ submission.title }}
                       </div>
-                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         {{ submission.description ? submission.description.substring(0, 50) + (submission.description.length > 50 ? '...' : '') : '-' }}
                       </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-4 py-3 whitespace-normal">
                       <div v-if="user.role === 'admin'" class="text-sm text-gray-900 dark:text-white">
                         {{ submission.user?.name || '-' }}
                       </div>
@@ -114,36 +114,36 @@
                         {{ formatDate(submission.created_at) }}
                       </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td class="px-4 py-3 whitespace-normal text-sm text-gray-500 dark:text-gray-400">
                       {{ formatDate(submission.created_at) }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-4 py-3 whitespace-normal">
                       <span 
-                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                         :class="getStatusClass(submission.status)"
                       >
                         {{ getStatusText(submission.status) }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <div class="flex items-center justify-center gap-2">
+                    <td class="px-4 py-3 whitespace-normal text-center text-sm font-medium">
+                      <div class="flex items-center justify-center gap-1">
                         <button
                           @click="openDetailModal(submission)"
-                          class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                         >
                           <Eye class="w-4 h-4" /> 
                         </button>
                         <button
                           v-if="canEditSubmission(submission)"
                           @click="openEditModal(submission)"
-                          class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300"
+                          class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 p-1"
                         >
                           <Edit3 class="w-4 h-4" />
                         </button>
                         <button
                           v-if="canDeleteSubmission(submission)"
                           @click="deleteSubmission(submission.id)"
-                          class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1"
                         >
                           <Trash2 class="w-4 h-4" />
                         </button>
@@ -151,7 +151,7 @@
                     </td>
                   </tr>
                   <tr v-if="filteredSubmissions.length === 0">
-                    <td colspan="5" class="px-6 py-12 text-center">
+                    <td colspan="5" class="px-4 py-12 text-center">
                       <div class="flex flex-col items-center justify-center">
                         <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -168,8 +168,8 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex justify-between items-center">
-              <div class="text-sm text-gray-700 dark:text-gray-300">
+            <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div class="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                 Menampilkan <span class="font-medium">{{ filteredSubmissions.length }}</span> dari <span class="font-medium">{{ submissions.data.length }}</span> pengajuan
               </div>
               <div class="flex space-x-2">

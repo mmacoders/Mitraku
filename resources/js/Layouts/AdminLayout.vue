@@ -7,61 +7,61 @@
         <div class="absolute top-0 right-0 -mr-12 pt-2">
           <button type="button" @click="toggleSidebar" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
             <span class="sr-only">Close sidebar</span>
-            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <PanelLeftClose class="h-6 w-6 text-white" />
           </button>
         </div>
         <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-          <div class="flex-shrink-0 flex items-center px-4">
-            <div class="h-8 w-auto text-gray-800 dark:text-gray-200 font-bold text-xl">e-PKS</div>
+          <div class="flex-shrink-0 flex justify-center items-center w-full px-4">
+            <img src="/assets/logo-app.png" alt="Mitraku Logo" class="h-10 w-auto">
           </div>
           <nav class="mt-5 px-2 space-y-1">
             <Link
               :href="route('admin.dashboard')"
               :class="[
-                route().current('admin.dashboard') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-                'group flex items-center px-2 py-2 text-base font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+                route().current('admin.dashboard') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
               ]"
             >
-              <svg class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Dashboard
+              <Home class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('admin.dashboard') ? 'text-white' : ''" />
+              <span>Dashboard</span>
             </Link>
             <Link
               :href="route('kelola.pks')"
               :class="[
-                route().current('kelola.pks') || route().current('pks.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-                'group flex items-center px-2 py-2 text-base font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+                route().current('kelola.pks') || route().current('pks.*') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
               ]"
             >
-              <svg class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Kelola Pengajuan PKS
+              <FileText class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.pks') || route().current('pks.*') ? 'text-white' : ''" />
+              <span>Kelola Pengajuan PKS</span>
             </Link>
             <Link
               :href="route('kelola.mitra')"
               :class="[
-                route().current('kelola.mitra') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-                'group flex items-center px-2 py-2 text-base font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+                route().current('kelola.mitra') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
               ]"
             >
-              <Users class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" />
-              Kelola Mitra
+              <Users class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.mitra') ? 'text-white' : ''" />
+              <span>Kelola Mitra</span>
             </Link>
             <Link
               :href="route('rapat.index')"
               :class="[
-                route().current('rapat.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-                'group flex items-center px-2 py-2 text-base font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+                route().current('rapat.*') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
               ]"
             >
-              <svg class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Kelola Rapat
+              <CalendarDays class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
+              <span>Kelola Rapat</span>
             </Link>
           </nav>
         </div>
@@ -74,7 +74,7 @@
                     :name="username" 
                     :size="48"
                     :imageSrc="profilePicture"
-                    class="rounded-full border border-gray-300 dark:border-gray-600"
+                    class="rounded-full border-2 border-gray-300 dark:border-gray-600"
                   />
                 </div>
               </div>
@@ -97,46 +97,33 @@
     <!-- Static sidebar for desktop -->
     <div 
       class="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 transition-all duration-300 ease-in-out"
-      :class="sidebarCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-[14rem]'"
+      :class="sidebarCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-64'"
     >
-      <div class="flex-1 flex flex-col min-h-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between flex-shrink-0 px-4 py-4">
-          <div v-if="!sidebarCollapsed" class="h-8 w-auto text-gray-800 dark:text-gray-200 font-bold text-xl">e-PKS</div>
-          <button 
-            @click="toggleSidebarCollapse" 
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none"
-          >
-            <svg 
-              v-if="sidebarCollapsed" 
-              class="h-5 w-5" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <svg 
-              v-else 
-              class="h-5 w-5" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+      <div class="flex-1 flex flex-col min-h-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 shadow-lg">
+        <div class="flex items-center justify-center flex-shrink-0 px-4 py-5">
+          <!-- Full logo when sidebar is expanded -->
+          <img v-if="!sidebarCollapsed" src="/assets/logo-app.png" alt="Mitraku Logo" class="h-10 w-auto">
+          <!-- Mobile logo when sidebar is collapsed -->
+          <img v-else src="/assets/logo-mobile.png" alt="Mitraku Logo" class="h-12 w-auto">
         </div>
-        <nav class="flex-1 px-2 space-y-1 py-4">
+        
+        <!-- Separator line and Menu Aplikasi text -->
+        <div v-if="!sidebarCollapsed" class="px-4">
+          <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+          <p class="text-xs font-medium text-center text-gray-800 dark:text-gray-400 uppercase tracking-wider mb-4">Menu Aplikasi</p>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-1 py-4">
           <Link
             :href="route('admin.dashboard')"
             :class="[
-              route().current('admin.dashboard') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-              'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+              route().current('admin.dashboard') 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
             ]"
           >
-            <svg class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+            <Home class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('admin.dashboard') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Dashboard</span>
           </Link>
 
@@ -144,13 +131,13 @@
           <Link
             :href="route('kelola.pks')"
             :class="[
-              route().current('kelola.pks') || route().current('pks.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-              'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+              route().current('kelola.pks') || route().current('pks.*') 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
             ]"
           >
-            <svg class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+            <FileText class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.pks') || route().current('pks.*') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Kelola Pengajuan PKS</span>
           </Link>
           
@@ -158,11 +145,13 @@
           <Link
             :href="route('kelola.mitra')"
             :class="[
-              route().current('kelola.mitra') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-              'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+              route().current('kelola.mitra') 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
             ]"
           >
-            <Users class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" />
+            <Users class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.mitra') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Kelola Mitra</span>
           </Link>
           
@@ -171,22 +160,13 @@
             :href="route('rapat.index')"
             :class="[
               route().current('rapat.*') 
-                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200' 
-                : 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300',
-              'group flex items-center px-2 py-2 text-base font-medium rounded-md transition-all duration-200 ease-in-out transform hover:scale-105'
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
             ]"
           >
-            <svg 
-              class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500" 
-              xmlns="http://www.w3.org/2000/svg" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Kelola Rapat
+            <CalendarDays class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
+            <span v-if="!sidebarCollapsed" class="ml-3">Kelola Rapat</span>
           </Link>
         </nav>
         <div class="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
@@ -201,7 +181,7 @@
                     :name="username" 
                     :size="48" 
                     :imageSrc="profilePicture"
-                    class="border border-gray-300 dark:border-gray-600 rounded-full"
+                    class="border-2 border-gray-300 dark:border-gray-600 rounded-full"
                   />
                 </div>
               </div>
@@ -227,21 +207,28 @@
 
     <div 
       class="flex flex-col flex-1 transition-all duration-300 ease-in-out"
-      :class="sidebarCollapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[14rem]'"
+      :class="sidebarCollapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-64'"
     >
-      <div class="sticky top-0 z-10 flex-shrink-0 flex h-[4rem] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div class="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <button 
           type="button" 
           @click="toggleSidebar" 
           class="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
         >
           <span class="sr-only">Open sidebar</span>
-          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-          </svg>
+          <Menu class="h-6 w-6" />
         </button>
-        <div class="flex-1 px-4 flex justify-between">
-          <div class="flex-1 flex items-center">
+        <div class="flex-1 px-4 flex justify-between items-center">
+          <div class="flex items-center">
+            <!-- Close/Open sidebar icon next to breadcrumb -->
+            <button 
+              @click="toggleSidebarCollapse" 
+              class="mr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
+              :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            >
+              <PanelLeftOpen v-if="sidebarCollapsed" class="h-6 w-6" />
+              <PanelLeftClose v-else class="h-6 w-6" />
+            </button>
             <!-- Modern Breadcrumb Component -->
             <ModernBreadcrumb />
           </div>
@@ -253,12 +240,8 @@
               class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-200 ease-in-out transform hover:scale-105"
             >
               <span class="sr-only">Toggle dark mode</span>
-              <svg v-if="isDarkMode" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-              </svg>
-              <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-              </svg>
+              <Sun v-if="isDarkMode" class="h-6 w-6" />
+              <Moon v-else class="h-6 w-6" />
             </button>
 
             <!-- Notification Icon -->
@@ -268,9 +251,7 @@
                 class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-200 ease-in-out transform hover:scale-105"
               >
                 <span class="sr-only">View notifications</span>
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                </svg>
+                <Bell class="h-6 w-6" />
                 <span v-if="unreadNotificationsCount > 0" class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
               </button>
 
@@ -283,7 +264,8 @@
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">Notifikasi</p>
-                    <button v-if="unreadNotificationsCount > 0" @click="markAllAsRead" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                    <button v-if="unreadNotificationsCount > 0" @click="markAllAsRead" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 flex items-center">
+                      <CheckCircle class="h-4 w-4 mr-1" />
                       Tandai semua dibaca
                     </button>
                   </div>
@@ -296,9 +278,11 @@
                     <div class="flex items-start">
                       <div class="flex-shrink-0 pt-0.5">
                         <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900">
-                          <svg class="w-4 h-4" :class="getNotificationColor(notification.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getNotificationIcon(notification.type)"></path>
-                          </svg>
+                          <component 
+                            :is="getNotificationIconComponent(notification.type)" 
+                            class="w-4 h-4" 
+                            :class="getNotificationColor(notification.type)"
+                          />
                         </div>
                       </div>
                       <div class="ml-3 flex-1">
@@ -334,7 +318,7 @@
                     :name="username" 
                     :size="40"
                     :imageSrc="profilePicture"
-                    class="rounded-full border border-gray-300 dark:border-gray-600"
+                    class="rounded-full border-2 border-gray-300 dark:border-gray-600"
                   />
                 </div>
               </div>
@@ -364,7 +348,20 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
-import { Users } from 'lucide-vue-next';
+import { 
+  Users, 
+  Home, 
+  FileText, 
+  CalendarDays, 
+  PanelLeftClose, 
+  PanelLeftOpen,
+  Menu,
+  Sun,
+  Moon,
+  Bell,
+  CheckCircle,
+  User
+} from 'lucide-vue-next';
 import Vue3Avatar from 'vue3-avatar';
 import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
 
@@ -526,19 +523,19 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID', options);
 };
 
-// Get notification icon based on type
-const getNotificationIcon = (type) => {
+// Get notification icon component based on type
+const getNotificationIconComponent = (type) => {
   switch (type) {
     case 'pks_submitted':
-      return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
+      return FileText; // Document icon for submitted PKS
     case 'pks_status_updated':
-      return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+      return CheckCircle; // Check circle for status updates
     case 'pks_revision_requested':
-      return 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9';
+      return Bell; // Bell for revision requests
     case 'rapat_scheduled':
-      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';
+      return CalendarDays; // Calendar for scheduled meetings
     default:
-      return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
+      return FileText; // Default to document icon
   }
 };
 

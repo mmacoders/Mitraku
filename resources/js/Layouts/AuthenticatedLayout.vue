@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
@@ -29,9 +28,7 @@ const isMitra = computed(() => user.value.role === 'mitra');
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
-                                    />
+                                    <img src="/assets/logo-mobile.png" alt="Application Logo" class="block h-8 w-auto" />
                                 </Link>
                             </div>
 
@@ -43,15 +40,14 @@ const isMitra = computed(() => user.value.role === 'mitra');
                                     :href="isAdmin ? route('admin.dashboard') : route('dashboard')"
                                     :active="route().current('dashboard') || route().current('admin.dashboard')"
                                 >
-                                    Dashboard
+                                    <h2>Dashboard</h2>
                                 </NavLink>
                             </div>
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Dark Mode Toggle -->
-                            <div class="flex items-center mr-4">
-                                <DarkModeToggle />
+                            <!-- User Avatar and Dark Mode Toggle -->
+                            <div class="flex items-center mr-4 space-x-3">
                             </div>
 
                             <!-- Settings Dropdown -->
@@ -180,9 +176,6 @@ const isMitra = computed(() => user.value.role === 'mitra');
                                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                     {{ $page.props.auth.user.email }}
                                 </div>
-                            </div>
-                            <div>
-                                <DarkModeToggle />
                             </div>
                         </div>
 

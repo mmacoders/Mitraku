@@ -61,67 +61,61 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        No
-                      </th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Nama Mitra
                       </th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Email
                       </th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                         Instansi / Perusahaan
                       </th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Jumlah PKS
                       </th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                         Tanggal Bergabung
                       </th>
-                      <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    <tr v-for="(mitra, index) in filteredMitra" :key="mitra.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {{ index + 1 }}
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
+                    <tr v-for="mitra in filteredMitra" :key="mitra.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                      <td class="px-4 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900 dark:text-white">
                           {{ mitra.name }}
                         </div>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ mitra.email }}
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                         {{ mitra.company || '-' }}
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ mitra.pks_count }}
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                         {{ formatDate(mitra.created_at) }}
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                      <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div class="flex items-center justify-center gap-2">
                           <button
-                            @click="openDetailModal(mitra)"
+                            @click.stop="openDetailModal(mitra)"
                             class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                           >
                             <Eye class="w-4 h-4" />
                           </button>
                           <button
-                            @click="openEditModal(mitra)"
+                            @click.stop="openEditModal(mitra)"
                             class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300"
                           >
                             <Pencil class="w-4 h-4" />
                           </button>
                           <button
-                            @click="openDeleteModal(mitra)"
+                            @click.stop="openDeleteModal(mitra)"
                             class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                           >
                             <Trash2 class="w-4 h-4" />
@@ -130,7 +124,7 @@
                       </td>
                     </tr>
                     <tr v-if="filteredMitra.length === 0">
-                      <td colspan="7" class="px-6 py-12 text-center">
+                      <td colspan="6" class="px-4 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
                           <Users class="h-12 w-12 text-gray-400" />
                           <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Tidak ada data mitra yang ditemukan</h3>
@@ -371,6 +365,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Mitra Detail Modal -->
+    <MitraDetailModal
+      :show="showDetailModal"
+      :mitra="selectedMitra"
+      @close="closeDetailModal"
+    />
+
   </AdminLayout>
 </template>
 
@@ -378,7 +380,9 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, watch } from 'vue';
-import { Eye, Pencil, Trash2, Users } from 'lucide-vue-next';
+import { Eye, Pencil, Trash2, Users, User, Mail, Building, FileText, Calendar, X } from 'lucide-vue-next';
+import Modal from '@/Components/Modal.vue';
+import MitraDetailModal from '@/Components/MitraDetailModal.vue';
 
 // Props
 const props = defineProps({
@@ -391,6 +395,7 @@ const searchQuery = ref('');
 const loading = ref(false);
 const showMitraModal = ref(false);
 const showDeleteModal = ref(false);
+const showDetailModal = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');
 const toastType = ref('success');
@@ -460,8 +465,17 @@ const closeMitraModal = () => {
 };
 
 const openDetailModal = (mitra) => {
-  // For now, we'll just show a toast with mitra details
-  showToastMessage(`Detail mitra: ${mitra.name}`, 'success');
+  console.log('Opening detail modal for mitra:', mitra);
+  selectedMitra.value = mitra;
+  showDetailModal.value = true;
+  console.log('Modal state:', showDetailModal.value);
+};
+
+const closeDetailModal = () => {
+  console.log('Closing detail modal');
+  showDetailModal.value = false;
+  selectedMitra.value = null;
+  console.log('Modal state:', showDetailModal.value);
 };
 
 const openDeleteModal = (mitra) => {

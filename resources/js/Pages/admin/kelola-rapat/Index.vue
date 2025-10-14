@@ -30,6 +30,13 @@
       @updated="refreshRapatList"
     />
 
+    <!-- Rapat Detail Modal -->
+    <RapatDetailModal
+      :show="showDetailModal"
+      :rapat="selectedRapat"
+      @close="closeDetailModal"
+    />
+    
     <div class="py-6">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Main Content -->
@@ -141,12 +148,12 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                        <div class="flex items-center justify-center gap">
-                      <Link
-                        :href="route('rapat.show', rapat.id)"
+                      <button
+                        @click="openDetailModal(rapat)"
                         class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-3"
                       >
                         <Eye class="w-4 h-4" /> 
-                      </Link>
+                      </button>
                       <button
                         @click="openEditModal(rapat)"
                         class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 mr-3"
@@ -215,6 +222,7 @@ import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import RapatModal from '@/Components/RapatModal.vue';
 import RapatEditModal from '@/Components/RapatEditModal.vue';
+import RapatDetailModal from '@/Components/RapatDetailModal.vue';
 import {Eye, Edit3, Trash2} from 'lucide-vue-next'
 
 const props = defineProps({
@@ -225,6 +233,7 @@ const props = defineProps({
 // Modal states
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
+const showDetailModal = ref(false);
 const selectedRapat = ref(null);
 
 // Use mitra data from props
@@ -254,6 +263,18 @@ const openEditModal = (rapat) => {
 // Close edit modal
 const closeEditModal = () => {
   showEditModal.value = false;
+  selectedRapat.value = null;
+};
+
+// Open detail modal
+const openDetailModal = (rapat) => {
+  selectedRapat.value = rapat;
+  showDetailModal.value = true;
+};
+
+// Close detail modal
+const closeDetailModal = () => {
+  showDetailModal.value = false;
   selectedRapat.value = null;
 };
 

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -39,7 +40,7 @@ Route::get('/admin/kelola-pks', [PksSubmissionController::class, 'index'])
 Route::get('/admin/kelola-mitra', [MitraController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('kelola.mitra');
-
+    
 // API routes for admin dashboard
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/dashboard/summary', [PksSubmissionController::class, 'getDashboardSummary'])
@@ -75,6 +76,60 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Routes to serve uploaded PKS documents
+    Route::get('/pks-documents/{path}', function (string $path) {
+        // Security check: ensure the path is within the allowed directories
+        if (!str_starts_with($path, 'pks-documents/') && 
+            !str_starts_with($path, 'pks-final-documents/') && 
+            !str_starts_with($path, 'pks_documents/')) {
+            abort(403);
+        }
+        
+        // Check if file exists
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+        
+        // Check if user is authenticated
+        $user = Auth::user();
+        if (!$user) {
+            abort(403);
+        }
+        
+        // Find submission associated with this document
+        $submission = \App\Models\PksSubmission::where('kak_document_path', $path)
+            ->orWhere('mou_document_path', $path)
+            ->orWhere('final_document_path', $path)
+            ->first();
+            
+        // Also check rapat documents
+        if (!$submission) {
+            $rapat = \App\Models\Rapat::where('pks_document_path', $path)->first();
+            if ($rapat) {
+                // Only admin or meeting creator can access rapat documents
+                if ($user->role === 'admin' || $user->id === $rapat->user_id) {
+                    return response()->file(Storage::disk('public')->path($path));
+                }
+                abort(403);
+            }
+        }
+        
+        if ($submission) {
+            // Admins can access all documents
+            if ($user->role === 'admin') {
+                return response()->file(Storage::disk('public')->path($path));
+            }
+            
+            // Mitra can only access their own documents
+            if ($user->id === $submission->user_id) {
+                return response()->file(Storage::disk('public')->path($path));
+            }
+        }
+        
+        // If we can't verify ownership, deny access
+        abort(403);
+    })->where('path', '.*')->name('pks.documents.serve');
     
     // PKS Submission Routes
     Route::get('/pks/create', [PksSubmissionController::class, 'create'])->name('pks.create');

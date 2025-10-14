@@ -35,7 +35,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
-import { Home, FileText, CalendarDays, ChevronRight } from 'lucide-vue-next'
+import { Home, FileText, Users, CalendarDays, ChevronRight } from 'lucide-vue-next'
 
 // Map route names to breadcrumb segments
 const routeToBreadcrumbMap = {
@@ -43,6 +43,7 @@ const routeToBreadcrumbMap = {
   'admin.kelola.pks.index': { title: 'Kelola Pengajuan PKS', icon: FileText, shortTitle: 'PKS' },
   'admin.kelola-rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' },
   'kelola.pks': { title: 'Kelola Pengajuan PKS', icon: FileText, shortTitle: 'PKS' },
+  'kelola.mitra': { title: 'Kelola Mitra', icon: Users, shortTitle: 'Mitra' },
   'rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' }
 }
 
