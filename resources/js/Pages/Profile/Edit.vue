@@ -5,6 +5,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import ProfileUpdateModal from '@/Components/ProfileUpdateModal.vue';
 import Vue3Avatar from 'vue3-avatar';
+import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
 
 defineProps<{
     mustVerifyEmail?: boolean;
@@ -71,6 +72,11 @@ const updatePassword = () => {
     <AdminLayout v-if="isAdmin">
         <div class="py-6 sm:py-10">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Breadcrumb -->
+                <div class="mb-6">
+                    <ModernBreadcrumb />
+                </div>
+                
                 <!-- Profile Header -->
                 <div class="bg-white/80 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out border border-gray-100 dark:border-gray-800">
                     <div class="flex flex-col sm:flex-row items-center">
@@ -213,6 +219,11 @@ const updatePassword = () => {
     <AuthenticatedLayout v-else>
         <div class="py-6 sm:py-10">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Breadcrumb -->
+                <div class="mb-6">
+                    <ModernBreadcrumb />
+                </div>
+                
                 <!-- Profile Header -->
                 <div class="bg-white/80 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out border border-gray-100 dark:border-gray-800">
                     <div class="flex flex-col sm:flex-row items-center">

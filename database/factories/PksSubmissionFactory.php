@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use Carbon\Carbon;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PksSubmission>
@@ -25,6 +26,8 @@ class PksSubmissionFactory extends Factory
             'status' => $this->faker->randomElement(['proses', 'revisi', 'ditolak', 'disetujui']),
             'revision_notes' => null,
             'final_document_path' => null,
+            'validity_period_start' => Carbon::today(),
+            'validity_period_end' => Carbon::today()->addYear(),
         ];
     }
 }

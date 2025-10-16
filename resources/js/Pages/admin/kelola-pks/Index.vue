@@ -89,6 +89,9 @@
                       Waktu Pengajuan
                     </th>
                     <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Masa Berlaku
+                    </th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Status
                     </th>
                     <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -116,6 +119,26 @@
                     </td>
                     <td class="px-4 py-3 whitespace-normal text-sm text-gray-500 dark:text-gray-400">
                       {{ formatDate(submission.created_at) }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-normal">
+                      <div v-if="submission.status === 'disetujui' && submission.validity_period_start && submission.validity_period_end" class="text-sm">
+                        <div>{{ formatDate(submission.validity_period_start) }} - {{ formatDate(submission.validity_period_end) }}</div>
+                        <div 
+                          v-if="isExpiringSoon(submission.validity_period_end)"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-1"
+                        >
+                          ⚠️ Akan kedaluwarsa
+                        </div>
+                        <div 
+                          v-else-if="isExpired(submission.validity_period_end)"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-1"
+                        >
+                          ⚠️ Sudah kedaluwarsa
+                        </div>
+                      </div>
+                      <div v-else class="text-sm text-gray-500 dark:text-gray-400">
+                        -
+                      </div>
                     </td>
                     <td class="px-4 py-3 whitespace-normal">
                       <span 
@@ -151,7 +174,7 @@
                     </td>
                   </tr>
                   <tr v-if="filteredSubmissions.length === 0">
-                    <td colspan="5" class="px-4 py-12 text-center">
+                    <td colspan="6" class="px-4 py-12 text-center">
                       <div class="flex flex-col items-center justify-center">
                         <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -205,6 +228,8 @@ import { ref, computed } from 'vue'
 import PksSubmissionDetailModal from '@/Components/PksSubmissionDetailModal.vue'
 import EditPksStatusModal from '@/Components/EditPksStatusModal.vue'
 import { Eye, Edit3, Trash2 } from 'lucide-vue-next'
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 const props = defineProps({
   submissions: Object,
@@ -258,9 +283,32 @@ const filterSubmissions = () => {
 }
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-  return new Date(dateString).toLocaleDateString('id-ID', options)
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    return format(date, 'dd MMM yyyy', { locale: id });
+  } catch (e) {
+    return '-';
+  }
 }
+
+// Check if PKS is expiring soon (within 7 days)
+const isExpiringSoon = (endDate) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  const diffTime = Math.abs(end.getTime() - today.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 7 && end > today;
+};
+
+// Check if PKS has expired
+const isExpired = (endDate) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  return end < today;
+};
 
 // Get status class
 const getStatusClass = (status) => {
@@ -273,6 +321,8 @@ const getStatusClass = (status) => {
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
     case 'disetujui':
       return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    case 'Pembahasan':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
   }
@@ -289,6 +339,8 @@ const getStatusText = (status) => {
       return 'Ditolak'
     case 'disetujui':
       return 'Disetujui'
+    case 'Pembahasan':
+      return 'Pembahasan'
     default:
       return status
   }

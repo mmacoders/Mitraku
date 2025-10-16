@@ -209,129 +209,127 @@
       class="flex flex-col flex-1 transition-all duration-300 ease-in-out"
       :class="sidebarCollapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-64'"
     >
-      <div class="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <button 
-          type="button" 
-          @click="toggleSidebar" 
-          class="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
-        >
-          <span class="sr-only">Open sidebar</span>
-          <Menu class="h-6 w-6" />
-        </button>
-        <div class="flex-1 px-4 flex justify-between items-center">
-          <div class="flex items-center">
-            <!-- Close/Open sidebar icon next to breadcrumb -->
-            <button 
-              @click="toggleSidebarCollapse" 
-              class="mr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
-              :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-            >
-              <PanelLeftOpen v-if="sidebarCollapsed" class="h-6 w-6" />
-              <PanelLeftClose v-else class="h-6 w-6" />
-            </button>
-            <!-- Modern Breadcrumb Component -->
-            <ModernBreadcrumb />
-          </div>
-          <div class="ml-4 flex items-center md:ml-6">
-            
-            <!-- Dark mode toggle -->
-            <button 
-              @click="toggleDarkMode" 
-              class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-200 ease-in-out transform hover:scale-105"
-            >
-              <span class="sr-only">Toggle dark mode</span>
-              <Sun v-if="isDarkMode" class="h-6 w-6" />
-              <Moon v-else class="h-6 w-6" />
-            </button>
+      <div class="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between h-16 px-6 bg-white dark:bg-gray-900 backdrop-blur-md shadow-sm dark:shadow-gray-800/50">
+        <div class="flex items-center">
+          <!-- Close/Open sidebar icon next to breadcrumb -->
+          <button 
+            @click="toggleSidebarCollapse" 
+            class="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
+            :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+          >
+            <PanelLeftOpen v-if="sidebarCollapsed" class="h-5 w-5" />
+            <PanelLeftClose v-else class="h-5 w-5" />
+          </button>
+          <!-- Modern Breadcrumb Component -->
+          <ModernBreadcrumb />
+        </div>
+        <div class="flex items-center">
+          
+          <!-- Dark mode toggle -->
+          <button 
+            @click="toggleDarkMode" 
+            class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="sr-only">Toggle dark mode</span>
+            <Sun v-if="isDarkMode" class="h-5 w-5" />
+            <Moon v-else class="h-5 w-5" />
+          </button>
 
-            <!-- Notification Icon -->
-            <div class="relative ml-3">
-              <button 
-                @click="toggleNotificationsDropdown" 
-                class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-200 ease-in-out transform hover:scale-105"
-              >
+          <!-- Notification Icon -->
+          <div class="relative ml-4" id="notification-dropdown">
+            <button 
+                @click.stop="toggleNotificationsDropdown" 
+                class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none relative transition-all duration-300 ease-in-out transform hover:scale-110"
+            >
                 <span class="sr-only">View notifications</span>
-                <Bell class="h-6 w-6" />
-                <span v-if="unreadNotificationsCount > 0" class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
-              </button>
+                <Bell class="h-5 w-5" />
+                <span v-if="unreadNotificationsCount > 0" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+            </button>
 
-              <!-- Notifications dropdown -->
-              <div 
+            <!-- Notifications dropdown -->
+            <div 
                 v-if="showNotificationsDropdown" 
-                class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform"
+                class="origin-top-right absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 backdrop-blur-md transition ease-out duration-200 transform z-50"
                 :class="showNotificationsDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95'"
-              >
+            >
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Notifikasi</p>
-                    <button v-if="unreadNotificationsCount > 0" @click="markAllAsRead" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 flex items-center">
-                      <CheckCircle class="h-4 w-4 mr-1" />
-                      Tandai semua dibaca
-                    </button>
-                  </div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Notifikasi</p>
+                        <button v-if="unreadNotificationsCount > 0" @click="markAllAsRead" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 flex items-center">
+                            <CheckCircle class="h-4 w-4 mr-1" />
+                            Tandai semua dibaca
+                        </button>
+                    </div>
                 </div>
                 <div class="max-h-96 overflow-y-auto">
-                  <div v-if="notifications.length === 0" class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                    Tidak ada notifikasi
-                  </div>
-                  <div v-for="notification in notifications" :key="notification.id" @click="markAsRead(notification.id)" class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                    <div class="flex items-start">
-                      <div class="flex-shrink-0 pt-0.5">
-                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900">
-                          <component 
-                            :is="getNotificationIconComponent(notification.type)" 
-                            class="w-4 h-4" 
-                            :class="getNotificationColor(notification.type)"
-                          />
-                        </div>
-                      </div>
-                      <div class="ml-3 flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">
-                          {{ formatNotificationMessage(notification) }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          {{ formatDate(notification.created_at) }}
-                        </p>
-                      </div>
-                      <div v-if="!notification.read_at" class="flex-shrink-0 ml-2">
-                        <span class="inline-block h-2 w-2 rounded-full bg-blue-400"></span>
-                      </div>
+                    <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                        Tidak ada notifikasi
                     </div>
-                  </div>
+                    <div 
+                        v-for="notification in notifications" 
+                        :key="notification.id" 
+                        @click.stop="markAsRead(notification.id)" 
+                        class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-all duration-150 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                        :class="getNotificationBackgroundColor(notification.type)"
+                    >
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 pt-0.5">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-full" 
+                                    :class="getNotificationIconBackground(notification.type)">
+                                    <component 
+                                        :is="getNotificationIconComponent(notification.type)" 
+                                        class="w-4 h-4" 
+                                        :class="getNotificationColor(notification.type)"
+                                    />
+                                </div>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ formatNotificationMessage(notification) }}
+                                </p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ formatDate(notification.created_at) }}
+                                </p>
+                            </div>
+                            <div v-if="!notification.read_at" class="flex-shrink-0 ml-2">
+                                <span class="inline-block h-2 w-2 rounded-full bg-blue-400"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div v-if="notifications.length > 0" class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
-                  <Link :href="route('kelola.pks')" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
-                    Lihat semua notifikasi
-                  </Link>
+                <div v-if="notifications.length > 0" class="text-sm text-center text-blue-600 dark:text-blue-400 py-2 border-t border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10">
+                    <Link :href="route('kelola.pks')" class="block w-full h-full">
+                        Lihat semua notifikasi
+                    </Link>
                 </div>
+            </div>
+          </div>
+
+          <!-- Profile dropdown -->
+          <div class="ml-4 relative" id="profile-dropdown">
+            <div class="flex items-center">
+              <div 
+                @click.stop="toggleProfileDropdown" 
+                class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105"
+              >
+                <Vue3Avatar 
+                  :name="username" 
+                  :size="36"
+                  :imageSrc="profilePicture"
+                  class="rounded-full border-2 border-gray-300 dark:border-gray-600"
+                />
               </div>
             </div>
-
-            <!-- Profile dropdown -->
-            <div class="ml-3 relative">
-              <div class="flex items-center">
-                <div 
-                  @click="toggleProfileDropdown" 
-                  class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105"
-                >
-                  <Vue3Avatar 
-                    :name="username" 
-                    :size="40"
-                    :imageSrc="profilePicture"
-                    class="rounded-full border-2 border-gray-300 dark:border-gray-600"
-                  />
-                </div>
-              </div>
-              
-              <!-- Profile dropdown menu -->
-              <div 
-                v-if="showProfileDropdown" 
-                class="origin-top-right absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform"
-                :class="showProfileDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95'"
-              >
-                <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Profile</Link>
-                <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Logout</button>
-              </div>
+            
+            <!-- Profile dropdown menu -->
+            <div 
+              v-if="showProfileDropdown" 
+              class="origin-top-right absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform"
+              :class="showProfileDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95'"
+            >
+              <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Profil</Link>
+              <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Pengaturan</Link>
+              <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Logout</button>
             </div>
           </div>
         </div>
@@ -360,7 +358,8 @@ import {
   Moon,
   Bell,
   CheckCircle,
-  User
+  User,
+  XCircle
 } from 'lucide-vue-next';
 import Vue3Avatar from 'vue3-avatar';
 import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
@@ -460,6 +459,12 @@ const fetchNotifications = async () => {
       const data = await response.json();
       notifications.value = data;
       unreadNotificationsCount.value = data.filter(notification => !notification.read_at).length;
+    } else {
+      console.error('Failed to fetch notifications. Status:', response.status);
+      // If unauthorized, redirect to login
+      if (response.status === 401) {
+        window.location.href = '/login';
+      }
     }
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -473,8 +478,11 @@ const markAsRead = async (id) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      }
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      },
+      body: JSON.stringify({
+        _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      })
     });
     
     if (response.ok) {
@@ -484,6 +492,15 @@ const markAsRead = async (id) => {
         notifications.value[index].read_at = new Date().toISOString();
         unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
       }
+      // Refresh notifications to ensure consistency
+      await fetchNotifications();
+    } else if (response.status === 404) {
+      // Notification not found, remove it from the list
+      notifications.value = notifications.value.filter(notification => notification.id !== id);
+      unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
+      console.log('Notification not found, removed from list');
+    } else {
+      console.error('Failed to mark notification as read. Status:', response.status);
     }
   } catch (error) {
     console.error('Error marking notification as read:', error);
@@ -493,20 +510,56 @@ const markAsRead = async (id) => {
 // Mark all notifications as read
 const markAllAsRead = async () => {
   try {
-    // Mark all unread notifications as read
+    // Get all unread notifications
     const unreadNotifications = notifications.value.filter(notification => !notification.read_at);
     
-    for (const notification of unreadNotifications) {
-      await markAsRead(notification.id);
+    // If there are no unread notifications, do nothing
+    if (unreadNotifications.length === 0) {
+      return;
     }
     
-    // Update UI
-    notifications.value = notifications.value.map(notification => ({
-      ...notification,
-      read_at: notification.read_at || new Date().toISOString()
-    }));
+    // Track successfully marked notifications
+    const successfullyMarked = [];
     
-    unreadNotificationsCount.value = 0;
+    // Mark each notification as read
+    for (const notification of unreadNotifications) {
+      try {
+        const response = await fetch(`/api/notifications/${notification.id}/read`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          },
+          body: JSON.stringify({
+            _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          })
+        });
+        
+        if (response.ok) {
+          // Update notification in the list immediately
+          const index = notifications.value.findIndex(n => n.id === notification.id);
+          if (index !== -1) {
+            notifications.value[index].read_at = new Date().toISOString();
+            successfullyMarked.push(notification.id);
+          }
+        } else if (response.status === 404) {
+          // Notification not found, remove it from the list
+          notifications.value = notifications.value.filter(n => n.id !== notification.id);
+        } else {
+          console.error('Failed to mark notification as read. Status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    }
+    
+    // Update unread count
+    unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
+    
+    // Refresh notifications to ensure consistency
+    await fetchNotifications();
+    
+    console.log(`Marked ${successfullyMarked.length} notifications as read`);
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
   }
@@ -514,7 +567,29 @@ const markAllAsRead = async () => {
 
 // Format notification message
 const formatNotificationMessage = (notification) => {
-  return notification.data?.message || 'New notification';
+  // Handle case where notification data might be missing
+  if (!notification.data) {
+    return 'New notification';
+  }
+  
+  // Return custom message if provided
+  if (notification.data.message) {
+    return notification.data.message;
+  }
+  
+  // Generate message based on notification type
+  switch (notification.type) {
+    case 'App\\Notifications\\PksSubmitted':
+      return `Pengajuan PKS baru: ${notification.data.pks_submission_title || 'Tanpa judul'}`;
+    case 'App\\Notifications\\PksStatusUpdated':
+      return `Status PKS "${notification.data.pks_submission_title || 'Tanpa judul'}" diperbarui menjadi ${notification.data.new_status || 'baru'}`;
+    case 'App\\Notifications\\PksRevisionRequested':
+      return `Revisi diminta untuk PKS: ${notification.data.pks_submission_title || 'Tanpa judul'}`;
+    case 'App\\Notifications\\AdminPksSubmissionNotification':
+      return `Pengajuan PKS baru dari ${notification.data.mitra_name || 'mitra'}`;
+    default:
+      return 'New notification';
+  }
 };
 
 // Format date
@@ -523,13 +598,51 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID', options);
 };
 
+// Get notification background color based on type
+const getNotificationBackgroundColor = (type) => {
+  switch (type) {
+    case 'pks_submitted':
+      return 'bg-blue-50 dark:bg-blue-900/20';
+    case 'pks_approved':
+      return 'bg-green-50 dark:bg-green-900/20';
+    case 'pks_rejected':
+      return 'bg-red-50 dark:bg-red-900/20';
+    case 'pks_revision_requested':
+      return 'bg-yellow-50 dark:bg-yellow-900/20';
+    case 'rapat_scheduled':
+      return 'bg-purple-50 dark:bg-purple-900/20';
+    default:
+      return 'bg-gray-50 dark:bg-gray-700/20';
+  }
+};
+
+// Get notification icon background color based on type
+const getNotificationIconBackground = (type) => {
+  switch (type) {
+    case 'pks_submitted':
+      return 'bg-blue-100 dark:bg-blue-900';
+    case 'pks_approved':
+      return 'bg-green-100 dark:bg-green-900';
+    case 'pks_rejected':
+      return 'bg-red-100 dark:bg-red-900';
+    case 'pks_revision_requested':
+      return 'bg-yellow-100 dark:bg-yellow-900';
+    case 'rapat_scheduled':
+      return 'bg-purple-100 dark:bg-purple-900';
+    default:
+      return 'bg-gray-100 dark:bg-gray-600';
+  }
+};
+
 // Get notification icon component based on type
 const getNotificationIconComponent = (type) => {
   switch (type) {
     case 'pks_submitted':
       return FileText; // Document icon for submitted PKS
-    case 'pks_status_updated':
-      return CheckCircle; // Check circle for status updates
+    case 'pks_approved':
+      return CheckCircle; // Check circle for approved PKS
+    case 'pks_rejected':
+      return XCircle; // X circle for rejected PKS
     case 'pks_revision_requested':
       return Bell; // Bell for revision requests
     case 'rapat_scheduled':
@@ -544,8 +657,10 @@ const getNotificationColor = (type) => {
   switch (type) {
     case 'pks_submitted':
       return 'text-blue-500';
-    case 'pks_status_updated':
+    case 'pks_approved':
       return 'text-green-500';
+    case 'pks_rejected':
+      return 'text-red-500';
     case 'pks_revision_requested':
       return 'text-yellow-500';
     case 'rapat_scheduled':
@@ -557,12 +672,21 @@ const getNotificationColor = (type) => {
 
 // Close dropdowns when clicking outside
 const handleClickOutside = (event) => {
-  if (showNotificationsDropdown.value && !event.target.closest('.relative.ml-3')) {
+  // More specific checks for each dropdown
+  const notificationDropdown = document.getElementById('notification-dropdown');
+  const profileDropdown = document.getElementById('profile-dropdown');
+  
+  // Check if click is outside the notification dropdown
+  if (showNotificationsDropdown.value && notificationDropdown && !notificationDropdown.contains(event.target)) {
     showNotificationsDropdown.value = false;
   }
-  if (showProfileDropdown.value && !event.target.closest('.relative.ml-3')) {
+  
+  // Check if click is outside the profile dropdown
+  if (showProfileDropdown.value && profileDropdown && !profileDropdown.contains(event.target)) {
     showProfileDropdown.value = false;
   }
+  
+  // Check if click is outside the user dropdown (mobile)
   if (showUserDropdown.value && !event.target.closest('.flex-shrink-0')) {
     showUserDropdown.value = false;
   }

@@ -11,7 +11,7 @@
                 Buat Rapat Baru
               </h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Isi detail rapat dan undang mitra
+                Isi detail rapat
               </p>
             </div>
           </div>
@@ -24,6 +24,85 @@
       <!-- Modal body -->
       <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
         <form @submit.prevent="submit" class="space-y-6">
+          <!-- Invite Mitra (Moved to top) -->
+          <div>
+            <InputLabel for="invited_mitra" value="Undang Mitra" />
+            <div class="mt-2">
+              <!-- Search input for mitra -->
+              <TextInput
+                id="search_mitra"
+                v-model="searchMitra"
+                type="text"
+                class="mt-1 block w-full"
+                placeholder="Cari mitra..."
+                @input="filterMitra"
+              />
+              
+              <!-- Selected mitra tags -->
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span
+                  v-for="mitraId in form.invited_mitra"
+                  :key="mitraId"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                >
+                  {{ getMitraName(mitraId) }}
+                  <button
+                    type="button"
+                    @click="removeMitra(mitraId)"
+                    class="ml-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:bg-blue-500 focus:text-white focus:outline-none dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 dark:hover:text-blue-100 dark:focus:bg-blue-500"
+                  >
+                    <span class="sr-only">Hapus</span>
+                    <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                      <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+                    </svg>
+                  </button>
+                </span>
+              </div>
+              
+              <!-- Dropdown for mitra selection -->
+              <div 
+                v-show="filteredMitra.length > 0 && searchMitra" 
+                class="mt-1 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg z-10 absolute w-[calc(100%-3rem)]"
+              >
+                <div 
+                  v-for="mitra in filteredMitra" 
+                  :key="mitra.id" 
+                  class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                  @click="selectMitra(mitra)"
+                >
+                  {{ mitra.name }} ({{ mitra.company || 'Perusahaan tidak diatur' }})
+                </div>
+                <div 
+                  v-if="filteredMitra.length === 0" 
+                  class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                >
+                  Tidak ada mitra yang ditemukan
+                </div>
+              </div>
+            </div>
+            <InputError class="mt-2" :message="form.errors.invited_mitra" />
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Cari dan pilih mitra yang ingin Anda undang ke rapat ini
+            </p>
+          </div>
+
+          <!-- Judul PKS - Only show when mitra is selected -->
+          <div v-if="form.invited_mitra.length > 0 && pksSubmissions && pksSubmissions.length > 0">
+            <InputLabel for="pks_submission_id" value="Judul PKS" />
+            <select
+              id="pks_submission_id"
+              v-model="form.pks_submission_id"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+              :disabled="form.processing"
+            >
+              <option value="">Pilih PKS yang akan di bahas</option>
+              <option v-for="pks in filteredPksSubmissions" :key="pks.id" :value="pks.id">
+                {{ pks.title }} - {{ pks.user.name }}
+              </option>
+            </select>
+            <InputError class="mt-2" :message="form.errors.pks_submission_id" />
+          </div>
+
           <!-- Judul Rapat -->
           <div>
             <InputLabel for="judul" value="Judul Rapat" />
@@ -81,112 +160,6 @@
             <InputError class="mt-2" :message="form.errors.deskripsi" />
           </div>
 
-          <!-- Mitra Selection -->
-          <div>
-            <InputLabel value="Undang Mitra" />
-            <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div
-                v-for="m in mitra"
-                :key="m.id"
-                @click="selectMitra(m.id)"
-                :class="[
-                  'p-3 rounded-lg border cursor-pointer transition-colors',
-                  selectedMitra.includes(m.id)
-                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
-                    : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                ]"
-              >
-                <div class="flex items-center">
-                  <div class="flex-shrink-0">
-                    <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                      <span class="text-green-800 dark:text-green-200 text-sm font-medium">{{ m.name.charAt(0) }}</span>
-                    </div>
-                  </div>
-                  <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ m.name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ m.email }}</p>
-                  </div>
-                  <div v-if="selectedMitra.includes(m.id)" class="ml-auto">
-                    <svg class="h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Selected Mitra Tags -->
-            <div v-if="selectedMitra.length > 0" class="mt-3 flex flex-wrap gap-2">
-              <span
-                v-for="id in selectedMitra"
-                :key="id"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-              >
-                {{ mitra.find(m => m.id === id)?.name }}
-                <button
-                  type="button"
-                  @click.stop="deselectMitra(id)"
-                  class="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:outline-none focus:bg-indigo-500 focus:text-white"
-                >
-                  <span class="sr-only">Remove</span>
-                  <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                    <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-                  </svg>
-                </button>
-              </span>
-            </div>
-            
-            <InputError class="mt-2" :message="form.errors.mitra" />
-          </div>
-
-          <!-- Upload Dokumen PKS -->
-          <div>
-            <InputLabel for="pks_document" value="Upload Dokumen PKS (Opsional)" />
-            <input
-              id="pks_document"
-              ref="fileInput"
-              type="file"
-              class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-indigo-50 file:text-indigo-700
-                hover:file:bg-indigo-100
-                dark:file:bg-indigo-900 dark:file:text-indigo-200
-                dark:hover:file:bg-indigo-800"
-              @change="handleFileChange"
-              accept=".pdf,.doc,.docx"
-            />
-            <!-- File preview -->
-            <div v-if="form.pks_document" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
-              <div class="flex items-center">
-                <span class="text-lg mr-2">
-                  {{ getFileIcon(form.pks_document.type) }}
-                </span>
-                <div class="text-xs">
-                  <p class="font-medium text-gray-900 dark:text-white truncate max-w-[120px]">
-                    {{ form.pks_document.name }}
-                  </p>
-                  <p class="text-gray-500 dark:text-gray-400">
-                    {{ formatFileSize(form.pks_document.size) }}
-                  </p>
-                </div>
-              </div>
-              <button 
-                type="button"
-                @click="removeFile"
-                class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
-                title="Hapus file"
-              >
-                ❌
-              </button>
-            </div>
-            <InputError class="mt-2" :message="form.errors.pks_document" />
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Format yang diterima: PDF, DOC, DOCX. Maksimal 2MB.
-            </p>
-          </div>
-
           <!-- Submit buttons -->
           <div class="flex items-center justify-end space-x-3 pt-4">
             <SecondaryButton @click="closeModal" :disabled="form.processing">
@@ -207,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Modal from '@/Components/Modal.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
@@ -219,35 +192,25 @@ import InputError from '@/Components/InputError.vue'
 const props = defineProps<{
   show: boolean
   onClose: () => void
-  mitra: Array<{
+  availableMitra: Array<{
     id: number
     name: string
-    email: string
+    company: string
+  }>
+  pksSubmissions?: Array<{
+    id: number
+    title: string
+    user: {
+      id: number
+      name: string
+    }
+    status: string
   }>
 }>()
 
 const emit = defineEmits(['created'])
 
-const fileInput = ref<HTMLInputElement | null>(null)
-const selectedMitra = ref<number[]>([])
-
-// Initialize selected mitra from props if editing
-onMounted(() => {
-  // This would be used if we're editing an existing rapat
-  // For now, it's just for demonstration
-})
-
-// Select mitra function
-const selectMitra = (id: number) => {
-  if (!selectedMitra.value.includes(id)) {
-    selectedMitra.value.push(id)
-  }
-}
-
-// Deselect mitra function
-const deselectMitra = (id: number) => {
-  selectedMitra.value = selectedMitra.value.filter(mitraId => mitraId !== id)
-}
+const searchMitra = ref('')
 
 // Form setup
 const form = useForm({
@@ -255,62 +218,65 @@ const form = useForm({
   tanggal_waktu: '',
   lokasi: '',
   deskripsi: '',
-  pks_document: null as File | null,
-  mitra: [] as number[]
+  pks_submission_id: '' as string | number,
+  invited_mitra: [] as number[]
 })
 
-// Handle file change
-const handleFileChange = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  if (target.files && target.files[0]) {
-    const file = target.files[0]
-    if (validateFile(file)) {
-      form.pks_document = file
-    }
-  }
-}
+// Filtered mitra based on search
+const filteredMitra = computed(() => {
+  if (!searchMitra.value) return []
+  return props.availableMitra.filter(mitra => 
+    mitra.name.toLowerCase().includes(searchMitra.value.toLowerCase()) ||
+    (mitra.company && mitra.company.toLowerCase().includes(searchMitra.value.toLowerCase()))
+  )
+})
 
-// Validate file
-const validateFile = (file: File): boolean => {
-  const validTypes = ['application/pdf', 'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-  const maxSize = 2 * 1024 * 1024 // 2MB
+// Filtered PKS submissions - only show "proses" status submissions from selected mitra
+const filteredPksSubmissions = computed(() => {
+  if (!props.pksSubmissions || form.invited_mitra.length === 0) return []
   
-  if (!validTypes.includes(file.type)) {
-    alert('Format file tidak didukung. Harap unggah file PDF, DOC, atau DOCX.')
-    return false
+  // Get user IDs of selected mitra
+  const selectedMitraIds = form.invited_mitra
+  
+  // Filter PKS submissions:
+  // 1. Only "proses" status submissions
+  // 2. Only from selected mitra
+  return props.pksSubmissions.filter(pks => 
+    pks.status === 'proses' && 
+    selectedMitraIds.includes(pks.user.id)
+  )
+})
+
+// Get mitra name by ID
+const getMitraName = (mitraId: number) => {
+  const mitra = props.availableMitra.find(m => m.id === mitraId)
+  return mitra ? mitra.name : ''
+}
+
+// Select mitra
+const selectMitra = (mitra: { id: number }) => {
+  if (!form.invited_mitra.includes(mitra.id)) {
+    form.invited_mitra.push(mitra.id)
+  }
+  searchMitra.value = ''
+}
+
+// Remove mitra
+const removeMitra = (mitraId: number) => {
+  const index = form.invited_mitra.indexOf(mitraId)
+  if (index !== -1) {
+    form.invited_mitra.splice(index, 1)
   }
   
-  if (file.size > maxSize) {
-    alert('Ukuran file terlalu besar. Maksimal 2MB.')
-    return false
-  }
-  
-  return true
-}
-
-// Remove file
-const removeFile = () => {
-  form.pks_document = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
+  // Clear PKS selection if no mitra selected
+  if (form.invited_mitra.length === 0) {
+    form.pks_submission_id = ''
   }
 }
 
-// Get file icon
-const getFileIcon = (type: string) => {
-  if (type.includes('pdf')) return '📄'
-  if (type.includes('word') || type.includes('doc')) return '📝'
-  return '📁'
-}
-
-// Format file size
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+// Filter mitra (called on input)
+const filterMitra = () => {
+  // Filtering is handled by the computed property
 }
 
 // Close modal
@@ -318,26 +284,12 @@ const closeModal = () => {
   props.onClose()
   form.reset()
   form.clearErrors()
-  selectedMitra.value = []
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
+  searchMitra.value = ''
 }
 
 // Submit form
 const submit = () => {
-  // Set the selected mitra to the form
-  form.mitra = selectedMitra.value
-  
-  // Validate that at least one mitra is selected
-  if (form.mitra.length === 0) {
-    form.setError('mitra', 'Harap pilih minimal satu mitra untuk diundang.')
-    return
-  }
-  
-  // We need to use forceFormData to properly handle file uploads
   form.post(route('rapat.store'), {
-    forceFormData: true,
     onSuccess: () => {
       closeModal()
       emit('created')

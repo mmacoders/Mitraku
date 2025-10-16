@@ -22,7 +22,6 @@ import {
 import PksSubmissionDetailModal from '@/Components/PksSubmissionDetailModal.vue';
 import PksSubmissionModal from '@/Components/PksSubmissionModal.vue';
 import { PksSubmission, PaginatedSubmissions } from '@/types';
-import EditPksStatusModal from '@/Components/EditPksStatusModal.vue';
 
 interface Props {
   submissions: PaginatedSubmissions;
@@ -141,6 +140,43 @@ const getStatusClass = (status: string) => {
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   }
+};
+
+// Format validity period
+const formatValidityPeriod = (submission: PksSubmission) => {
+  if (submission.status === 'disetujui' && submission.validity_period_start && submission.validity_period_end) {
+    const start = new Date(submission.validity_period_start).toLocaleDateString('id-ID');
+    const end = new Date(submission.validity_period_end).toLocaleDateString('id-ID');
+    return `${start} - ${end}`;
+  }
+  return '-';
+};
+
+// Check if PKS is expiring soon (within 7 days)
+const isExpiringSoon = (endDate: string) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  const diffTime = Math.abs(end.getTime() - today.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 7 && end > today;
+};
+
+// Check if PKS has expired
+const isExpired = (endDate: string) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  return end < today;
+};
+
+// Get days until expiration
+const getDaysUntilExpiration = (endDate: string) => {
+  if (!endDate) return 0;
+  const end = new Date(endDate);
+  const today = new Date();
+  const diffTime = end.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Check if user can delete submission (only for 'proses' status)
@@ -352,6 +388,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Judul PKS</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Pengajuan</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status Pengajuan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Masa Berlaku</th>
                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
                   </tr>
                 </thead>
@@ -371,6 +408,23 @@ const canDeleteSubmission = (submission: PksSubmission) => {
                       >
                         {{ getStatusText(submission.status) }}
                       </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900 dark:text-white">
+                        {{ formatValidityPeriod(submission) }}
+                        <div 
+                          v-if="submission.status === 'disetujui' && submission.validity_period_end && isExpiringSoon(submission.validity_period_end)"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-1"
+                        >
+                          ⚠️ Akan kedaluwarsa
+                        </div>
+                        <div 
+                          v-else-if="submission.status === 'disetujui' && submission.validity_period_end && isExpired(submission.validity_period_end)"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-1"
+                        >
+                          ⚠️ Sudah kedaluwarsa
+                        </div>
+                      </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div class="flex justify-end space-x-2 gap-2">

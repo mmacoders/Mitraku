@@ -28,7 +28,8 @@ class Rapat extends Model
         'lokasi',
         'user_id',
         'status',
-        'pks_document_path', // Add this field
+        'pks_document_path',
+        'pks_submission_id', // Add this field
     ];
 
     /**
@@ -58,6 +59,14 @@ class Rapat extends Model
         return $this->belongsToMany(User::class, 'rapat_mitra', 'rapat_id', 'user_id')
                     ->withPivot('status_kehadiran')
                     ->withTimestamps();
+    }
+    
+    /**
+     * Get the PKS submission associated with this meeting.
+     */
+    public function pksSubmission()
+    {
+        return $this->belongsTo(PksSubmission::class, 'pks_submission_id');
     }
     
     /**

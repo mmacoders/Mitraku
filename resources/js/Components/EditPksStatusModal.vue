@@ -47,6 +47,33 @@
                     </select>
                   </div>
                   
+                  <!-- Validity Period Fields (only shown when status is disetujui) -->
+                  <div v-if="formData.status === 'disetujui'" class="mt-4 space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tanggal Mulai Berlaku
+                      </label>
+                      <input
+                        v-model="formData.validityPeriodStart"
+                        type="date"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
+                        :disabled="isProcessing"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tanggal Berakhir
+                      </label>
+                      <input
+                        v-model="formData.validityPeriodEnd"
+                        type="date"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
+                        :disabled="isProcessing"
+                      />
+                    </div>
+                  </div>
+                  
                   <div v-if="formData.status === 'ditolak' || formData.status === 'revisi'" class="mt-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Catatan Revisi
@@ -125,7 +152,9 @@ const emit = defineEmits(['close', 'success'])
 // Form data
 const formData = ref({
   status: '',
-  notes: ''
+  notes: '',
+  validityPeriodStart: '',
+  validityPeriodEnd: ''
 })
 
 // Processing state
@@ -133,7 +162,14 @@ const isProcessing = ref(false)
 
 // Validation
 const isFormValid = computed(() => {
-  return formData.value.status !== ''
+  if (!formData.value.status) return false
+  
+  // If status is disetujui, both validity period fields are required
+  if (formData.value.status === 'disetujui') {
+    return formData.value.validityPeriodStart && formData.value.validityPeriodEnd
+  }
+  
+  return true
 })
 
 // Watch for show prop changes
@@ -142,6 +178,8 @@ watch(() => props.show, (newValue) => {
     // Reset form when modal opens
     formData.value.status = ''
     formData.value.notes = ''
+    formData.value.validityPeriodStart = ''
+    formData.value.validityPeriodEnd = ''
     isProcessing.value = false
   }
 })
@@ -156,11 +194,20 @@ const updateStatus = () => {
   
   isProcessing.value = true
   
-  // Actual implementation to update status
-  router.put(route('pks.updateStatus', props.submission.id), {
+  // Prepare data for submission
+  const data = {
     status: formData.value.status,
     revision_notes: formData.value.notes
-  }, {
+  }
+  
+  // Add validity period data if status is disetujui
+  if (formData.value.status === 'disetujui') {
+    data.validity_period_start = formData.value.validityPeriodStart
+    data.validity_period_end = formData.value.validityPeriodEnd
+  }
+  
+  // Actual implementation to update status
+  router.put(route('pks.updateStatus', props.submission.id), data, {
     onSuccess: (response) => {
       isProcessing.value = false
       emit('success')

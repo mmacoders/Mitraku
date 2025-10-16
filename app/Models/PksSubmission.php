@@ -29,6 +29,8 @@ class PksSubmission extends Model
         'phone',
         'kak_document_path',
         'mou_document_path',
+        'validity_period_start',
+        'validity_period_end',
     ];
 
     /**
@@ -39,6 +41,8 @@ class PksSubmission extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'validity_period_start' => 'date',
+        'validity_period_end' => 'date',
     ];
 
     /**

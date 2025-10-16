@@ -77,6 +77,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
+    // Debug route to check rapat data
+    Route::get('/debug/rapat-data', function () {
+        $allRapat = \App\Models\Rapat::all();
+        $futureRapatCount = \App\Models\Rapat::where('status', 'akan_datang')
+            ->where('tanggal_waktu', '>=', now())
+            ->count();
+            
+        return response()->json([
+            'all_rapat' => $allRapat,
+            'future_rapat_count' => $futureRapatCount,
+            'now' => now()->toDateTimeString()
+        ]);
+    });
+    
     // Routes to serve uploaded PKS documents
     Route::get('/pks-documents/{path}', function (string $path) {
         // Security check: ensure the path is within the allowed directories

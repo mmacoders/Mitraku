@@ -17,7 +17,8 @@
     <RapatModal 
       :show="showCreateModal" 
       :on-close="closeCreateModal"
-      :mitra="mitra"
+      :available-mitra="mitraUsers"
+      :pks-submissions="pksSubmissions"
       @created="refreshRapatList"
     />
 
@@ -25,8 +26,9 @@
     <RapatEditModal 
       :show="showEditModal" 
       :on-close="closeEditModal"
-      :mitra="mitra"
       :rapat="selectedRapat"
+      :available-mitra="mitraUsers"
+      :pks-submissions="pksSubmissions"
       @updated="refreshRapatList"
     />
 
@@ -227,7 +229,8 @@ import {Eye, Edit3, Trash2} from 'lucide-vue-next'
 
 const props = defineProps({
   rapat: Object,
-  mitra: Array,
+  mitraUsers: Array,
+  pksSubmissions: Array,
 });
 
 // Modal states
@@ -235,9 +238,6 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDetailModal = ref(false);
 const selectedRapat = ref(null);
-
-// Use mitra data from props
-const mitra = ref(props.mitra || []);
 
 // Open create modal
 const openCreateModal = () => {

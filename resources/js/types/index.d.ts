@@ -13,7 +13,7 @@ export interface PksSubmission {
     title: string;
     description: string;
     document_path?: string;
-    status: 'proses' | 'ditolak' | 'disetujui' | 'revisi';
+    status: 'proses' | 'ditolak' | 'disetujui' | 'revisi' | 'Pembahasan';
     revision_notes?: string;
     final_document_path?: string;
     digital_signature?: string;
@@ -23,6 +23,8 @@ export interface PksSubmission {
     phone?: string;
     kak_document_path?: string;
     mou_document_path?: string;
+    validity_period_start?: string;
+    validity_period_end?: string;
     created_at: string;
     updated_at: string;
     user: User;

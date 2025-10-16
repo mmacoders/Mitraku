@@ -17,7 +17,7 @@
 
       <!-- Modal Body -->
       <div class="p-6 overflow-y-auto max-h-[60vh]">
-        <div class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <!-- Nama Mitra Card -->
           <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
             <div class="flex items-start">
@@ -49,7 +49,7 @@
           </div>
 
           <!-- Tujuan Card -->
-          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md md:col-span-2">
             <div class="flex items-start">
               <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
                 <Target class="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
@@ -80,6 +80,33 @@
             </div>
           </div>
 
+          <!-- Validity Period Card (only shown when status is disetujui) -->
+          <div v-if="submission?.status === 'disetujui' && submission?.validity_period_start && submission?.validity_period_end" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                <Calendar class="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              </div>
+              <div class="ml-4">
+                <h4 class="text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">Masa Berlaku</h4>
+                <p class="text-base text-gray-800 dark:text-gray-200 font-medium mt-1">
+                  {{ formatValidityPeriod(submission) }}
+                </p>
+                <div 
+                  v-if="isExpiringSoon(submission.validity_period_end)"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-2"
+                >
+                  ⚠️ Akan kedaluwarsa dalam {{ getDaysUntilExpiration(submission.validity_period_end) }} hari
+                </div>
+                <div 
+                  v-else-if="isExpired(submission.validity_period_end)"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mt-2"
+                >
+                  ⚠️ Sudah kedaluwarsa
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Status Card -->
           <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
             <div class="flex items-start">
@@ -99,7 +126,7 @@
           </div>
 
           <!-- Document Links Card -->
-          <div v-if="submission?.kak_document_path || submission?.mou_document_path || submission?.final_document_path" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+          <div v-if="(submission?.kak_document_path || submission?.mou_document_path || submission?.final_document_path)" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 transition-all duration-200 hover:shadow-md md:col-span-2">
             <div class="flex items-start">
               <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                 <File class="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -160,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { X, User, FileText, Target, CalendarDays, BadgeCheck, File, FileCheck } from 'lucide-vue-next';
+import { X, User, FileText, Target, CalendarDays, BadgeCheck, File, FileCheck, Calendar } from 'lucide-vue-next';
 import Modal from '@/Components/Modal.vue';
 import { PksSubmission } from '@/types';
 
@@ -190,6 +217,43 @@ const formatDate = (dateString: string | undefined) => {
     minute: '2-digit' 
   };
   return new Date(dateString).toLocaleDateString('id-ID', options);
+};
+
+// Format validity period
+const formatValidityPeriod = (submission: PksSubmission) => {
+  if (submission.status === 'disetujui' && submission.validity_period_start && submission.validity_period_end) {
+    const start = new Date(submission.validity_period_start).toLocaleDateString('id-ID');
+    const end = new Date(submission.validity_period_end).toLocaleDateString('id-ID');
+    return `${start} - ${end}`;
+  }
+  return '-';
+};
+
+// Check if PKS is expiring soon (within 7 days)
+const isExpiringSoon = (endDate: string) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  const diffTime = Math.abs(end.getTime() - today.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 7 && end > today;
+};
+
+// Check if PKS has expired
+const isExpired = (endDate: string) => {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  const today = new Date();
+  return end < today;
+};
+
+// Get days until expiration
+const getDaysUntilExpiration = (endDate: string) => {
+  if (!endDate) return 0;
+  const end = new Date(endDate);
+  const today = new Date();
+  const diffTime = Math.abs(end.getTime() - today.getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Get status text

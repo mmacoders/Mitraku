@@ -1,12 +1,12 @@
 <template>
   <nav class="flex items-center" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-2 ">
+    <ol class="inline-flex items-center space-x-2">
       <template v-for="(segment, index) in breadcrumbSegments" :key="index">
         <li>
           <Link
             v-if="index < breadcrumbSegments.length - 1"
             :href="segment.url"
-            class="inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 ease-in-out transform hover:scale-105"
+            class="inline-flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all duration-300 ease-in-out"
           >
             <component :is="segment.icon" class="w-4 h-4 mr-2" />
             <span class="hidden sm:inline truncate max-w-[120px]">{{ segment.title }}</span>
@@ -14,7 +14,7 @@
           </Link>
           <div
             v-else
-            class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400"
+            class="inline-flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300"
           >
             <component :is="segment.icon" class="w-4 h-4 mr-2" />
             <span class="truncate max-w-[120px]">{{ segment.title }}</span>
@@ -35,7 +35,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
-import { Home, FileText, Users, CalendarDays, ChevronRight } from 'lucide-vue-next'
+import { Home, FileText, Users, CalendarDays, ChevronRight, User } from 'lucide-vue-next'
 
 // Map route names to breadcrumb segments
 const routeToBreadcrumbMap = {
@@ -44,7 +44,8 @@ const routeToBreadcrumbMap = {
   'admin.kelola-rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' },
   'kelola.pks': { title: 'Kelola Pengajuan PKS', icon: FileText, shortTitle: 'PKS' },
   'kelola.mitra': { title: 'Kelola Mitra', icon: Users, shortTitle: 'Mitra' },
-  'rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' }
+  'rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' },
+  'profile.edit': { title: 'Profil', icon: User, shortTitle: 'Profil' }
 }
 
 // Get the current route name

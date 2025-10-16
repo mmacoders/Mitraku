@@ -7,8 +7,9 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\View;
 
-class RapatScheduled extends Notification
+class RapatScheduled extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -29,7 +30,43 @@ class RapatScheduled extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['gmail', 'database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Undangan Rapat: ' . $this->rapat->judul)
+            ->greeting('Halo ' . $notifiable->name . ',')
+            ->line('Anda telah diundang ke rapat dengan detail sebagai berikut:')
+            ->line('**Judul Rapat:** ' . $this->rapat->judul)
+            ->line('**Tanggal & Waktu:** ' . $this->rapat->tanggal_waktu->format('d F Y H:i'))
+            ->line('**Lokasi/Link Meeting:** ' . $this->rapat->lokasi)
+            ->line('**Deskripsi:** ' . ($this->rapat->deskripsi ?? 'Tidak ada deskripsi'))
+            ->action('Lihat Detail Rapat', url('/mitra/rapat/' . $this->rapat->id))
+            ->line('Terima kasih telah menggunakan aplikasi kami!');
+    }
+
+    /**
+     * Get the Gmail representation of the notification.
+     */
+    public function toGmail(object $notifiable)
+    {
+        $subject = 'Undangan Rapat: ' . $this->rapat->judul;
+
+        // Render the HTML email template
+        $body = View::make('emails.rapat-scheduled', [
+            'rapat' => $this->rapat,
+            'user' => $notifiable,
+        ])->render();
+
+        return [
+            'subject' => $subject,
+            'body' => $body,
+        ];
     }
 
     /**

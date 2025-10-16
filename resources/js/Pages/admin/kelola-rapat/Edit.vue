@@ -129,61 +129,34 @@
               <InputError :message="form.errors.deskripsi" class="mt-2" />
             </div>
 
-            <!-- Mitra Selection -->
+            <!-- Invite Mitra -->
             <div>
-              <InputLabel value="Undang Mitra" />
-              <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div
-                  v-for="m in mitra"
-                  :key="m.id"
-                  @click="selectMitra(m.id)"
-                  :class="[
-                    'p-3 rounded-lg border cursor-pointer transition-colors',
-                    selectedMitra.includes(m.id)
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
-                      : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  ]"
+              <InputLabel for="invited_mitra" value="Undang Mitra" />
+              <div class="mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md p-2">
+                <div 
+                  v-for="mitra in mitraUsers" 
+                  :key="mitra.id" 
+                  class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                  @click="toggleMitra(mitra.id)"
                 >
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                        <span class="text-green-800 dark:text-green-200 text-sm font-medium">{{ m.name.charAt(0) }}</span>
-                      </div>
-                    </div>
-                    <div class="ml-3">
-                      <p class="text-sm font-medium text-gray-900 dark:text-white">{{ m.name }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ m.email }}</p>
-                    </div>
-                    <div v-if="selectedMitra.includes(m.id)" class="ml-auto">
-                      <svg class="h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                    </div>
-                  </div>
+                  <input
+                    type="checkbox"
+                    :checked="form.invited_mitra.includes(mitra.id)"
+                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                    readonly
+                  />
+                  <span class="ml-2 text-sm text-gray-900 dark:text-gray-300">
+                    {{ mitra.name }} ({{ mitra.company || 'Perusahaan tidak diatur' }})
+                  </span>
+                </div>
+                <div v-if="!mitraUsers || mitraUsers.length === 0" class="text-sm text-gray-500 dark:text-gray-400 p-2">
+                  Tidak ada mitra yang tersedia untuk diundang
                 </div>
               </div>
-              <InputError :message="form.errors.mitra" class="mt-2" />
-              
-              <!-- Selected Mitra Tags -->
-              <div v-if="selectedMitra.length > 0" class="mt-3 flex flex-wrap gap-2">
-                <span
-                  v-for="id in selectedMitra"
-                  :key="id"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-                >
-                  {{ props.mitra.find(m => m.id === id)?.name }}
-                  <button
-                    type="button"
-                    @click="deselectMitra(id)"
-                    class="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:outline-none focus:bg-indigo-500 focus:text-white"
-                  >
-                    <span class="sr-only">Remove</span>
-                    <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                      <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-                    </svg>
-                  </button>
-                </span>
-              </div>
+              <InputError class="mt-2" :message="form.errors.invited_mitra" />
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Pilih mitra yang ingin Anda undang ke rapat ini
+              </p>
             </div>
 
             <!-- Submit Button -->
@@ -234,6 +207,28 @@
                   {{ getStatusText(rapat.status) }}
                 </span>
               </div>
+              <!-- Invited Mitra Section -->
+              <div>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Mitra yang Diundang</h3>
+                <div v-if="rapat.invited_mitra && rapat.invited_mitra.length > 0" class="mt-2 space-y-2">
+                  <div 
+                    v-for="mitra in rapat.invited_mitra" 
+                    :key="mitra.id"
+                    class="flex items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700"
+                  >
+                    <div class="flex-shrink-0">
+                      <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                        <span class="text-green-800 dark:text-green-200 text-sm font-medium">{{ mitra.name.charAt(0) }}</span>
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white">{{ mitra.name }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ mitra.email }}</p>
+                    </div>
+                  </div>
+                </div>
+                <p v-else class="mt-2 text-sm text-gray-500 dark:text-gray-400">Tidak ada mitra yang diundang</p>
+              </div>
             </div>
           </div>
         </div>
@@ -271,10 +266,10 @@ const props = defineProps<{
       email: string
     }>
   }
-  mitra: Array<{
+  mitraUsers: Array<{
     id: number
     name: string
-    email: string
+    company: string
   }>
   pksSubmissions: Array<{
     id: number
@@ -293,22 +288,17 @@ const form = useForm({
   lokasi: props.rapat.lokasi,
   deskripsi: props.rapat.deskripsi,
   status: props.rapat.status,
-  mitra: [] as number[]
+  invited_mitra: props.rapat.invited_mitra.map(mitra => mitra.id) as number[]
 })
 
-// Selected mitra tracking - initialized with already invited mitra
-const selectedMitra = ref<number[]>(props.rapat.invited_mitra.map(m => m.id))
-
-// Select mitra function
-const selectMitra = (id: number) => {
-  if (!selectedMitra.value.includes(id)) {
-    selectedMitra.value.push(id)
+// Toggle mitra selection
+const toggleMitra = (mitraId: number) => {
+  const index = form.invited_mitra.indexOf(mitraId)
+  if (index === -1) {
+    form.invited_mitra.push(mitraId)
+  } else {
+    form.invited_mitra.splice(index, 1)
   }
-}
-
-// Deselect mitra function
-const deselectMitra = (id: number) => {
-  selectedMitra.value = selectedMitra.value.filter(mitraId => mitraId !== id)
 }
 
 // Format date function
@@ -353,7 +343,6 @@ const getStatusText = (status: string) => {
 
 // Submit function
 const submit = () => {
-  form.mitra = selectedMitra.value
   form.put(route('rapat.update', props.rapat.id))
 }
 </script>

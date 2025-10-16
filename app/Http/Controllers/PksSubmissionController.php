@@ -16,9 +16,121 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Services\GmailService;
 use Illuminate\Support\Facades\Log;
+use App\Models\Rapat;
 
 class PksSubmissionController extends Controller
 {
+    /**
+     * Display the mitra dashboard with submissions or admin management view.
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        
+        // Handle admin users - show management view
+        if ($user->role === 'admin') {
+            // Build query for all submissions
+            $query = PksSubmission::with(['user']);
+            
+            // Apply search filter
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('title', 'like', '%' . $search . '%')
+                      ->orWhere('description', 'like', '%' . $search . '%')
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'like', '%' . $search . '%');
+                      });
+                });
+            }
+            
+            // Apply status filter
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            
+            // Apply date range filter
+            if ($request->filled('start_date')) {
+                $query->whereDate('created_at', '>=', $request->start_date);
+            }
+            
+            if ($request->filled('end_date')) {
+                $query->whereDate('created_at', '<=', $request->end_date);
+            }
+            
+            // Get submissions with user relationship
+            $submissions = $query->latest()->paginate(10);
+            
+            // Get statistics
+            $totalSubmissions = PksSubmission::count();
+            $approvedSubmissions = PksSubmission::where('status', 'disetujui')->count();
+            $pendingSubmissions = PksSubmission::where('status', 'proses')->count();
+            $rejectedSubmissions = PksSubmission::where('status', 'ditolak')->count();
+            $revisionSubmissions = PksSubmission::where('status', 'revisi')->count();
+            
+            return Inertia::render('admin/kelola-pks/Index', [
+                'submissions' => $submissions,
+                'statistics' => [
+                    'total' => $totalSubmissions,
+                    'approved' => $approvedSubmissions,
+                    'pending' => $pendingSubmissions,
+                    'rejected' => $rejectedSubmissions,
+                    'revision' => $revisionSubmissions,
+                ],
+            ]);
+        }
+        
+        // Only allow mitra users to access the dashboard view
+        if ($user->role !== 'mitra') {
+            return redirect()->route('dashboard');
+        }
+        
+        // Build query for user's submissions
+        $query = PksSubmission::where('user_id', $user->id);
+        
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+        
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply date range filter
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+        
+        // Get submissions with user relationship
+        $submissions = $query->with(['user'])->latest()->paginate(10);
+        
+        // Get statistics
+        $totalSubmissions = PksSubmission::where('user_id', $user->id)->count();
+        $approvedSubmissions = PksSubmission::where('user_id', $user->id)->where('status', 'disetujui')->count();
+        $pendingSubmissions = PksSubmission::where('user_id', $user->id)->where('status', 'proses')->count();
+        $rejectedSubmissions = PksSubmission::where('user_id', $user->id)->where('status', 'ditolak')->count();
+        
+        return Inertia::render('mitra/Dashboard', [
+            'submissions' => $submissions,
+            'statistics' => [
+                'total' => $totalSubmissions,
+                'approved' => $approvedSubmissions,
+                'pending' => $pendingSubmissions,
+                'rejected' => $rejectedSubmissions,
+            ],
+        ]);
+    }
+    
     /**
      * Display the admin dashboard with statistics.
      */
@@ -41,15 +153,28 @@ class PksSubmissionController extends Controller
         // Get recent submissions
         $recentSubmissions = PksSubmission::with('user')->latest()->take(5)->get();
         
-        return Inertia::render('DashboardAdmin', [
+        // Get recent notifications/activities
+        $recentActivities = $user->notifications()->latest()->take(4)->get();
+        
+        // Get mitra count
+        $mitraCount = User::where('role', 'mitra')->count();
+        
+        // Get scheduled meetings count (meetings with status 'akan_datang')
+        // This counts ALL meetings with status 'akan_datang', regardless of date
+        $scheduledMeetingsCount = Rapat::where('status', 'akan_datang')->count();
+        
+        return Inertia::render('admin/DashboardAdmin', [
             'statistics' => [
                 'total' => $totalSubmissions,
                 'approved' => $approvedSubmissions,
                 'rejected' => $rejectedSubmissions,
                 'pending' => $pendingSubmissions,
                 'revision' => $revisionSubmissions,
+                'mitra' => $mitraCount,
+                'scheduled_meetings' => $scheduledMeetingsCount,
             ],
             'recentSubmissions' => $recentSubmissions,
+            'recentActivities' => $recentActivities,
         ]);
     }
     
@@ -102,6 +227,12 @@ class PksSubmissionController extends Controller
         $pendingSubmissions = PksSubmission::where('status', 'proses')->count();
         $revisionSubmissions = PksSubmission::where('status', 'revisi')->count();
         
+        // Get mitra count
+        $mitraCount = User::where('role', 'mitra')->count();
+        
+        // Get scheduled meetings count (meetings with status 'akan_datang')
+        $scheduledMeetingsCount = Rapat::where('status', 'akan_datang')->count();
+        
         return response()->json([
             'statistics' => [
                 'total' => $totalSubmissions,
@@ -109,6 +240,8 @@ class PksSubmissionController extends Controller
                 'rejected' => $rejectedSubmissions,
                 'pending' => $pendingSubmissions,
                 'revision' => $revisionSubmissions,
+                'mitra' => $mitraCount,
+                'scheduled_meetings' => $scheduledMeetingsCount,
             ]
         ]);
     }
@@ -195,62 +328,6 @@ class PksSubmissionController extends Controller
             'submissionsPerMonth' => $submissionsPerMonth
         ]);
     }
-    
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $user = $request->user();
-        
-        if ($user->isAdmin()) {
-            // Admin can see all submissions and statistics
-            $totalSubmissions = PksSubmission::count();
-            $approvedSubmissions = PksSubmission::where('status', 'disetujui')->count();
-            $rejectedSubmissions = PksSubmission::where('status', 'ditolak')->count();
-            $pendingSubmissions = PksSubmission::where('status', 'proses')->count();
-            $revisionSubmissions = PksSubmission::where('status', 'revisi')->count();
-            
-            $submissions = PksSubmission::with('user')->latest()->paginate(10);
-        } else {
-            // Mitra can only see their own submissions and statistics
-            $totalSubmissions = $user->pksSubmissions()->count();
-            $approvedSubmissions = $user->pksSubmissions()->where('status', 'disetujui')->count();
-            $rejectedSubmissions = $user->pksSubmissions()->where('status', 'ditolak')->count();
-            $pendingSubmissions = $user->pksSubmissions()->where('status', 'proses')->count();
-            $revisionSubmissions = $user->pksSubmissions()->where('status', 'revisi')->count();
-            
-            $submissions = $user->pksSubmissions()->with('user')->latest()->paginate(10);
-        }
-        
-        $statistics = [
-            'total' => $totalSubmissions,
-            'approved' => $approvedSubmissions,
-            'rejected' => $rejectedSubmissions,
-            'pending' => $pendingSubmissions,
-            'revision' => $revisionSubmissions,
-        ];
-        
-        // Check if this is a request for the new kelola-pks route
-        if ($request->route()->getName() === 'kelola.pks') {
-            return Inertia::render('admin/kelola-pks/Index', [
-                'submissions' => $submissions,
-                'statistics' => $statistics,
-            ]);
-        }
-        
-        // Check if this is a request for the mitra dashboard
-        if ($request->route()->getName() === 'mitra.dashboard') {
-            return Inertia::render('mitra/Dashboard', [
-                'submissions' => $submissions,
-                'statistics' => $statistics,
-            ]);
-        }
-        
-        return Inertia::render('admin/kelola-pks/Index', [
-            'submissions' => $submissions,
-        ]);
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -314,7 +391,7 @@ class PksSubmissionController extends Controller
                 "Halo {$request->user()->name},\n\nPengajuan PKS Anda berhasil dikirim dan sedang diproses.\n\nTerima kasih."
             );
         } catch (\Exception $e) {
-            \Log::error('Gagal kirim notifikasi Gmail: '.$e->getMessage());
+            Log::error('Gagal kirim notifikasi Gmail: '.$e->getMessage());
         }
         
         // Redirect mitra users back to their dashboard instead of admin page
@@ -413,6 +490,8 @@ class PksSubmissionController extends Controller
             'revision_notes' => 'nullable|string',
             'final_document' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
             'digital_signature' => 'nullable|string',
+            'validity_period_start' => 'nullable|date|required_if:status,disetujui',
+            'validity_period_end' => 'nullable|date|required_if:status,disetujui|after:validity_period_start',
         ]);
         
         // Store the old status
@@ -438,11 +517,19 @@ class PksSubmissionController extends Controller
             $data['final_document_path'] = $filePath;
         }
         
-        // Handle digital signature when status is disetujui
-        if ($request->status === 'disetujui' && $request->filled('digital_signature')) {
-            $data['digital_signature'] = $request->digital_signature;
-            $data['signed_by'] = $request->user()->name;
-            $data['signed_at'] = now();
+        // Handle digital signature and validity period when status is disetujui
+        if ($request->status === 'disetujui') {
+            if ($request->filled('digital_signature')) {
+                $data['digital_signature'] = $request->digital_signature;
+                $data['signed_by'] = $request->user()->name;
+                $data['signed_at'] = now();
+            }
+            
+            // Add validity period data
+            if ($request->filled('validity_period_start') && $request->filled('validity_period_end')) {
+                $data['validity_period_start'] = $request->validity_period_start;
+                $data['validity_period_end'] = $request->validity_period_end;
+            }
         }
         
         Log::info('Updating submission with data: ', $data);
@@ -525,7 +612,27 @@ class PksSubmissionController extends Controller
         $user = $request->user();
         $notifications = $user->notifications()->latest()->take(20)->get();
         
-        return response()->json($notifications);
+        // Filter out notifications for PKS submissions that no longer exist
+        $filteredNotifications = $notifications->filter(function ($notification) {
+            // Check if this is a PKS-related notification
+            if (in_array($notification->type, [
+                'App\Notifications\PksSubmitted',
+                'App\Notifications\PksStatusUpdated',
+                'App\Notifications\PksRevisionRequested',
+                'App\Notifications\AdminPksSubmissionNotification'
+            ])) {
+                // Extract PKS submission ID from notification data
+                $pksId = $notification->data['pks_submission_id'] ?? null;
+                if ($pksId) {
+                    // Check if the PKS submission still exists
+                    return PksSubmission::where('id', $pksId)->exists();
+                }
+            }
+            // For non-PKS notifications or notifications without PKS ID, keep them
+            return true;
+        });
+        
+        return response()->json($filteredNotifications->values());
     }
     
     /**
