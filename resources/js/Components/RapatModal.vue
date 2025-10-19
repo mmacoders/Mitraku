@@ -97,7 +97,7 @@
             >
               <option value="">Pilih PKS yang akan di bahas</option>
               <option v-for="pks in filteredPksSubmissions" :key="pks.id" :value="pks.id">
-                {{ pks.title }} - {{ pks.user.name }}
+                {{ pks.title }} - {{ pks.user ? pks.user.name : 'User tidak ditemukan' }}
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.pks_submission_id" />
@@ -146,6 +146,22 @@
             <InputError class="mt-2" :message="form.errors.lokasi" />
           </div>
 
+          <!-- Status -->
+          <div>
+            <InputLabel for="status" value="Status" />
+            <select
+              id="status"
+              v-model="form.status"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+              :disabled="form.processing"
+            >
+              <option value="akan_datang">Proses</option>
+              <option value="selesai">Selesai</option>
+              <option value="dibatalkan">Dibatalkan</option>
+            </select>
+            <InputError class="mt-2" :message="form.errors.status" />
+          </div>
+
           <!-- Deskripsi Agenda Rapat -->
           <div>
             <InputLabel for="deskripsi" value="Deskripsi Agenda Rapat (Opsional)" />
@@ -168,6 +184,7 @@
             <PrimaryButton 
               :class="{ 'opacity-25': form.processing }" 
               :disabled="form.processing"
+              type="submit"
             >
               <span v-if="form.processing">Menyimpan...</span>
               <span v-else>Simpan</span>
@@ -218,6 +235,7 @@ const form = useForm({
   tanggal_waktu: '',
   lokasi: '',
   deskripsi: '',
+  status: 'akan_datang',
   pks_submission_id: '' as string | number,
   invited_mitra: [] as number[]
 })
@@ -243,6 +261,7 @@ const filteredPksSubmissions = computed(() => {
   // 2. Only from selected mitra
   return props.pksSubmissions.filter(pks => 
     pks.status === 'proses' && 
+    pks.user && 
     selectedMitraIds.includes(pks.user.id)
   )
 })
@@ -259,6 +278,9 @@ const selectMitra = (mitra: { id: number }) => {
     form.invited_mitra.push(mitra.id)
   }
   searchMitra.value = ''
+  
+  // Clear PKS selection when mitra changes
+  form.pks_submission_id = ''
 }
 
 // Remove mitra
@@ -293,6 +315,11 @@ const submit = () => {
     onSuccess: () => {
       closeModal()
       emit('created')
+    },
+    onError: (errors) => {
+      console.error('Form submission error:', errors)
+      // Show a user-friendly error message
+      alert('Terjadi kesalahan saat menyimpan rapat. Silakan periksa kembali data yang dimasukkan.')
     }
   })
 }

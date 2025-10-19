@@ -1,4 +1,4 @@
-# Mitraku (Elektronik Perjanjian Kerja Sama)
+# SI-Huyula (Elektronik Perjanjian Kerja Sama)
 
 A Laravel + Vue.js application for managing partnership agreements (PKS) with role-based access control for Mitra and Admin users.
 

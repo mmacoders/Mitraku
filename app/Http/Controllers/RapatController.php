@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class RapatController extends Controller
 {
@@ -96,7 +97,7 @@ class RapatController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RapatRequest $request)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -105,17 +106,9 @@ class RapatController extends Controller
         if (!$user->isAdmin()) {
             return redirect()->route('dashboard');
         }
-        
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'tanggal_waktu' => 'required|date',
-            'lokasi' => 'nullable|string|max:255',
-            'pks_document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB max
-            'invited_mitra' => 'nullable|array',
-            'invited_mitra.*' => 'exists:users,id',
-            'pks_submission_id' => 'nullable|exists:pks_submissions,id',
-        ]);
+
+        // Get validated data
+        $validatedData = $request->validated();
         
         // Handle file upload if present
         $pksDocumentPath = null;
@@ -123,21 +116,24 @@ class RapatController extends Controller
             $pksDocumentPath = $request->file('pks_document')->store('pks_documents', 'public');
         }
         
+        // Format tanggal_waktu for database storage
+        $tanggalWaktu = Carbon::parse($validatedData['tanggal_waktu']);
+        
         // Create the rapat
         $rapat = Rapat::create([
-            'judul' => $request->judul,
-            'deskripsi' => $request->deskripsi,
-            'tanggal_waktu' => $request->tanggal_waktu,
-            'lokasi' => $request->lokasi,
+            'judul' => $validatedData['judul'],
+            'deskripsi' => $validatedData['deskripsi'] ?? null,
+            'tanggal_waktu' => $tanggalWaktu,
+            'lokasi' => $validatedData['lokasi'] ?? null,
             'user_id' => $user->id,
-            'status' => 'akan_datang',
+            'status' => $validatedData['status'] ?? 'akan_datang',
             'pks_document_path' => $pksDocumentPath,
-            'pks_submission_id' => $request->pks_submission_id,
+            'pks_submission_id' => $validatedData['pks_submission_id'] ?? null,
         ]);
         
         // Update PKS status to "Pembahasan" if mitra are invited and PKS submission exists
-        if ($request->has('invited_mitra') && is_array($request->invited_mitra) && !empty($request->invited_mitra) && $request->pks_submission_id) {
-            $pksSubmission = PksSubmission::find($request->pks_submission_id);
+        if (!empty($validatedData['invited_mitra']) && !empty($validatedData['pks_submission_id'])) {
+            $pksSubmission = PksSubmission::find($validatedData['pks_submission_id']);
             if ($pksSubmission && $pksSubmission->status !== 'Pembahasan') {
                 // Store the old status
                 $oldStatus = $pksSubmission->status;
@@ -159,11 +155,11 @@ class RapatController extends Controller
         }
         
         // Attach invited mitra to the rapat
-        if ($request->has('invited_mitra') && is_array($request->invited_mitra)) {
-            $rapat->invitedMitra()->attach($request->invited_mitra);
+        if (!empty($validatedData['invited_mitra'])) {
+            $rapat->invitedMitra()->attach($validatedData['invited_mitra']);
             
             // Send notifications to invited mitra
-            $invitedMitraUsers = User::whereIn('id', $request->invited_mitra)->get();
+            $invitedMitraUsers = User::whereIn('id', $validatedData['invited_mitra'])->get();
             foreach ($invitedMitraUsers as $mitra) {
                 $mitra->notify(new RapatScheduled($rapat));
             }
@@ -209,6 +205,20 @@ class RapatController extends Controller
         $rapat->load(['invitedMitra']);
         $rapat->append('pks_document_url');
         
+        // Format the tanggal_waktu for datetime-local input
+        if ($rapat->tanggal_waktu instanceof Carbon) {
+            $rapat->tanggal_waktu = $rapat->tanggal_waktu->format('Y-m-d\TH:i');
+        } else {
+            // Handle string format and ensure proper parsing
+            try {
+                $date = Carbon::parse($rapat->tanggal_waktu);
+                $rapat->tanggal_waktu = $date->format('Y-m-d\TH:i');
+            } catch (\Exception $e) {
+                // If parsing fails, use the original value
+                $rapat->tanggal_waktu = '';
+            }
+        }
+        
         // Get all mitra users for invitation
         $mitraUsers = User::where('role', 'mitra')
             ->select('id', 'name', 'company')
@@ -239,18 +249,8 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        // Debug: Dump all request data to see what's being received
-        \Log::info('=== Rapat Update Debug Info ===');
-        \Log::info('All request data:', $request->all());
-        \Log::info('Judul value:', [$request->judul]);
-        \Log::info('Tanggal waktu value:', [$request->tanggal_waktu]);
-        \Log::info('Status value:', [$request->status]);
-        \Log::info('Request method: ' . $request->method());
-        \Log::info('Content type: ' . $request->header('Content-Type'));
-        
         // Get validated data
         $validatedData = $request->validated();
-        \Log::info('Validation passed. Validated data:', $validatedData);
         
         // Handle file removal
         if ($request->shouldRemoveExistingDocument) {
@@ -273,22 +273,18 @@ class RapatController extends Controller
             $pksDocumentPath = $request->file('pks_document')->store('pks_documents', 'public');
         }
         
-        // Format tanggal_waktu for database storage if needed
-        $tanggalWaktu = $request->tanggal_waktu;
-        // If it's in datetime-local format, convert to proper datetime format for database
-        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $tanggalWaktu)) {
-            $tanggalWaktu = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $tanggalWaktu);
-        }
+        // Format tanggal_waktu for database storage
+        $tanggalWaktu = Carbon::parse($validatedData['tanggal_waktu']);
         
         // Update the rapat
         $rapat->update([
-            'judul' => $request->judul,
-            'deskripsi' => $request->deskripsi,
+            'judul' => $validatedData['judul'],
+            'deskripsi' => $validatedData['deskripsi'] ?? null,
             'tanggal_waktu' => $tanggalWaktu,
-            'lokasi' => $request->lokasi,
-            'status' => $request->status,
+            'lokasi' => $validatedData['lokasi'] ?? null,
+            'status' => $validatedData['status'],
             'pks_document_path' => $pksDocumentPath,
-            'pks_submission_id' => $request->pks_submission_id,
+            'pks_submission_id' => $validatedData['pks_submission_id'] ?? null,
         ]);
         
         // Check if we need to update PKS status to "Pembahasan"
@@ -296,12 +292,12 @@ class RapatController extends Controller
         // 1. PKS submission is associated with this meeting
         // 2. Mitra are invited (either newly or already existing)
         // 3. PKS submission status is not already "Pembahasan"
-        if ($request->pks_submission_id) {
-            $pksSubmission = PksSubmission::find($request->pks_submission_id);
+        if (!empty($validatedData['pks_submission_id'])) {
+            $pksSubmission = PksSubmission::find($validatedData['pks_submission_id']);
             if ($pksSubmission && $pksSubmission->status !== 'Pembahasan') {
                 // Check if there are invited mitra
                 $hasInvitedMitra = false;
-                if ($request->has('invited_mitra') && is_array($request->invited_mitra) && !empty($request->invited_mitra)) {
+                if (!empty($validatedData['invited_mitra'])) {
                     $hasInvitedMitra = true;
                 } else {
                     // Check if there were already invited mitra
@@ -330,12 +326,12 @@ class RapatController extends Controller
         }
         
         // Handle mitra invitations if provided
-        if ($request->has('invited_mitra') && is_array($request->invited_mitra)) {
+        if (isset($validatedData['invited_mitra'])) {
             // Sync the invited mitra (this will add new ones and remove ones not in the array)
-            $rapat->invitedMitra()->sync($request->invited_mitra);
+            $rapat->invitedMitra()->sync($validatedData['invited_mitra']);
             
             // Send notifications to newly invited mitra
-            $invitedMitraUsers = User::whereIn('id', $request->invited_mitra)->get();
+            $invitedMitraUsers = User::whereIn('id', $validatedData['invited_mitra'])->get();
             foreach ($invitedMitraUsers as $mitra) {
                 $mitra->notify(new RapatScheduled($rapat));
             }

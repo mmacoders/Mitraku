@@ -195,7 +195,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
           <div class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div class="block h-8 w-auto text-gray-800 dark:text-gray-200 font-bold text-xl">
-                Mitraku
+                SI-Huyula
               </div>
             </div>
             <button 

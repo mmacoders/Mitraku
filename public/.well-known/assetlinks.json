@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.sihuyula.app",
+      "sha256_cert_fingerprints": [
+        "9B:B0:31:24:73:C3:00:3E:30:C4:F6:41:33:8C:B8:5B:05:F3:D0:EA:50:7D:43:D4:5D:0C:AD:87:AD:E2:64:5F"
+      ]
+    }
+  }
+]

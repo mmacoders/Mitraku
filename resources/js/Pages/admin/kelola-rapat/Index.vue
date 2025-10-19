@@ -23,7 +23,7 @@
     />
 
     <!-- Rapat Edit Modal -->
-    <RapatEditModal 
+    <Edit 
       :show="showEditModal" 
       :on-close="closeEditModal"
       :rapat="selectedRapat"
@@ -223,7 +223,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import RapatModal from '@/Components/RapatModal.vue';
-import RapatEditModal from '@/Components/RapatEditModal.vue';
+import Edit from './Edit.vue';
 import RapatDetailModal from '@/Components/RapatDetailModal.vue';
 import {Eye, Edit3, Trash2} from 'lucide-vue-next'
 

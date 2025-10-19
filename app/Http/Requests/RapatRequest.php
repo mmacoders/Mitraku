@@ -11,7 +11,8 @@ class RapatRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Only allow authenticated users to make this request
+        return auth()->check();
     }
 
     /**
@@ -24,11 +25,14 @@ class RapatRequest extends FormRequest
         return [
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'tanggal_waktu' => 'required|date_format:Y-m-d\TH:i', // Changed to accept datetime-local format
+            'tanggal_waktu' => 'required|date',
             'lokasi' => 'nullable|string|max:255',
             'status' => 'required|in:akan_datang,selesai,dibatalkan',
             'pks_document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB max
-            'shouldRemoveExistingDocument' => 'nullable|boolean'
+            'shouldRemoveExistingDocument' => 'nullable|boolean',
+            'pks_submission_id' => 'nullable|integer|exists:pks_submissions,id',
+            'invited_mitra' => 'nullable|array',
+            'invited_mitra.*' => 'integer|exists:users,id',
         ];
     }
 
@@ -42,12 +46,16 @@ class RapatRequest extends FormRequest
         return [
             'judul.required' => 'Judul rapat harus diisi.',
             'tanggal_waktu.required' => 'Tanggal dan waktu rapat harus diisi.',
-            'tanggal_waktu.date_format' => 'Format tanggal dan waktu tidak valid. Gunakan format YYYY-MM-DD HH:MM', // Updated message
             'status.required' => 'Status rapat harus dipilih.',
             'status.in' => 'Status rapat tidak valid.',
             'pks_document.file' => 'File dokumen PKS tidak valid.',
             'pks_document.mimes' => 'File dokumen PKS harus berupa PDF, DOC, atau DOCX.',
             'pks_document.max' => 'Ukuran file dokumen PKS tidak boleh lebih dari 2MB.',
+            'pks_submission_id.integer' => 'ID pengajuan PKS tidak valid.',
+            'pks_submission_id.exists' => 'Pengajuan PKS tidak ditemukan.',
+            'invited_mitra.array' => 'Daftar mitra yang diundang tidak valid.',
+            'invited_mitra.*.integer' => 'ID mitra tidak valid.',
+            'invited_mitra.*.exists' => 'Mitra tidak ditemukan.',
         ];
     }
     
@@ -56,10 +64,36 @@ class RapatRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        // If tanggal_waktu is in datetime-local format, we can use it as is
-        // Laravel's date_format rule will validate it properly
+        // Trim whitespace from important fields
         $this->merge([
-            // No transformation needed as we're now accepting the datetime-local format directly
+            'judul' => trim($this->judul ?? ''),
+            'tanggal_waktu' => trim($this->tanggal_waktu ?? ''),
+            'status' => trim($this->status ?? ''),
+            'lokasi' => trim($this->lokasi ?? ''),
+            'deskripsi' => trim($this->deskripsi ?? ''),
         ]);
+        
+        // Handle pks_submission_id
+        if ($this->pks_submission_id === '') {
+            $this->merge(['pks_submission_id' => null]);
+        }
+        
+        // Handle invited_mitra if it's not an array
+        if ($this->invited_mitra && !is_array($this->invited_mitra)) {
+            $this->merge(['invited_mitra' => []]);
+        }
+        
+        // Ensure required fields are not null
+        if (is_null($this->judul)) {
+            $this->merge(['judul' => '']);
+        }
+        
+        if (is_null($this->tanggal_waktu)) {
+            $this->merge(['tanggal_waktu' => '']);
+        }
+        
+        if (is_null($this->status)) {
+            $this->merge(['status' => '']);
+        }
     }
 }

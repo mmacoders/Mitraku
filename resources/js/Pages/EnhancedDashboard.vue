@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import HttpsWarningBanner from '@/Components/HttpsWarningBanner.vue';
 import { Head } from '@inertiajs/vue3';
 // @ts-ignore
 import VueApexCharts from 'vue3-apexcharts';
@@ -162,6 +163,9 @@ const lineChartSeries = [{
   <Head title="Dashboard Admin" />
 
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- HTTPS Warning Banner -->
+    <HttpsWarningBanner />
+    
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow dark:shadow-gray-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -254,7 +258,7 @@ const lineChartSeries = [{
         <div class="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl shadow-sm p-6 border border-blue-100 dark:border-blue-900/50">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang di Mitraku 🎉</h1>
+              <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang di SI-Huyula 🎉</h1>
               <p class="mt-2 text-gray-600 dark:text-gray-300">Kelola pengajuan, rapat, dan mitra dengan mudah di satu platform.</p>
             </div>
             <div class="mt-4 md:mt-0">

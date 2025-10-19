@@ -8,6 +8,7 @@ use App\Models\Rapat;
 use App\Notifications\RapatScheduled;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\View;
 
 class RapatInvitationTest extends TestCase
 {
@@ -132,5 +133,40 @@ class RapatInvitationTest extends TestCase
         
         // Assert notification was sent to the newly invited mitra
         Notification::assertSentTo($mitra2, RapatScheduled::class);
+    }
+
+    /** @test */
+    public function rapat_scheduled_notification_contains_valid_calendar_link()
+    {
+        // Create a test rapat
+        $rapat = new Rapat([
+            'judul' => 'Test Meeting',
+            'deskripsi' => 'This is a test meeting',
+            'tanggal_waktu' => '2025-12-01 10:00:00',
+            'lokasi' => 'Test Location',
+            'user_id' => 1,
+            'status' => 'akan_datang'
+        ]);
+        
+        // Create a test user
+        $user = new User([
+            'name' => 'Test User',
+            'email' => 'test@example.com'
+        ]);
+        
+        // Create the notification
+        $notification = new RapatScheduled($rapat);
+        
+        // Get the Gmail representation (which uses the HTML template)
+        $gmailData = $notification->toGmail($user);
+        
+        // Check that the calendar link is present in the email body
+        $this->assertStringContainsString('Tambahkan ke Kalender', $gmailData['body']);
+        $this->assertStringContainsString('calendar.google.com/calendar/render', $gmailData['body']);
+        
+        // Check that the link contains the correct parameters
+        $this->assertStringContainsString(urlencode('Test Meeting'), $gmailData['body']);
+        $this->assertStringContainsString('20251201T100000', $gmailData['body']);
+        $this->assertStringContainsString(urlencode('Test Location'), $gmailData['body']);
     }
 }

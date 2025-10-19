@@ -54,7 +54,7 @@
 
         {{-- Outro --}}
         <p style="font-size: 16px; line-height: 1.5; margin-top: 20px;">
-            Email ini dikirim otomatis oleh sistem Mitraku. Mohon tidak membalas email ini.
+            Email ini dikirim otomatis oleh sistem SI-Huyula. Mohon tidak membalas email ini.
         </p>
     </div>
 </body>

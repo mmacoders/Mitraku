@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- HTTPS Warning Banner -->
+    <HttpsWarningBanner />
+    
     <!-- Off-canvas sidebar for mobile -->
     <div v-if="sidebarOpen" class="fixed inset-0 flex z-50 lg:hidden" role="dialog" aria-modal="true">
       <div class="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ease-linear duration-300" aria-hidden="true"></div>
@@ -12,7 +15,7 @@
         </div>
         <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
           <div class="flex-shrink-0 flex justify-center items-center w-full px-4">
-            <img src="/assets/logo-app.png" alt="Mitraku Logo" class="h-10 w-auto">
+            <img src="/assets/logo-app.png" alt="SI-Huyula Logo" class="h-10 w-auto">
           </div>
           <nav class="mt-5 px-2 space-y-1">
             <Link
@@ -102,9 +105,9 @@
       <div class="flex-1 flex flex-col min-h-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 shadow-lg">
         <div class="flex items-center justify-center flex-shrink-0 px-4 py-5">
           <!-- Full logo when sidebar is expanded -->
-          <img v-if="!sidebarCollapsed" src="/assets/logo-app.png" alt="Mitraku Logo" class="h-10 w-auto">
+          <img v-if="!sidebarCollapsed" src="/assets/logo-app.png" alt="SI-Huyula Logo" class="h-10 w-auto">
           <!-- Mobile logo when sidebar is collapsed -->
-          <img v-else src="/assets/logo-mobile.png" alt="Mitraku Logo" class="h-12 w-auto">
+          <img v-else src="/assets/logo-mobile.png" alt="SI-Huyula Logo" class="h-12 w-auto">
         </div>
         
         <!-- Separator line and Menu Aplikasi text -->
@@ -211,10 +214,19 @@
     >
       <div class="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between h-16 px-6 bg-white dark:bg-gray-900 backdrop-blur-md shadow-sm dark:shadow-gray-800/50">
         <div class="flex items-center">
+          <!-- Mobile menu button -->
+          <button 
+            @click="toggleSidebar" 
+            class="lg:hidden mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
+            :title="'Open sidebar'"
+          >
+            <Menu class="h-6 w-6" />
+          </button>
+          
           <!-- Close/Open sidebar icon next to breadcrumb -->
           <button 
             @click="toggleSidebarCollapse" 
-            class="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
+            class="hidden lg:block mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none transition-all duration-300 ease-in-out"
             :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
           >
             <PanelLeftOpen v-if="sidebarCollapsed" class="h-5 w-5" />
@@ -328,7 +340,6 @@
               :class="showProfileDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95'"
             >
               <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Profil</Link>
-              <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Pengaturan</Link>
               <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Logout</button>
             </div>
           </div>
@@ -363,6 +374,7 @@ import {
 } from 'lucide-vue-next';
 import Vue3Avatar from 'vue3-avatar';
 import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
+import HttpsWarningBanner from '@/Components/HttpsWarningBanner.vue';
 
 // Define reactive properties
 const sidebarOpen = ref(false);

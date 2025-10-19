@@ -6,8 +6,12 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import VueApexCharts from 'vue3-apexcharts';
+import { registerServiceWorker } from './registerServiceWorker';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Register service worker for PWA
+registerServiceWorker();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
