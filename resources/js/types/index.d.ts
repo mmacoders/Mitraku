@@ -13,8 +13,7 @@ export interface PksSubmission {
     title: string;
     description: string;
     document_path?: string;
-    status: 'proses' | 'ditolak' | 'disetujui' | 'revisi' | 'Pembahasan';
-    revision_notes?: string;
+    status: 'proses' | 'ditolak' | 'disetujui'; // Removed 'revisi' and 'Pembahasan'
     final_document_path?: string;
     digital_signature?: string;
     signed_by?: string;

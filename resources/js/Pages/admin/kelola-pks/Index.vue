@@ -57,7 +57,7 @@
                 >
                   <option value="">Semua Status</option>
                   <option value="proses">Proses</option>
-                  <option value="revisi">Revisi</option>
+                  <!-- Removed 'revisi' option -->
                   <option value="ditolak">Ditolak</option>
                   <option value="disetujui">Disetujui</option>
                 </select>
@@ -315,8 +315,7 @@ const getStatusClass = (status) => {
   switch (status) {
     case 'proses':
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-    case 'revisi':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+    // Removed 'revisi' case
     case 'ditolak':
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
     case 'disetujui':
@@ -333,8 +332,7 @@ const getStatusText = (status) => {
   switch (status) {
     case 'proses':
       return 'Proses'
-    case 'revisi':
-      return 'Revisi'
+    // Removed 'revisi' case
     case 'ditolak':
       return 'Ditolak'
     case 'disetujui':
@@ -349,7 +347,8 @@ const getStatusText = (status) => {
 // Check if user can edit submission
 const canEditSubmission = (submission) => {
   if (user.role === 'mitra') {
-    return submission.status === 'revisi'
+    // Removed revision status check
+    return false;
   } else if (user.role === 'admin') {
     return true
   }

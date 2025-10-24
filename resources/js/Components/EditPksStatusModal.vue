@@ -43,7 +43,7 @@
                       <option value="">Pilih Status</option>
                       <option value="disetujui">Disetujui</option>
                       <option value="ditolak">Ditolak</option>
-                      <option value="revisi">Revisi</option>
+                      <!-- Removed 'revisi' option -->
                     </select>
                   </div>
                   
@@ -74,18 +74,7 @@
                     </div>
                   </div>
                   
-                  <div v-if="formData.status === 'ditolak' || formData.status === 'revisi'" class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Catatan Revisi
-                    </label>
-                    <textarea
-                      v-model="formData.notes"
-                      rows="3"
-                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
-                      placeholder="Tambahkan catatan revisi jika diperlukan..."
-                      :disabled="isProcessing"
-                    ></textarea>
-                  </div>
+                  <!-- Removed revision notes section -->
                 </div>
                 
                 <div class="mt-8 flex gap-3">
@@ -152,7 +141,7 @@ const emit = defineEmits(['close', 'success'])
 // Form data
 const formData = ref({
   status: '',
-  notes: '',
+  // Removed notes field
   validityPeriodStart: '',
   validityPeriodEnd: ''
 })
@@ -177,7 +166,7 @@ watch(() => props.show, (newValue) => {
   if (newValue) {
     // Reset form when modal opens
     formData.value.status = ''
-    formData.value.notes = ''
+    // Removed notes reset
     formData.value.validityPeriodStart = ''
     formData.value.validityPeriodEnd = ''
     isProcessing.value = false
@@ -196,8 +185,8 @@ const updateStatus = () => {
   
   // Prepare data for submission
   const data = {
-    status: formData.value.status,
-    revision_notes: formData.value.notes
+    status: formData.value.status
+    // Removed revision_notes
   }
   
   // Add validity period data if status is disetujui

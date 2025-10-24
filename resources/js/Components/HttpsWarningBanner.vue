@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showWarning" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 dark:bg-yellow-900/20 dark:border-yellow-600">
+  <div v-if="showWarning" class="relative z-50 bg-yellow-50 border-l-4 border-yellow-400 p-4 dark:bg-yellow-900/20 dark:border-yellow-600">
     <div class="flex">
       <div class="flex-shrink-0">
         <svg class="h-5 w-5 text-yellow-400 dark:text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

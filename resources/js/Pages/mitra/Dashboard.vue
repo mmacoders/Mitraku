@@ -25,7 +25,7 @@ import { PksSubmission, PaginatedSubmissions } from '@/types';
 
 interface Props {
   submissions: PaginatedSubmissions;
-  statistics: {
+  statistics?: {
     total: number;
     approved: number;
     pending: number;
@@ -40,6 +40,27 @@ const isModalOpen = ref(false);
 const isCreateModalOpen = ref(false);
 const isProfileDropdownOpen = ref(false);
 const isMobileMenuOpen = ref(false);
+
+// Provide default values for statistics if not provided
+const safeStatistics = computed(() => {
+  // Check if statistics exists and has the required properties
+  if (props.statistics && 
+      typeof props.statistics === 'object' &&
+      'total' in props.statistics &&
+      'approved' in props.statistics &&
+      'pending' in props.statistics &&
+      'rejected' in props.statistics) {
+    return props.statistics;
+  }
+  
+  // Return default values if statistics is missing or incomplete
+  return {
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0
+  };
+});
 
 const openModal = (submission: PksSubmission) => {
   selectedSubmission.value = submission;
@@ -66,6 +87,9 @@ const handleCreateSuccess = () => {
     onSuccess: () => {
       // Close the modal after successful submission
       closeCreateModal();
+    },
+    onError: (errors) => {
+      console.error('Reload error:', errors);
     }
   });
 };
@@ -76,8 +100,14 @@ const deleteSubmission = (id: number) => {
       onSuccess: () => {
         // Refresh submissions after deletion
         router.reload({
-          only: ['submissions', 'statistics']
+          only: ['submissions', 'statistics'],
+          onError: (errors) => {
+            console.error('Reload error:', errors);
+          }
         });
+      },
+      onError: (errors) => {
+        console.error('Delete error:', errors);
       }
     });
   }
@@ -318,7 +348,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pengajuan</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ safeStatistics.total }}</p>
               </div>
             </div>
           </div>
@@ -331,7 +361,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Disetujui</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.approved }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ safeStatistics.approved }}</p>
               </div>
             </div>
           </div>
@@ -344,7 +374,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Menunggu</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.pending }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ safeStatistics.pending }}</p>
               </div>
             </div>
           </div>
@@ -357,7 +387,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ditolak</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.rejected }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ safeStatistics.rejected }}</p>
               </div>
             </div>
           </div>

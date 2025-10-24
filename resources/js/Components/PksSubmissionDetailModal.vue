@@ -261,8 +261,8 @@ const getStatusText = (status: string | undefined) => {
   const statusMap: Record<string, string> = {
     'proses': 'Menunggu',
     'ditolak': 'Ditolak',
-    'disetujui': 'Disetujui',
-    'revisi': 'Revisi'
+    'disetujui': 'Disetujui'
+    // Removed 'revisi' status
   };
   return statusMap[status || ''] || status || 'Menunggu';
 };
@@ -274,8 +274,7 @@ const getStatusClass = (status: string | undefined) => {
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
     case 'disetujui':
       return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-    case 'revisi':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+    // Removed 'revisi' case
     case 'ditolak':
       return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
     default:

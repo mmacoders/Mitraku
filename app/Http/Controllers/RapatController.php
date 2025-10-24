@@ -131,26 +131,26 @@ class RapatController extends Controller
             'pks_submission_id' => $validatedData['pks_submission_id'] ?? null,
         ]);
         
-        // Update PKS status to "Pembahasan" if mitra are invited and PKS submission exists
+        // Update PKS status to "proses" if mitra are invited and PKS submission exists
         if (!empty($validatedData['invited_mitra']) && !empty($validatedData['pks_submission_id'])) {
             $pksSubmission = PksSubmission::find($validatedData['pks_submission_id']);
-            if ($pksSubmission && $pksSubmission->status !== 'Pembahasan') {
+            if ($pksSubmission && $pksSubmission->status !== 'proses') {
                 // Store the old status
                 $oldStatus = $pksSubmission->status;
                 
                 // Update the status
-                $pksSubmission->update(['status' => 'Pembahasan']);
+                $pksSubmission->update(['status' => 'proses']);
                 
                 // Create status history
                 \App\Models\StatusHistory::create([
                     'pks_submission_id' => $pksSubmission->id,
-                    'status' => 'Pembahasan',
-                    'notes' => 'Status diubah menjadi Pembahasan karena rapat telah dibuat dengan mitra yang diundang',
+                    'status' => 'proses',
+                    'notes' => 'Status diubah karena rapat telah dibuat dengan mitra yang diundang',
                 ]);
                 
                 // Notify the mitra about the status update
                 $mitra = $pksSubmission->user;
-                $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'Pembahasan'));
+                $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'proses'));
             }
         }
         
@@ -287,14 +287,14 @@ class RapatController extends Controller
             'pks_submission_id' => $validatedData['pks_submission_id'] ?? null,
         ]);
         
-        // Check if we need to update PKS status to "Pembahasan"
+        // Check if we need to update PKS status to "proses"
         // This happens when:
         // 1. PKS submission is associated with this meeting
         // 2. Mitra are invited (either newly or already existing)
-        // 3. PKS submission status is not already "Pembahasan"
+        // 3. PKS submission status is not already "proses"
         if (!empty($validatedData['pks_submission_id'])) {
             $pksSubmission = PksSubmission::find($validatedData['pks_submission_id']);
-            if ($pksSubmission && $pksSubmission->status !== 'Pembahasan') {
+            if ($pksSubmission && $pksSubmission->status !== 'proses') {
                 // Check if there are invited mitra
                 $hasInvitedMitra = false;
                 if (!empty($validatedData['invited_mitra'])) {
@@ -309,18 +309,18 @@ class RapatController extends Controller
                     $oldStatus = $pksSubmission->status;
                     
                     // Update the status
-                    $pksSubmission->update(['status' => 'Pembahasan']);
+                    $pksSubmission->update(['status' => 'proses']);
                     
                     // Create status history
                     \App\Models\StatusHistory::create([
                         'pks_submission_id' => $pksSubmission->id,
-                        'status' => 'Pembahasan',
-                        'notes' => 'Status diubah menjadi Pembahasan karena rapat dengan mitra telah diatur',
+                        'status' => 'proses',
+                        'notes' => 'Status diubah karena rapat dengan mitra telah diatur',
                     ]);
                     
                     // Notify the mitra about the status update
                     $mitra = $pksSubmission->user;
-                    $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'Pembahasan'));
+                    $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'proses'));
                 }
             }
         }

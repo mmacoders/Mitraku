@@ -28,7 +28,6 @@ class PksSubmissionSeeder extends Seeder
                 'description' => 'Perjanjian kerjasama antara perusahaan kami dengan mitra strategis.',
                 'document_path' => null,
                 'status' => 'proses',
-                'revision_notes' => null,
                 'final_document_path' => null,
             ]);
 
@@ -40,27 +39,26 @@ class PksSubmissionSeeder extends Seeder
             ]);
         }
 
-        // Create a submission with revision status
-        $revisionSubmission = PksSubmission::create([
+        // Create a rejected submission instead of revision
+        $rejectedSubmission = PksSubmission::create([
             'user_id' => $mitraUsers->first()->id,
-            'title' => 'PKS Revisi',
-            'description' => 'Perjanjian kerjasama yang memerlukan revisi.',
+            'title' => 'PKS Ditolak',
+            'description' => 'Perjanjian kerjasama yang ditolak.',
             'document_path' => null,
-            'status' => 'revisi',
-            'revision_notes' => 'Mohon perbaiki bagian ketentuan kerjasama pada pasal 5.',
+            'status' => 'ditolak',
             'final_document_path' => null,
         ]);
 
         StatusHistory::create([
-            'pks_submission_id' => $revisionSubmission->id,
+            'pks_submission_id' => $rejectedSubmission->id,
             'status' => 'proses',
             'notes' => 'Dokumen diajukan oleh mitra',
         ]);
 
         StatusHistory::create([
-            'pks_submission_id' => $revisionSubmission->id,
-            'status' => 'revisi',
-            'notes' => 'Mohon perbaiki bagian ketentuan kerjasama pada pasal 5.',
+            'pks_submission_id' => $rejectedSubmission->id,
+            'status' => 'ditolak',
+            'notes' => 'Dokumen ditolak oleh admin karena tidak memenuhi syarat.',
         ]);
 
         // Create an approved submission
@@ -70,7 +68,6 @@ class PksSubmissionSeeder extends Seeder
             'description' => 'Perjanjian kerjasama yang telah disetujui.',
             'document_path' => null,
             'status' => 'disetujui',
-            'revision_notes' => null,
             'final_document_path' => null,
         ]);
 

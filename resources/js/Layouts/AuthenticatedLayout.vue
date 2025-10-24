@@ -31,8 +31,14 @@ const isMitra = computed(() => user.value.role === 'mitra');
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <img src="/assets/logo-mobile.png" alt="Application Logo" class="block h-8 w-auto" />
+                                <Link :href="route('dashboard')" class="flex items-center">
+                                    <!-- Mobile: Logo only -->
+                                    <img src="/assets/logo.png" alt="Application Logo" class="block h-8 w-auto lg:hidden" />
+                                    <!-- Desktop: Logo with text -->
+                                    <div class="hidden lg:flex items-center">
+                                        <img src="/assets/logo.png" alt="Application Logo" class="h-8 w-auto" />
+                                        <span class="ml-2 text-xl font-bold text-gray-800 dark:text-white">SI-Huyula</span>
+                                    </div>
                                 </Link>
                             </div>
 

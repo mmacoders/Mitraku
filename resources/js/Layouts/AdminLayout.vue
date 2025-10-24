@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
           <div class="flex-shrink-0 flex justify-center items-center w-full px-4">
-            <img src="/assets/logo-app.png" alt="SI-Huyula Logo" class="h-10 w-auto">
+            <img src="/assets/logo.png" alt="SI-Huyula Logo" class="h-10 w-auto">
           </div>
           <nav class="mt-5 px-2 space-y-1">
             <Link
@@ -104,10 +104,13 @@
     >
       <div class="flex-1 flex flex-col min-h-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 shadow-lg">
         <div class="flex items-center justify-center flex-shrink-0 px-4 py-5">
-          <!-- Full logo when sidebar is expanded -->
-          <img v-if="!sidebarCollapsed" src="/assets/logo-app.png" alt="SI-Huyula Logo" class="h-10 w-auto">
+          <!-- Full logo with text when sidebar is expanded -->
+          <div v-if="!sidebarCollapsed" class="flex items-center">
+            <img src="/assets/logo.png" alt="SI-Huyula Logo" class="h-10 w-auto" />
+            <span class="ml-2 text-xl font-bold text-gray-800 dark:text-white">SI-Huyula</span>
+          </div>
           <!-- Mobile logo when sidebar is collapsed -->
-          <img v-else src="/assets/logo-mobile.png" alt="SI-Huyula Logo" class="h-12 w-auto">
+          <img v-else src="/assets/logo.png" alt="SI-Huyula Logo" class="h-12 w-auto" />
         </div>
         
         <!-- Separator line and Menu Aplikasi text -->

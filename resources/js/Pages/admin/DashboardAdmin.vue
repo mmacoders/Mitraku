@@ -13,7 +13,7 @@ interface Statistics {
   approved: number;
   pending: number;
   rejected: number;
-  revision: number;
+  // Removed revision property
   mitra: number;
   scheduled_meetings: number;
 }
@@ -47,7 +47,7 @@ const statistics = ref<Statistics>({
   approved: initialStatistics?.approved || 0,
   pending: initialStatistics?.pending || 0,
   rejected: initialStatistics?.rejected || 0,
-  revision: initialStatistics?.revision || 0,
+  // Removed revision: initialStatistics?.revision || 0,
   mitra: initialStatistics?.mitra || 0,
   scheduled_meetings: initialStatistics?.scheduled_meetings || 0
 });
@@ -81,13 +81,13 @@ const infoCards = computed(() => [
 ]);
 
 // Chart data
-const donutChartSeries = ref([0, 0, 0, 0]);
+const donutChartSeries = ref([0, 0, 0]); // Changed from [0, 0, 0, 0] to [0, 0, 0]
 const donutChartOptions = ref({
   chart: {
     type: 'donut',
   },
-  labels: ['Disetujui', 'Dalam Proses', 'Revisi', 'Ditolak'],
-  colors: ['#10B981', '#3B82F6', '#8B5CF6', '#EF4444'],
+  labels: ['Disetujui', 'Dalam Proses', 'Ditolak'], // Removed 'Revisi'
+  colors: ['#10B981', '#3B82F6', '#EF4444'], // Removed '#8B5CF6' (purple for revision)
   responsive: [{
     breakpoint: 480,
     options: {
@@ -212,11 +212,11 @@ const fetchDashboardData = async () => {
     const statusMap: Record<string, number> = {
       'disetujui': 0,
       'proses': 1,
-      'revisi': 2,
-      'ditolak': 3
+      'ditolak': 2
     };
     
-    const newDonutSeries = [0, 0, 0, 0];
+    // Changed from [0, 0, 0, 0] to [0, 0, 0]
+    const newDonutSeries = [0, 0, 0];
     statusData.forEach((item: any) => {
       if (statusMap[item.status] !== undefined) {
         newDonutSeries[statusMap[item.status]] = item.count;
@@ -286,7 +286,7 @@ const getActivityIcon = (type: string) => {
       return '📝';
     case 'pks_status_updated':
       return '🔄';
-    case 'pks_revision_requested':
+    case 'pks_revision_requested': // This can be kept for backward compatibility
       return '✏️';
     case 'rapat_scheduled':
       return '📅';
@@ -305,7 +305,6 @@ const formatDate = (dateString: string) => {
     minute: '2-digit'
   });
 };
-
 
 </script>
 
@@ -453,7 +452,7 @@ const formatDate = (dateString: string) => {
                 <option value="">Semua Status</option>
                 <option value="approved">Disetujui</option>
                 <option value="pending">Dalam Proses</option>
-                <option value="revision">Revisi</option>
+                <!-- Removed revision option -->
                 <option value="rejected">Ditolak</option>
               </select>
             </div>

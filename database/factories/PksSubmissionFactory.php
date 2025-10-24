@@ -23,8 +23,7 @@ class PksSubmissionFactory extends Factory
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
             'document_path' => null,
-            'status' => $this->faker->randomElement(['proses', 'revisi', 'ditolak', 'disetujui']),
-            'revision_notes' => null,
+            'status' => $this->faker->randomElement(['proses', 'ditolak', 'disetujui']), // Removed 'revisi'
             'final_document_path' => null,
             'validity_period_start' => Carbon::today(),
             'validity_period_end' => Carbon::today()->addYear(),

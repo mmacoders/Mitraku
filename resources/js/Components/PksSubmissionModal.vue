@@ -1,3 +1,245 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import { 
+  Dialog, 
+  DialogPanel, 
+  DialogTitle, 
+  TransitionChild, 
+  TransitionRoot 
+} from '@headlessui/vue'
+import { PksSubmission } from '@/types'
+
+interface Props {
+  isOpen: boolean
+}
+
+interface Emits {
+  (e: 'close'): void
+  (e: 'success'): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+// File input references
+const kakFileInput = ref<HTMLInputElement | null>(null)
+const mouFileInput = ref<HTMLInputElement | null>(null)
+
+// Drag state
+const isDraggingKak = ref(false)
+const isDraggingMou = ref(false)
+
+// Confirmation dialog state
+const showConfirmation = ref(false)
+
+// Toast notification state
+const showToast = ref(false)
+const toastMessage = ref('')
+
+// Form setup
+const form = useForm({
+  title: '',
+  purpose: '',
+  kak_document: null as File | null,
+  mou_document: null as File | null
+})
+
+// Handle drag events for KAK
+const handleDragOverKak = () => {
+  isDraggingKak.value = true
+}
+
+const handleDragLeaveKak = () => {
+  isDraggingKak.value = false
+}
+
+const handleDropKak = (e: DragEvent) => {
+  isDraggingKak.value = false
+  if (e.dataTransfer?.files?.length) {
+    const file = e.dataTransfer.files[0]
+    if (validateFile(file)) {
+      form.kak_document = file
+    }
+  }
+}
+
+// Handle drag events for MoU
+const handleDragOverMou = () => {
+  isDraggingMou.value = true
+}
+
+const handleDragLeaveMou = () => {
+  isDraggingMou.value = false
+}
+
+const handleDropMou = (e: DragEvent) => {
+  isDraggingMou.value = false
+  if (e.dataTransfer?.files?.length) {
+    const file = e.dataTransfer.files[0]
+    if (validateFile(file)) {
+      form.mou_document = file
+    }
+  }
+}
+
+// Trigger file input
+const triggerFileInput = (type: 'kak' | 'mou') => {
+  if (type === 'kak' && kakFileInput.value) {
+    kakFileInput.value.click()
+  } else if (type === 'mou' && mouFileInput.value) {
+    mouFileInput.value.click()
+  }
+}
+
+// Handle file change
+const handleFileChange = (e: Event, type: 'kak' | 'mou') => {
+  const target = e.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    if (validateFile(file)) {
+      if (type === 'kak') {
+        form.kak_document = file
+      } else {
+        form.mou_document = file
+      }
+    }
+  }
+}
+
+// Validate file
+const validateFile = (file: File): boolean => {
+  const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  const maxSize = 2 * 1024 * 1024 // 2MB
+  
+  if (!validTypes.includes(file.type)) {
+    form.setError('kak_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
+    form.setError('mou_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
+    return false
+  }
+  
+  if (file.size > maxSize) {
+    form.setError('kak_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
+    form.setError('mou_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
+    return false
+  }
+  
+  return true
+}
+
+// Remove file
+const removeFile = (type: 'kak' | 'mou') => {
+  if (type === 'kak') {
+    form.kak_document = null
+    if (kakFileInput.value) {
+      kakFileInput.value.value = ''
+    }
+  } else {
+    form.mou_document = null
+    if (mouFileInput.value) {
+      mouFileInput.value.value = ''
+    }
+  }
+}
+
+// Get file icon
+const getFileIcon = (type: string) => {
+  if (type.includes('pdf')) return '📄'
+  if (type.includes('word') || type.includes('doc')) return '📝'
+  return '📁'
+}
+
+// Format file size
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Close modal
+const closeModal = () => {
+  emit('close')
+  form.reset()
+  form.clearErrors()
+  if (kakFileInput.value) kakFileInput.value.value = ''
+  if (mouFileInput.value) mouFileInput.value.value = ''
+  showConfirmation.value = false
+}
+
+// Submit form after confirmation
+const confirmSubmit = () => {
+  showConfirmation.value = false
+  form.post(route('pks.store'), {
+    forceFormData: true,
+    onSuccess: () => {
+      // Show success toast
+      toastMessage.value = 'Pengajuan berhasil dikirim ke admin untuk diverifikasi'
+      showToast.value = true
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        showToast.value = false
+      }, 3000)
+      
+      closeModal()
+      emit('success')
+    },
+    onError: (errors) => {
+      // Handle validation errors from server
+      Object.keys(errors).forEach(key => {
+        // Type-safe error setting
+        if (key === 'title' || key === 'purpose' || key === 'kak_document' || key === 'mou_document') {
+          form.setError(key, errors[key])
+        }
+      })
+      
+      // Show error in confirmation modal
+      toastMessage.value = 'Terjadi kesalahan validasi. Silakan periksa kembali form Anda.'
+      showConfirmation.value = true
+    }
+  })
+}
+
+// Cancel submission
+const cancelSubmit = () => {
+  showConfirmation.value = false
+}
+
+// Submit form
+const submitForm = () => {
+  // Clear previous errors
+  form.clearErrors()
+  
+  // Validate all required fields
+  let hasErrors = false
+  
+  if (!form.title?.trim()) {
+    form.setError('title', 'Judul harus diisi.')
+    hasErrors = true
+  }
+  
+  if (!form.purpose?.trim()) {
+    form.setError('purpose', 'Tujuan harus diisi.')
+    hasErrors = true
+  }
+  
+  if (!form.kak_document) {
+    form.setError('kak_document', 'Dokumen KAK harus diunggah.')
+    hasErrors = true
+  }
+  
+  if (!form.mou_document) {
+    form.setError('mou_document', 'Dokumen MoU harus diunggah.')
+    hasErrors = true
+  }
+  
+  // Show confirmation dialog (it will display errors if any, or confirmation if none)
+  showConfirmation.value = true
+}
+</script>
+
 <template>
   <TransitionRoot as="template" :show="isOpen">
     <Dialog as="div" class="relative z-50" @close="closeModal">
@@ -51,8 +293,122 @@
                 </button>
               </div>
 
+              <!-- Main Content - Either Form or Confirmation Dialog -->
+              <div v-if="showConfirmation" class="mt-8">
+                <!-- Confirmation Dialog -->
+                <div class="text-center">
+                  <!-- Icon - Warning for errors, Info for confirmation -->
+                  <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4"
+                    :class="{
+                      'bg-rose-50 dark:bg-rose-900/20': form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document,
+                      'bg-amber-50 dark:bg-amber-900/20': !form.errors.title && !form.errors.purpose && !form.errors.kak_document && !form.errors.mou_document
+                    }">
+                    <svg v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="h-8 w-8 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <svg v-else class="h-8 w-8 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  
+                  <!-- Title -->
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document ? 'Form Tidak Lengkap' : 'Konfirmasi Pengajuan PKS' }}
+                  </h3>
+                  
+                  <!-- Description -->
+                  <div class="mt-2 mb-6">
+                    <p v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      Mohon lengkapi semua field yang diperlukan sebelum mengirimkan pengajuan.
+                    </p>
+                    <p v-else class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      Pastikan semua data pengajuan sudah benar sebelum dikirim. Setelah diajukan, data tidak dapat diubah tanpa persetujuan admin.
+                    </p>
+                  </div>
+                  
+                  <!-- Error Messages -->
+                  <div v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 mb-6 text-left">
+                    <h4 class="font-medium text-rose-800 dark:text-rose-200 mb-2">Field yang harus dilengkapi:</h4>
+                    <ul class="space-y-2 text-sm text-rose-700 dark:text-rose-300">
+                      <li v-if="form.errors.title" class="flex items-start">
+                        <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Judul: {{ form.errors.title }}</span>
+                      </li>
+                      <li v-if="form.errors.purpose" class="flex items-start">
+                        <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Tujuan: {{ form.errors.purpose }}</span>
+                      </li>
+                      <li v-if="form.errors.kak_document" class="flex items-start">
+                        <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Dokumen KAK: {{ form.errors.kak_document }}</span>
+                      </li>
+                      <li v-if="form.errors.mou_document" class="flex items-start">
+                        <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Dokumen MoU: {{ form.errors.mou_document }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <!-- Form Summary (only shown when no errors) -->
+                  <div v-else class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6 text-left">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Ringkasan Pengajuan:</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Judul: {{ form.title || '-' }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Dokumen KAK: {{ form.kak_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Dokumen MoU: {{ form.mou_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <!-- Action Buttons -->
+                  <div class="flex flex-col sm:flex-row gap-3">
+                    <button
+                      v-if="!(form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document)"
+                      type="button"
+                      class="w-full inline-flex justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-4 py-3 text-sm font-medium text-white shadow-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5"
+                      @click="confirmSubmit"
+                    >
+                      Ajukan Sekarang
+                    </button>
+                    <button
+                      type="button"
+                      class="w-full inline-flex justify-center rounded-xl"
+                      :class="{
+                        'bg-rose-500 hover:bg-rose-600 text-white': form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document,
+                        'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 ease-in-out': !(form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document)
+                      }"
+                      @click="cancelSubmit"
+                    >
+                      {{ form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document ? 'Perbaiki Form' : 'Periksa Kembali' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
               <!-- Form -->
-              <form @submit.prevent="submitForm" class="mt-8 space-y-6">
+              <form v-else @submit.prevent="submitForm" class="mt-8 space-y-6">
                 <!-- Judul Pengajuan PKS -->
                 <div>
                   <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -277,193 +633,29 @@
       </div>
     </Dialog>
   </TransitionRoot>
+  
+  <!-- Toast Notification -->
+  <div 
+    v-if="showToast"
+    class="fixed bottom-4 right-4 z-50 flex items-center justify-between rounded-lg bg-green-500 px-4 py-3 text-white shadow-lg transition-all duration-300 ease-in-out transform"
+    :class="{
+      'translate-y-0 opacity-100': showToast,
+      'translate-y-4 opacity-0': !showToast
+    }"
+  >
+    <div class="flex items-center">
+      <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>{{ toastMessage }}</span>
+    </div>
+    <button 
+      @click="showToast = false"
+      class="ml-4 text-white hover:text-gray-200 focus:outline-none"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
 </template>
-
-<script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import { 
-  Dialog, 
-  DialogPanel, 
-  DialogTitle, 
-  TransitionChild, 
-  TransitionRoot 
-} from '@headlessui/vue'
-import { PksSubmission } from '@/types'
-
-interface Props {
-  isOpen: boolean
-}
-
-interface Emits {
-  (e: 'close'): void
-  (e: 'success'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
-
-// File input references
-const kakFileInput = ref<HTMLInputElement | null>(null)
-const mouFileInput = ref<HTMLInputElement | null>(null)
-
-// Drag state
-const isDraggingKak = ref(false)
-const isDraggingMou = ref(false)
-
-// Form setup
-const form = useForm({
-  title: '',
-  purpose: '',
-  kak_document: null as File | null,
-  mou_document: null as File | null
-})
-
-// Handle drag events for KAK
-const handleDragOverKak = () => {
-  isDraggingKak.value = true
-}
-
-const handleDragLeaveKak = () => {
-  isDraggingKak.value = false
-}
-
-const handleDropKak = (e: DragEvent) => {
-  isDraggingKak.value = false
-  if (e.dataTransfer?.files?.length) {
-    const file = e.dataTransfer.files[0]
-    if (validateFile(file)) {
-      form.kak_document = file
-    }
-  }
-}
-
-// Handle drag events for MoU
-const handleDragOverMou = () => {
-  isDraggingMou.value = true
-}
-
-const handleDragLeaveMou = () => {
-  isDraggingMou.value = false
-}
-
-const handleDropMou = (e: DragEvent) => {
-  isDraggingMou.value = false
-  if (e.dataTransfer?.files?.length) {
-    const file = e.dataTransfer.files[0]
-    if (validateFile(file)) {
-      form.mou_document = file
-    }
-  }
-}
-
-// Trigger file input
-const triggerFileInput = (type: 'kak' | 'mou') => {
-  if (type === 'kak' && kakFileInput.value) {
-    kakFileInput.value.click()
-  } else if (type === 'mou' && mouFileInput.value) {
-    mouFileInput.value.click()
-  }
-}
-
-// Handle file change
-const handleFileChange = (e: Event, type: 'kak' | 'mou') => {
-  const target = e.target as HTMLInputElement
-  if (target.files && target.files[0]) {
-    const file = target.files[0]
-    if (validateFile(file)) {
-      if (type === 'kak') {
-        form.kak_document = file
-      } else {
-        form.mou_document = file
-      }
-    }
-  }
-}
-
-// Validate file
-const validateFile = (file: File): boolean => {
-  const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-  const maxSize = 2 * 1024 * 1024 // 2MB
-  
-  if (!validTypes.includes(file.type)) {
-    form.setError('kak_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
-    form.setError('mou_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
-    return false
-  }
-  
-  if (file.size > maxSize) {
-    form.setError('kak_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
-    form.setError('mou_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
-    return false
-  }
-  
-  return true
-}
-
-// Remove file
-const removeFile = (type: 'kak' | 'mou') => {
-  if (type === 'kak') {
-    form.kak_document = null
-    if (kakFileInput.value) {
-      kakFileInput.value.value = ''
-    }
-  } else {
-    form.mou_document = null
-    if (mouFileInput.value) {
-      mouFileInput.value.value = ''
-    }
-  }
-}
-
-// Get file icon
-const getFileIcon = (type: string) => {
-  if (type.includes('pdf')) return '📄'
-  if (type.includes('word') || type.includes('doc')) return '📝'
-  return '📁'
-}
-
-// Format file size
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// Close modal
-const closeModal = () => {
-  emit('close')
-  form.reset()
-  form.clearErrors()
-  if (kakFileInput.value) kakFileInput.value.value = ''
-  if (mouFileInput.value) mouFileInput.value.value = ''
-}
-
-// Submit form
-const submitForm = () => {
-  // Validate required files
-  if (!form.kak_document) {
-    form.setError('kak_document', 'Dokumen KAK harus diunggah.')
-  }
-  
-  if (!form.mou_document) {
-    form.setError('mou_document', 'Dokumen MoU harus diunggah.')
-  }
-  
-  // If we have errors, don't submit
-  if (form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document) {
-    return
-  }
-  
-  // Submit the form
-  form.post(route('pks.store'), {
-    forceFormData: true,
-    onSuccess: () => {
-      closeModal()
-      emit('success')
-    }
-  })
-}
-</script>
