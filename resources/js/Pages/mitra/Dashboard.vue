@@ -19,8 +19,8 @@ import {
   Eye,
   Trash2
 } from 'lucide-vue-next';
-import PksSubmissionDetailModal from '@/Components/PksSubmissionDetailModal.vue';
-import PksSubmissionModal from '@/Components/PksSubmissionModal.vue';
+import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue';
+import PksSubmissionModal from '@/Components/admin/PksSubmissionModal.vue';
 import { PksSubmission, PaginatedSubmissions } from '@/types';
 
 interface Props {
@@ -502,6 +502,7 @@ const canDeleteSubmission = (submission: PksSubmission) => {
     <PksSubmissionDetailModal 
       :show="isModalOpen" 
       :submission="selectedSubmission || undefined" 
+      context="mitra"
       @close="closeModal" 
     />
 

@@ -209,6 +209,7 @@
     <PksSubmissionDetailModal 
       :show="showDetailModal" 
       :submission="selectedSubmission" 
+      context="admin"
       @close="closeDetailModal" 
     />
     
@@ -225,8 +226,8 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
-import PksSubmissionDetailModal from '@/Components/PksSubmissionDetailModal.vue'
-import EditPksStatusModal from '@/Components/EditPksStatusModal.vue'
+import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue'
+import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue'
 import { Eye, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';

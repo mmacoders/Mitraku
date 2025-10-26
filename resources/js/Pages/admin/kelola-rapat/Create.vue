@@ -48,7 +48,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
-import RapatModal from '@/Components/RapatModal.vue'
+import RapatModal from '@/Components/admin/RapatModal.vue'
 
 const props = defineProps<{
   pksSubmissions: Array<{

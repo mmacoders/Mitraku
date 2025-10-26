@@ -65,7 +65,7 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import RapatDetailModal from '@/Components/RapatDetailModal.vue';
+import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
 

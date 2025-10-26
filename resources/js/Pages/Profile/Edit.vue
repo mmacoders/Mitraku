@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import ProfileUpdateModal from '@/Components/ProfileUpdateModal.vue';
+import ProfileUpdateModal from '@/Components/admin/ProfileUpdateModal.vue';
 import Vue3Avatar from 'vue3-avatar';
 
 defineProps<{

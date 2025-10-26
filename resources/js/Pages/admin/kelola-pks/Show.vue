@@ -5,6 +5,7 @@
       <PksSubmissionDetailModal 
         :show="true" 
         :submission="submission" 
+        context="admin"
         @close="handleClose" 
       />
     </div>
@@ -15,7 +16,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import PksSubmissionDetailModal from '@/Components/PksSubmissionDetailModal.vue'
+import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue'
 
 const props = defineProps({
   submission: Object,

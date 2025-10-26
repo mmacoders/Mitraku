@@ -14,7 +14,7 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import EditPksStatusModal from '@/Components/EditPksStatusModal.vue'
+import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue'
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
