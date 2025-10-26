@@ -4,6 +4,7 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { AlertCircle } from 'lucide-vue-next';
 
 defineProps<{
     canResetPassword?: boolean;
@@ -66,6 +67,7 @@ const submit = () => {
                                         required
                                         autofocus
                                         autocomplete="username"
+                                        :class="{ 'border-red-500 focus:ring-red-500': form.errors.email }"
                                     />
                                     <label for="email" class="absolute -top-2 left-10 bg-white dark:bg-gray-800 px-1 text-xs text-gray-500 dark:text-gray-400 transition-all duration-200">Email</label>
                                 </div>
@@ -86,6 +88,7 @@ const submit = () => {
                                         v-model="form.password"
                                         required
                                         autocomplete="current-password"
+                                        :class="{ 'border-red-500 focus:ring-red-500': form.errors.password }"
                                     />
                                     <label for="password" class="absolute -top-2 left-10 bg-white dark:bg-gray-800 px-1 text-xs text-gray-500 dark:text-gray-400 transition-all duration-200">Password</label>
                                 </div>
@@ -131,6 +134,8 @@ const submit = () => {
                         <p class="text-gray-600 dark:text-gray-300 mt-2">Silahkan Login ke Akun anda</p>
                     </div>
 
+                    <!-- Error message for invalid credentials -->
+
                     <form @submit.prevent="submit">
                         <div class="mb-6">
                             <div class="relative">
@@ -148,6 +153,7 @@ const submit = () => {
                                     autofocus
                                     autocomplete="username"
                                     placeholder="Massukkan Email Anda"
+                                    :class="{ 'border-red-500 focus:ring-red-500': form.errors.email }"
                                 />
                                 <label for="email" 
                                 class="absolute -top-2 left-10 bg-white dark:bg-gray-800 px-1 text-xs text-gray-500 dark:text-gray-400 transition-all duration-200">
@@ -171,6 +177,7 @@ const submit = () => {
                                     v-model="form.password"
                                     required
                                     autocomplete="current-password"
+                                    :class="{ 'border-red-500 focus:ring-red-500': form.errors.password }"
                                 />
                                 <label for="password" class="absolute -top-2 left-10 bg-white dark:bg-gray-800 px-1 text-xs text-gray-500 dark:text-gray-400 transition-all duration-200">Password</label>
                             </div>

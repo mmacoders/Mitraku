@@ -5,7 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-vue-next';
+import { User, Mail, Phone, Lock, Eye, EyeOff, Building } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const form = useForm({
@@ -15,6 +15,7 @@ const form = useForm({
     password_confirmation: '',
     role: 'mitra',
     phone: '',
+    company: '', // Add company field
 });
 
 const showPassword = ref(false);
@@ -106,26 +107,50 @@ const togglePasswordConfirmationVisibility = () => {
                         </div>
                     </div>
 
-                    <!-- Phone -->
-                    <div class="space-y-1">
-                        <InputLabel for="phone" value="Nomor HP" class="text-gray-700 dark:text-gray-300 text-sm" />
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Phone class="h-4 w-4 text-gray-400 " />
+                    <!-- Grid layout for Phone and Company -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Phone -->
+                        <div class="space-y-1">
+                            <InputLabel for="phone" value="Nomor HP" class="text-gray-700 dark:text-gray-300 text-sm" />
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Phone class="h-4 w-4 text-gray-400 " />
+                                </div>
+                                <input
+                                    id="phone"
+                                    type="tel"
+                                    v-model="form.phone"
+                                    required
+                                    class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white transition-all duration-300 text-sm"
+                                    placeholder="081234567890"
+                                />
                             </div>
-                            <input
-                                id="phone"
-                                type="tel"
-                                v-model="form.phone"
-                                required
-                                class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white transition-all duration-300 text-sm"
-                                placeholder="081234567890"
-                            />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Nomor handphone yang dapat dihubungi untuk verifikasi
+                            </p>
+                            <InputError :message="form.errors.phone" class="mt-1 text-xs" />
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Nomor handphone yang dapat dihubungi untuk verifikasi
-                        </p>
-                        <InputError :message="form.errors.phone" class="mt-1 text-xs" />
+
+                        <!-- Company -->
+                        <div class="space-y-1">
+                            <InputLabel for="company" value="Nama Perusahaan" class="text-gray-700 dark:text-gray-300 text-sm" />
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Building class="h-4 w-4 text-gray-400 " />
+                                </div>
+                                <input
+                                    id="company"
+                                    type="text"
+                                    v-model="form.company"
+                                    class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white transition-all duration-300 text-sm"
+                                    placeholder="Nama perusahaan Anda"
+                                />
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Nama perusahaan atau instansi (opsional)
+                            </p>
+                            <InputError :message="form.errors.company" class="mt-1 text-xs" />
+                        </div>
                     </div>
 
                     <!-- Grid layout for Password and Password Confirmation -->
@@ -224,37 +249,3 @@ const togglePasswordConfirmationVisibility = () => {
         </div>
     </div>
 </template>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-body {
-    font-family: 'Inter', sans-serif;
-}
-
-/* Reduce padding on mobile for better fit */
-@media (max-width: 640px) {
-    .backdrop-blur-lg {
-        padding: 1.25rem;
-    }
-    
-    .text-xl {
-        font-size: 1.25rem;
-    }
-    
-    .space-y-4 {
-        gap: 0.75rem;
-    }
-}
-
-/* Ensure proper grid behavior on small screens */
-@media (max-width: 768px) {
-    .grid-cols-1 {
-        grid-template-columns: 1fr;
-    }
-    
-    .max-w-xl {
-        max-width: 28rem;
-    }
-}
-</style>

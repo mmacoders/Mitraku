@@ -31,7 +31,7 @@ A Laravel + Vue.js application for managing partnership agreements (PKS) with ro
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd mitraku
+   cd e-pks
    ```
 
 2. Install PHP dependencies:
@@ -44,7 +44,7 @@ A Laravel + Vue.js application for managing partnership agreements (PKS) with ro
    npm install
    ```
 
-4. Create a MySQL database named `mitraku`
+4. Create a MySQL database named `e_pks`
 
 5. Configure your `.env` file with your database credentials:
    ```env

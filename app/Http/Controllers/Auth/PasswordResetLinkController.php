@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -32,6 +33,15 @@ class PasswordResetLinkController extends Controller
         $request->validate([
             'email' => 'required|email',
         ]);
+
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['Email tidak ditemukan dalam sistem kami. Silakan periksa kembali email Anda.'],
+            ]);
+        }
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we
