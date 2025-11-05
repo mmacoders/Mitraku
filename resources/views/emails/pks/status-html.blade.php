@@ -49,39 +49,6 @@
             font-size: 16px;
         }
         
-        /* Expiration warning */
-        .expiration-warning {
-            background-color: #FFF8E1;
-            border-left: 4px solid #FACC15;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: flex-start;
-        }
-        
-        .expiration-icon {
-            font-size: 20px;
-            margin-right: 12px;
-            color: #92400E;
-        }
-        
-        .expiration-content {
-            flex: 1;
-        }
-        
-        .expiration-content h2 {
-            color: #92400E;
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        
-        .expiration-content p {
-            margin: 0 0 5px 0;
-            color: #92400E;
-        }
-        
         /* Submission details card */
         .submission-details {
             background-color: #F9FAFB;
@@ -201,37 +168,6 @@
         <p>Status pengajuan PKS Anda telah diperbarui. Berikut detailnya:</p>
     </div>
 
-    <!-- Expiration Warning -->
-    @if($newStatus == 'disetujui' && $pksSubmission->validity_period_end)
-        @php
-            $expirationDate = \Carbon\Carbon::parse($pksSubmission->validity_period_end);
-            $today = \Carbon\Carbon::now();
-            $daysUntilExpiration = ceil($today->floatDiffInDays($expirationDate)); // selalu positif
-        @endphp
-
-        @if($expirationDate->isFuture() && $daysUntilExpiration <= 7)
-             <div style="display:flex;justify-content:center;margin:20px 0;">
-            <div style="max-width:600px;background:#FFF8E6;border:1px solid #FACC15;
-                        border-radius:10px;padding:16px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.05);
-                        display:flex;align-items:flex-start;">
-                <div style="font-size:22px;margin-right:12px;line-height:1;">⚠️</div>
-                <div>
-                    <div style="font-size:16px;font-weight:600;color:#854D0E;margin-bottom:4px;">
-                        Peringatan Kedaluwarsa
-                    </div>
-                    <div style="font-size:14px;color:#78350F;line-height:1.4;">
-                        PKS Anda akan kedaluwarsa dalam 
-                        <strong>{{ $daysUntilExpiration }} hari</strong> — tepatnya pada 
-                        <strong>{{ $expirationDate->format('d F Y') }}</strong>.
-                        <br>
-                        <span style="color:#92400E;">Segera lakukan perpanjangan sebelum masa berlaku habis.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-    @endif
-
     <!-- PKS Details Card -->
     <div style="max-width:600px;margin:0 auto;background:#F9FAFB;border:1px solid #E5E7EB;
             border-radius:10px;padding:20px 24px;box-shadow:0 2px 4px rgba(0,0,0,0.04);
@@ -296,10 +232,6 @@
 
             @if($endDate->isPast())
                 <div style="color:#DC2626;margin-left:150px;">Masa berlaku telah berakhir.</div>
-            @elseif($endDate->isFuture() && $daysUntilExpiration <= 7)
-                <div style="color:#CA8A04;margin-left:150px;">
-                    Akan kedaluwarsa dalam <strong>{{ $daysUntilExpiration }} hari</strong>.
-                </div>
             @endif
         @endif
     </div>

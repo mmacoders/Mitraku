@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Log;
 
 class PksStatusUpdated extends Notification implements ShouldQueue
 {
@@ -50,7 +51,7 @@ class PksStatusUpdated extends Notification implements ShouldQueue
 
         $subject = match($this->newStatus) {
             'proses' => 'Pengajuan PKS Anda sedang diproses',
-            'disetujui' => 'Pengajuan PKS Anda telah disetujui',
+            'disetujui' => '[DISETUJUI] Pengajuan PKS Anda telah disetujui',
             'ditolak' => 'Pengajuan PKS Anda ditolak',
             'revisi' => 'Pengajuan PKS Anda memerlukan revisi',
             default => 'Status Pengajuan PKS Anda telah berubah'
@@ -66,7 +67,7 @@ class PksStatusUpdated extends Notification implements ShouldQueue
         ])->render();
 
         // Log the email sending
-        \Log::info('[PksStatusUpdated] Email prepared for ' . $notifiable->email . ' for submission ID ' . $this->pksSubmission->id);
+        Log::info('[PksStatusUpdated] Email prepared for ' . $notifiable->email . ' for submission ID ' . $this->pksSubmission->id);
 
         return [
             'subject' => $subject,

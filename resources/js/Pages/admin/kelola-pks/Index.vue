@@ -293,14 +293,14 @@ const formatDate = (dateString) => {
   }
 }
 
-// Check if PKS is expiring soon (within 7 days)
+// Check if PKS is expiring soon (within 30 days)
 const isExpiringSoon = (endDate) => {
   if (!endDate) return false;
   const end = new Date(endDate);
   const today = new Date();
   const diffTime = Math.abs(end.getTime() - today.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 7 && end > today;
+  return diffDays <= 30 && end > today;
 };
 
 // Check if PKS has expired

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\CheckPksExpiration::class,
         Commands\TestAdminNotification::class,
+        Commands\TestPartnerNotification::class,
     ];
 
     /**
