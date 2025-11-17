@@ -1,9 +1,315 @@
+<template>
+  <!-- Glassmorphism Header -->
+  <div class="fixed top-0 left-0 right-0 z-50
+     backdrop-blur-xl
+     bg-gradient-to-r from-white/30 via-white/20 to-white/30
+     dark:bg-gradient-to-r dark:from-black/30 dark:via-black/20 dark:to-black/30
+     border-b border-white/20 dark:border-white/10
+     shadow-lg shadow-black/5
+     supports-[backdrop-filter]:backdrop-blur-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo and App Name -->
+        <div class="flex items-center">
+          <img src="/assets/logo.png" alt="SI-Huyula Logo" class="h-8 w-auto" />
+          <span class="ml-3 text-xl font-bold text-gray-900 dark:text-white">SI-Huyula</span>
+        </div>
+
+        <!-- Username Display -->
+        <div class="text-center">
+          <span class="text-lg font-medium dark:text-gray-300">
+            {{ username }}
+          </span>
+        </div>
+        
+        <!-- User Profile with Dropdown -->
+        <div class="relative ml-3">
+          <div class="flex items-center">
+            <Vue3Avatar 
+              :name="username" 
+              :size="40"
+              :imageSrc="profilePicture"
+              class="rounded-full border-2 border-white/30 dark:border-white/20 shadow-sm cursor-pointer"
+              @click="toggleDropdown"
+            />
+          </div>
+          
+          <!-- Dropdown menu -->
+          <transition
+            enter-active-class="transition ease-out duration-100"
+            enter-from-class="transform opacity-0 scale-95"
+            enter-to-class="transform opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-75"
+            leave-from-class="transform opacity-100 scale-100"
+            leave-to-class="transform opacity-0 scale-95"
+          >
+            <div 
+              v-show="dropdownOpen"
+              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+            >
+              <Link
+                :href="route('profile.edit')"
+                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Settings
+              </Link>
+              <a
+                href="#"
+                @click.prevent="logout"
+                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Logout
+              </a>
+            </div>
+          </transition>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content with Glassmorphism Greeting -->
+  <div class="pt-16 min-h-screen bg-gradient-to-br  from-blue-50/50 to-purple-50/50 dark:from-gray-900/50 dark:to-gray-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+       <!-- Welcome Section -->
+         <div class="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl shadow-sm p-6 border border-blue-100 dark:border-blue-900/50">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang di SI-Huyula 🎉</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-300">Kelola pengajuan, rapat, dan mitra dengan mudah di satu platform.</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <!-- Profile Avatar in Welcome Card -->
+            <Vue3Avatar 
+              :name="username" 
+              :size="48"
+              :imageSrc="profilePicture"
+              class="rounded-full border border-gray-300 dark:border-gray-600"
+            />
+          </div>
+        </div></div>
+
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div 
+          v-for="card in infoCards" 
+          :key="card.id"
+          class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 p-5 transition-all duration-300 hover:shadow-xl"
+        >
+          <div class="flex items-center">
+            <div :class="card.bgColor" class="rounded-lg p-3">
+              <component :is="card.icon" :class="card.iconColor" class="h-6 w-6" />
+            </div>
+            <div class="ml-4">
+              <dt class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ card.title }}
+              </dt>
+              <dd class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                {{ card.value }}
+              </dd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Recent PKS Submissions -->
+        <div class="lg:col-span-2">
+          <div class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 overflow-hidden">
+            <div class="px-6 py-5 border-b border-white/20 dark:border-white/10">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                  Pengajuan PKS Terbaru
+                </h3>
+                <button 
+                  @click="openCreatePksModal"
+                  class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                >
+                  <Plus class="h-4 w-4 mr-1" />
+                  Buat Pengajuan
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div v-if="submissions?.data?.length > 0" class="overflow-hidden rounded-lg">
+                <ul class="divide-y divide-white/20 dark:divide-white/10">
+                  <li v-for="submission in submissions.data" :key="submission.id">
+                    <Link 
+                      :href="route('mitra.pks.show', submission.id)" 
+                      class="block hover:bg-white/20 dark:hover:bg-white/10 transition-colors duration-150 rounded-lg px-4 py-4"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {{ submission.title }}
+                          </p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                          <StatusBadge :status="submission.status" />
+                        </div>
+                      </div>
+                      <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                          <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                            <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                            {{ submission.user?.name || 'Unknown User' }}
+                          </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
+                          <Calendar class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          <p>
+                            {{ formatDate(submission.created_at) }}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div v-else class="text-center py-12">
+                <FileText class="mx-auto h-12 w-12 text-gray-500 dark:text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Tidak ada pengajuan</h3>
+                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                  Anda belum membuat pengajuan PKS apa pun.
+                </p>
+                <div class="mt-6">
+                  <button
+                    @click="openCreatePksModal"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  >
+                    <Plus class="h-5 w-5 mr-2" />
+                    Buat Pengajuan PKS Pertama
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="space-y-8">
+          <!-- Upcoming Meetings -->
+          <div class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 overflow-hidden">
+            <div class="px-6 py-5 border-b border-white/20 dark:border-white/10">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                Jadwal Rapat Mendatang
+              </h3>
+            </div>
+            <div class="p-6">
+              <div v-if="upcomingMeetings?.length > 0" class="flow-root">
+                <ul class="divide-y divide-white/20 dark:divide-white/10">
+                  <li 
+                    v-for="meeting in upcomingMeetings" 
+                    :key="meeting.id"
+                    class="py-4 cursor-pointer hover:bg-white/20 dark:hover:bg-white/10 rounded-lg px-2 transition-colors duration-150"
+                    @click="openMeetingDetail(meeting)"
+                  >
+                    <div class="flex items-center space-x-4">
+                      <div class="flex-shrink-0">
+                        <Calendar class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {{ meeting.judul }}
+                        </p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 truncate">
+                          {{ formatDate(meeting.tanggal_waktu) }}
+                        </p>
+                      </div>
+                      <div>
+                        <span 
+                          :class="getMeetingStatusClass(meeting.status)"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        >
+                          {{ getMeetingStatusText(meeting.status) }}
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div v-else class="text-center py-8">
+                <Calendar class="mx-auto h-12 w-12 text-gray-500 dark:text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Tidak ada rapat terjadwal</h3>
+                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                  Tidak ada rapat yang dijadwalkan dalam waktu dekat.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meeting Detail Modal -->
+  <Modal :show="showMeetingDetail" @close="closeMeetingDetail" max-width="md">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
+            Detail Rapat
+          </h3>
+          <button @click="closeMeetingDetail" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+            <X class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div class="px-6 py-4">
+        <div v-if="selectedMeeting" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul Rapat</label>
+            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedMeeting.judul }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal & Waktu</label>
+            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDate(selectedMeeting.tanggal_waktu) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lokasi/Link Meeting</label>
+            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedMeeting.lokasi || 'Tidak ditentukan' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+            <span 
+              :class="getMeetingStatusClass(selectedMeeting.status)"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+            >
+              {{ getMeetingStatusText(selectedMeeting.status) }}
+            </span>
+          </div>
+          <div v-if="selectedMeeting.deskripsi">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
+            <p class="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-line">{{ selectedMeeting.deskripsi }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+        <button
+          @click="closeMeetingDetail"
+          type="button"
+          class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200 text-sm dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  </Modal>
+
+  <!-- Create PKS Submission Modal -->
+  <CreatePksSubmissionModal 
+    :show="showCreatePksModal" 
+    @close="closeCreatePksModal" 
+  />
+</template>
+
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import Modal from '@/Components/Modal.vue'
+import Vue3Avatar from 'vue3-avatar'
 
 // Icons
 import { 
@@ -35,20 +341,27 @@ const props = defineProps({
   upcomingMeetings: Array
 })
 
+// Get user data from page props
+const pageProps = usePage().props
+const user = computed(() => {
+  return pageProps.auth?.user || { name: 'User', profile_picture: null }
+})
+
+// Computed properties for username and profile picture
+const username = computed(() => {
+  return user.value?.name || 'User'
+})
+
+const profilePicture = computed(() => {
+  return user.value?.profile_picture || null
+})
+
 // Reactive data
 const showMeetingDetail = ref(false)
 const selectedMeeting = ref(null)
 const showCreatePksModal = ref(false)
 
 // Computed properties
-const username = computed(() => {
-  return props.submissions?.data?.length > 0 ? props.submissions.data[0].user?.name || '' : ''
-})
-
-const profilePicture = computed(() => {
-  return props.submissions?.data?.length > 0 ? props.submissions.data[0].user?.profile_photo_url || '' : ''
-})
-
 const infoCards = computed(() => [
   {
     id: 'total',
@@ -144,3 +457,15 @@ onMounted(() => {
   return () => clearInterval(interval)
 })
 </script>
+
+<style scoped>
+.glass-card {
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+.glass-icon {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+</style>

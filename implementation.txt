@@ -1,0 +1,22 @@
+ “Ubah tampilan Dashboard Mitra dengan gaya modern glassmorphism. Dashboard tidak menggunakan sidebar — hanya header minimalis di bagian atas dengan background transparan blur, berisi nama aplikasi ‘SI-Huyula’ di kiri beserta logonya dan foto profil mitra di kanan.
+
+ Bagian atas halaman tampilkan greeting section dengan gaya glass card transparan:
+
+ * Sapaan: *“Selamat datang kembali, [Nama Mitra]!”*
+ * Subtext: *“Kelola pengajuan PKS Anda dengan mudah.”*
+ * Efek: background glass (blur 20–30px), opacity 0.4–0.6, border semi-transparent, glowing subtle shadow.
+ * Ikon kecil ilustrasi modern (linear icon).
+
+ Layout harus full responsive:
+
+ * Mobile: stack column
+ * Tablet/Desktop: grid modern
+ * Semua elemen memiliki efek glassmorphism konsisten (blur, gradient subtle, transparent border, soft shadow).
+
+ Tone warna:
+
+ * Dasar: kombinasi putih transparan / abu soft dengan efek blur
+ * Aksen: biru neon lembut atau purple soft
+ * Dark mode: glass gelap (black/30%) dengan subtle neon edges.
+
+ Tampilan keseluruhan harus elegan, clean, futuristik, dan tidak berlebihan.”
