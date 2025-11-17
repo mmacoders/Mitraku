@@ -7,6 +7,7 @@ import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import VueApexCharts from 'vue3-apexcharts';
 import { registerServiceWorker } from './registerServiceWorker';
+import Vue3Avatar from 'vue3-avatar';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -25,6 +26,7 @@ createInertiaApp({
             .use(plugin)
             .use(VueApexCharts as any)
             .use(ZiggyVue)
+            .component('Vue3Avatar', Vue3Avatar)
             .mount(el);
     },
     progress: {

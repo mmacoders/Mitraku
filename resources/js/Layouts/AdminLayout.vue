@@ -66,6 +66,18 @@
               <CalendarDays class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
               <span>Kelola Rapat</span>
             </Link>
+            <Link
+              :href="route('kelola.dokumen.pasca.rapat')"
+              :class="[
+                route().current('kelola.dokumen.pasca.rapat') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
+              ]"
+            >
+              <FileText class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.dokumen.pasca.rapat') ? 'text-white' : ''" />
+              <span>Pasca Rapat</span>
+            </Link>
           </nav>
         </div>
         <div class="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
@@ -173,6 +185,20 @@
           >
             <CalendarDays class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Kelola Rapat</span>
+          </Link>
+          
+          <!-- Pasca Rapat -->
+          <Link
+            :href="route('kelola.dokumen.pasca.rapat')"
+            :class="[
+              route().current('kelola.dokumen.pasca.rapat') 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
+            ]"
+          >
+            <FileText class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.dokumen.pasca.rapat') ? 'text-white' : ''" />
+            <span v-if="!sidebarCollapsed" class="ml-3">Pasca Rapat</span>
           </Link>
         </nav>
         <div class="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
@@ -366,99 +392,57 @@ import {
   FileText, 
   CalendarDays, 
   PanelLeftClose, 
-  PanelLeftOpen,
+  PanelLeftOpen, 
   Menu,
   Sun,
   Moon,
   Bell,
-  CheckCircle,
-  User,
-  XCircle
+  CheckCircle
 } from 'lucide-vue-next';
-import Vue3Avatar from 'vue3-avatar';
-import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
 import HttpsWarningBanner from '@/Components/HttpsWarningBanner.vue';
+import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
+import Vue3Avatar from 'vue3-avatar';
 
-// Define reactive properties
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+const username = computed(() => user.value?.name || 'User');
+const profilePicture = computed(() => user.value?.profile_picture || null);
+
+// Sidebar state
 const sidebarOpen = ref(false);
 const sidebarCollapsed = ref(false);
-const showNotificationsDropdown = ref(false);
-const showProfileDropdown = ref(false);
+
+// Dropdown states
 const showUserDropdown = ref(false);
-const notifications = ref([]);
-const unreadNotificationsCount = ref(0);
-const isDarkMode = ref(false);
+const showProfileDropdown = ref(false);
+const showNotificationsDropdown = ref(false);
 
-// Get user from Inertia page props with a fallback
-const user = computed(() => {
-  const userData = usePage().props.auth?.user;
-  return userData || { name: 'U', role: 'guest', profile_picture: null };
-});
+// Notifications
+const notifications = ref(page.props.notifications || []);
+const unreadNotificationsCount = computed(() => 
+  notifications.value.filter(notification => !notification.read_at).length
+);
 
-// Get username safely for avatar component
-const username = computed(() => {
-  return user.value?.name || 'User';
-});
-
-// Get profile picture URL for avatar component
-const profilePicture = computed(() => {
-  return user.value?.profile_picture || null;
-});
-
-// Toggle sidebar
+// Toggle functions
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
 };
 
-// Toggle sidebar collapse
 const toggleSidebarCollapse = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value;
-  // Close user dropdown when collapsing sidebar
-  if (sidebarCollapsed.value) {
-    showUserDropdown.value = false;
-  }
+  localStorage.setItem('sidebarCollapsed', sidebarCollapsed.value);
 };
 
-// Toggle notifications dropdown
-const toggleNotificationsDropdown = () => {
-  showNotificationsDropdown.value = !showNotificationsDropdown.value;
-  // Close other dropdowns
-  if (showNotificationsDropdown.value) {
-    showProfileDropdown.value = false;
-    showUserDropdown.value = false;
-  }
-};
-
-// Toggle profile dropdown
-const toggleProfileDropdown = () => {
-  showProfileDropdown.value = !showProfileDropdown.value;
-  // Close other dropdowns
-  if (showProfileDropdown.value) {
-    showNotificationsDropdown.value = false;
-    showUserDropdown.value = false;
-  }
-};
-
-// Toggle user dropdown
 const toggleUserDropdown = () => {
   showUserDropdown.value = !showUserDropdown.value;
-  // Close other dropdowns
-  if (showUserDropdown.value) {
-    showNotificationsDropdown.value = false;
-    showProfileDropdown.value = false;
-  }
 };
 
-// Toggle dark mode
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value;
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark');
-    localStorage.setItem('darkMode', 'true');
-  } else {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('darkMode', 'false');
-  }
+const toggleProfileDropdown = () => {
+  showProfileDropdown.value = !showProfileDropdown.value;
+};
+
+const toggleNotificationsDropdown = () => {
+  showNotificationsDropdown.value = !showNotificationsDropdown.value;
 };
 
 // Logout function
@@ -466,288 +450,170 @@ const logout = () => {
   router.post(route('logout'));
 };
 
-// Fetch notifications
-const fetchNotifications = async () => {
-  try {
-    const response = await fetch('/api/notifications');
-    if (response.ok) {
-      const data = await response.json();
-      notifications.value = data;
-      unreadNotificationsCount.value = data.filter(notification => !notification.read_at).length;
-    } else {
-      console.error('Failed to fetch notifications. Status:', response.status);
-      // If unauthorized, redirect to login
-      if (response.status === 401) {
-        window.location.href = '/login';
+// Notification helper functions
+const markAsRead = (notificationId) => {
+  router.patch(route('notifications.markAsRead', notificationId), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      const notification = notifications.value.find(n => n.id === notificationId);
+      if (notification) {
+        notification.read_at = new Date().toISOString();
       }
     }
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-  }
+  });
 };
 
-// Mark notification as read
-const markAsRead = async (id) => {
-  try {
-    const response = await fetch(`/api/notifications/${id}/read`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      },
-      body: JSON.stringify({
-        _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      })
-    });
-    
-    if (response.ok) {
-      // Update notification in the list
-      const index = notifications.value.findIndex(notification => notification.id === id);
-      if (index !== -1) {
-        notifications.value[index].read_at = new Date().toISOString();
-        unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
-      }
-      // Refresh notifications to ensure consistency
-      await fetchNotifications();
-    } else if (response.status === 404) {
-      // Notification not found, remove it from the list
-      notifications.value = notifications.value.filter(notification => notification.id !== id);
-      unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
-      console.log('Notification not found, removed from list');
-    } else {
-      console.error('Failed to mark notification as read. Status:', response.status);
+const markAllAsRead = () => {
+  router.post(route('notifications.markAllAsRead'), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      notifications.value.forEach(notification => {
+        notification.read_at = new Date().toISOString();
+      });
     }
-  } catch (error) {
-    console.error('Error marking notification as read:', error);
-  }
+  });
 };
 
-// Mark all notifications as read
-const markAllAsRead = async () => {
-  try {
-    // Get all unread notifications
-    const unreadNotifications = notifications.value.filter(notification => !notification.read_at);
-    
-    // If there are no unread notifications, do nothing
-    if (unreadNotifications.length === 0) {
-      return;
-    }
-    
-    // Track successfully marked notifications
-    const successfullyMarked = [];
-    
-    // Mark each notification as read
-    for (const notification of unreadNotifications) {
-      try {
-        const response = await fetch(`/api/notifications/${notification.id}/read`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-          },
-          body: JSON.stringify({
-            _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-          })
-        });
-        
-        if (response.ok) {
-          // Update notification in the list immediately
-          const index = notifications.value.findIndex(n => n.id === notification.id);
-          if (index !== -1) {
-            notifications.value[index].read_at = new Date().toISOString();
-            successfullyMarked.push(notification.id);
-          }
-        } else if (response.status === 404) {
-          // Notification not found, remove it from the list
-          notifications.value = notifications.value.filter(n => n.id !== notification.id);
-        } else {
-          console.error('Failed to mark notification as read. Status:', response.status);
-        }
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
-    }
-    
-    // Update unread count
-    unreadNotificationsCount.value = notifications.value.filter(notification => !notification.read_at).length;
-    
-    // Refresh notifications to ensure consistency
-    await fetchNotifications();
-    
-    console.log(`Marked ${successfullyMarked.length} notifications as read`);
-  } catch (error) {
-    console.error('Error marking all notifications as read:', error);
-  }
-};
-
-// Format notification message
-const formatNotificationMessage = (notification) => {
-  // Handle case where notification data might be missing
-  if (!notification.data) {
-    return 'New notification';
-  }
-  
-  // Return custom message if provided
-  if (notification.data.message) {
-    return notification.data.message;
-  }
-  
-  // Generate message based on notification type
-  switch (notification.type) {
-    case 'App\\Notifications\\PksSubmitted':
-      return `Pengajuan PKS baru: ${notification.data.pks_submission_title || 'Tanpa judul'}`;
-    case 'App\\Notifications\\PksStatusUpdated':
-      return `Status PKS "${notification.data.pks_submission_title || 'Tanpa judul'}" diperbarui menjadi ${notification.data.new_status || 'baru'}`;
-    case 'App\\Notifications\\PksRevisionRequested':
-      return `Revisi diminta untuk PKS: ${notification.data.pks_submission_title || 'Tanpa judul'}`;
-    case 'App\\Notifications\\AdminPksSubmissionNotification':
-      return `Pengajuan PKS baru dari ${notification.data.mitra_name || 'mitra'}`;
-    default:
-      return 'New notification';
-  }
-};
-
-// Format date
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleDateString('id-ID', options);
-};
-
-// Get notification background color based on type
 const getNotificationBackgroundColor = (type) => {
   switch (type) {
-    case 'pks_submitted':
+    case 'info':
       return 'bg-blue-50 dark:bg-blue-900/20';
-    case 'pks_approved':
-      return 'bg-green-50 dark:bg-green-900/20';
-    case 'pks_rejected':
-      return 'bg-red-50 dark:bg-red-900/20';
-    case 'pks_revision_requested':
+    case 'warning':
       return 'bg-yellow-50 dark:bg-yellow-900/20';
-    case 'rapat_scheduled':
-      return 'bg-purple-50 dark:bg-purple-900/20';
+    case 'error':
+      return 'bg-red-50 dark:bg-red-900/20';
+    case 'success':
+      return 'bg-green-50 dark:bg-green-900/20';
     default:
-      return 'bg-gray-50 dark:bg-gray-700/20';
+      return 'bg-gray-50 dark:bg-gray-700';
   }
 };
 
-// Get notification icon background color based on type
 const getNotificationIconBackground = (type) => {
   switch (type) {
-    case 'pks_submitted':
-      return 'bg-blue-100 dark:bg-blue-900';
-    case 'pks_approved':
-      return 'bg-green-100 dark:bg-green-900';
-    case 'pks_rejected':
-      return 'bg-red-100 dark:bg-red-900';
-    case 'pks_revision_requested':
-      return 'bg-yellow-100 dark:bg-yellow-900';
-    case 'rapat_scheduled':
-      return 'bg-purple-100 dark:bg-purple-900';
+    case 'info':
+      return 'bg-blue-100 dark:bg-blue-900/30';
+    case 'warning':
+      return 'bg-yellow-100 dark:bg-yellow-900/30';
+    case 'error':
+      return 'bg-red-100 dark:bg-red-900/30';
+    case 'success':
+      return 'bg-green-100 dark:bg-green-900/30';
     default:
       return 'bg-gray-100 dark:bg-gray-600';
   }
 };
 
-// Get notification icon component based on type
-const getNotificationIconComponent = (type) => {
-  switch (type) {
-    case 'pks_submitted':
-      return FileText; // Document icon for submitted PKS
-    case 'pks_approved':
-      return CheckCircle; // Check circle for approved PKS
-    case 'pks_rejected':
-      return XCircle; // X circle for rejected PKS
-    case 'pks_revision_requested':
-      return Bell; // Bell for revision requests
-    case 'rapat_scheduled':
-      return CalendarDays; // Calendar for scheduled meetings
-    default:
-      return FileText; // Default to document icon
-  }
-};
-
-// Get notification color based on type
 const getNotificationColor = (type) => {
   switch (type) {
-    case 'pks_submitted':
-      return 'text-blue-500';
-    case 'pks_approved':
-      return 'text-green-500';
-    case 'pks_rejected':
-      return 'text-red-500';
-    case 'pks_revision_requested':
-      return 'text-yellow-500';
-    case 'rapat_scheduled':
-      return 'text-purple-500';
+    case 'info':
+      return 'text-blue-600 dark:text-blue-400';
+    case 'warning':
+      return 'text-yellow-600 dark:text-yellow-400';
+    case 'error':
+      return 'text-red-600 dark:text-red-400';
+    case 'success':
+      return 'text-green-600 dark:text-green-400';
     default:
-      return 'text-gray-500';
+      return 'text-gray-600 dark:text-gray-400';
   }
 };
 
-// Close dropdowns when clicking outside
-const handleClickOutside = (event) => {
-  // More specific checks for each dropdown
-  const notificationDropdown = document.getElementById('notification-dropdown');
-  const profileDropdown = document.getElementById('profile-dropdown');
-  
-  // Check if click is outside the notification dropdown
-  if (showNotificationsDropdown.value && notificationDropdown && !notificationDropdown.contains(event.target)) {
-    showNotificationsDropdown.value = false;
+const getNotificationIconComponent = (type) => {
+  switch (type) {
+    case 'info':
+      return 'Info';
+    case 'warning':
+      return 'AlertTriangle';
+    case 'error':
+      return 'XCircle';
+    case 'success':
+      return 'CheckCircle';
+    default:
+      return 'Bell';
   }
-  
-  // Check if click is outside the profile dropdown
-  if (showProfileDropdown.value && profileDropdown && !profileDropdown.contains(event.target)) {
+};
+
+const formatNotificationMessage = (notification) => {
+  if (notification.data && notification.data.message) {
+    return notification.data.message;
+  }
+  return notification.type;
+};
+
+const formatDate = (dateString) => {
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  };
+  return new Date(dateString).toLocaleDateString('id-ID', options);
+};
+
+// Click outside handler
+const handleClickOutside = (event) => {
+  // Close dropdowns if clicked outside
+  if (!document.getElementById('profile-dropdown')?.contains(event.target)) {
     showProfileDropdown.value = false;
   }
   
-  // Check if click is outside the user dropdown (mobile)
-  if (showUserDropdown.value && !event.target.closest('.flex-shrink-0')) {
-    showUserDropdown.value = false;
+  if (!document.getElementById('notification-dropdown')?.contains(event.target)) {
+    showNotificationsDropdown.value = false;
   }
 };
 
-// Check for saved dark mode preference
-const checkDarkModePreference = () => {
-  const savedDarkMode = localStorage.getItem('darkMode');
-  if (savedDarkMode === 'true') {
-    isDarkMode.value = true;
-    document.documentElement.classList.add('dark');
-  } else if (savedDarkMode === 'false') {
-    isDarkMode.value = false;
-    document.documentElement.classList.remove('dark');
-  } else {
-    // Default to system preference
-    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (isDarkMode.value) {
-      document.documentElement.classList.add('dark');
-    }
-  }
-};
-
-// Mount and unmount event listeners
-onMounted(() => {
-  // Check dark mode preference
-  checkDarkModePreference();
-  
-  // Fetch notifications on component mount
-  fetchNotifications();
-  
-  // Set up interval to fetch notifications every 30 seconds
-  const notificationInterval = setInterval(fetchNotifications, 30000);
-  
-  // Add click outside listener
-  document.addEventListener('click', handleClickOutside);
-  
-  // Clean up on unmount
-  onUnmounted(() => {
-    clearInterval(notificationInterval);
-    document.removeEventListener('click', handleClickOutside);
-  });
+// Dark mode
+const isDarkMode = computed(() => {
+  return document.documentElement.classList.contains('dark') || 
+         (window.matchMedia('(prefers-color-scheme: dark)').matches && 
+          !document.documentElement.classList.contains('light'));
 });
 
-// Watch for route changes to close mobile sidebar
-watch(() => usePage().props, () => {
-  sidebarOpen.value = false;
+const toggleDarkMode = () => {
+  if (document.documentElement.classList.contains('dark')) {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    localStorage.setItem('theme', 'light');
+  } else {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }
+};
+
+// Initialize sidebar state from localStorage
+onMounted(() => {
+  const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  sidebarCollapsed.value = isSidebarCollapsed;
+  
+  // Set initial theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.add('light');
+  }
+  
+  // Add event listeners
+  document.addEventListener('click', handleClickOutside);
+  
+  // Listen for notifications updates
+  window.Echo?.private(`App.Models.User.${user.value?.id}`)
+    .notification((notification) => {
+      notifications.value.unshift(notification);
+    });
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
+// Watch for page changes to update notifications
+watch(() => page.props.notifications, (newNotifications) => {
+  if (newNotifications) {
+    notifications.value = newNotifications;
+  }
 });
 </script>

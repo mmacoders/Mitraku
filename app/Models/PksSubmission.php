@@ -29,6 +29,8 @@ class PksSubmission extends Model
         'phone',
         'kak_document_path',
         'mou_document_path',
+        'draft_document_path',
+        'signed_document_path',
         'validity_period_start',
         'validity_period_end',
     ];
@@ -67,5 +69,43 @@ class PksSubmission extends Model
     public function rapat()
     {
         return $this->hasOne(Rapat::class);
+    }
+    
+    /**
+     * Get the rapat with draft document associated with the PKS submission.
+     */
+    public function rapatWithDraft()
+    {
+        return $this->hasOne(Rapat::class)->whereNotNull('draft_document_path');
+    }
+    
+    /**
+     * Get the rapat with signed document associated with the PKS submission.
+     */
+    public function rapatWithSignedDocument()
+    {
+        return $this->hasOne(Rapat::class)->whereNotNull('signed_document_path');
+    }
+    
+    /**
+     * Get the full URL to the draft document.
+     */
+    public function getDraftDocumentUrlAttribute()
+    {
+        if ($this->draft_document_path) {
+            return asset('storage/' . $this->draft_document_path);
+        }
+        return null;
+    }
+    
+    /**
+     * Get the full URL to the signed document.
+     */
+    public function getSignedDocumentUrlAttribute()
+    {
+        if ($this->signed_document_path) {
+            return asset('storage/' . $this->signed_document_path);
+        }
+        return null;
     }
 }

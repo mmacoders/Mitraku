@@ -236,7 +236,7 @@ const formatValidityPeriod = (submission: PksSubmission) => {
 };
 
 // Check if PKS is expiring soon (within 30 days)
-const isExpiringSoon = (endDate) => {
+const isExpiringSoon = (endDate: string) => {
   if (!endDate) return false;
   const end = new Date(endDate);
   const today = new Date();

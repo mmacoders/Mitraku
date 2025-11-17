@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PksSubmissionController;
 use App\Http\Controllers\RapatController;
 use App\Http\Controllers\MitraController;
+use App\Http\Controllers\Mitra\PksSubmissionController as MitraPksSubmissionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,11 @@ Route::get('/admin/kelola-pks', [PksSubmissionController::class, 'index'])
 Route::get('/admin/kelola-mitra', [MitraController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('kelola.mitra');
+
+// Kelola Dokumen Pasca Rapat route
+Route::get('/admin/kelola-dokumen-pasca-rapat', [RapatController::class, 'indexPostMeetingDocuments'])
+    ->middleware(['auth', 'verified'])
+    ->name('kelola.dokumen.pasca.rapat');
     
 // API routes for admin dashboard
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -70,6 +76,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/kelola-rapat/{rapat}/edit', [RapatController::class, 'edit'])->name('rapat.edit');
     Route::put('/admin/kelola-rapat/{rapat}', [RapatController::class, 'update'])->name('rapat.update');
     Route::delete('/admin/kelola-rapat/{rapat}', [RapatController::class, 'destroy'])->name('rapat.destroy');
+    
+    // Post-meeting document handling routes
+    Route::post('/admin/kelola-rapat/{rapat}/upload-draft', [RapatController::class, 'uploadDraftDocument'])->name('rapat.uploadDraftDocument');
+    Route::post('/admin/kelola-rapat/{rapat}/set-signing-schedule', [RapatController::class, 'setSigningSchedule'])->name('rapat.setSigningSchedule');
+    Route::post('/admin/kelola-rapat/{rapat}/upload-signed', [RapatController::class, 'uploadSignedDocument'])->name('rapat.uploadSignedDocument');
+    
+    // Document deletion routes
+    Route::delete('/admin/kelola-rapat/{rapat}/delete-draft', [RapatController::class, 'deleteDraftDocument'])->name('rapat.deleteDraftDocument');
+    Route::delete('/admin/kelola-rapat/{rapat}/delete-signed', [RapatController::class, 'deleteSignedDocument'])->name('rapat.deleteSignedDocument');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -96,7 +111,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Security check: ensure the path is within the allowed directories
         if (!str_starts_with($path, 'pks-documents/') && 
             !str_starts_with($path, 'pks-final-documents/') && 
-            !str_starts_with($path, 'pks_documents/')) {
+            !str_starts_with($path, 'pks_documents/') &&
+            !str_starts_with($path, 'pks-drafts/') &&
+            !str_starts_with($path, 'pks-signatures/')) {
             abort(403);
         }
         
@@ -115,11 +132,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $submission = \App\Models\PksSubmission::where('kak_document_path', $path)
             ->orWhere('mou_document_path', $path)
             ->orWhere('final_document_path', $path)
+            ->orWhere('draft_document_path', $path)
+            ->orWhere('signed_document_path', $path)
             ->first();
             
         // Also check rapat documents
         if (!$submission) {
-            $rapat = \App\Models\Rapat::where('pks_document_path', $path)->first();
+            $rapat = \App\Models\Rapat::where('pks_document_path', $path)
+                ->orWhere('draft_document_path', $path)
+                ->orWhere('signed_document_path', $path)
+                ->first();
             if ($rapat) {
                 // Only admin or meeting creator can access rapat documents
                 if ($user->role === 'admin' || $user->id === $rapat->user_id) {
@@ -153,6 +175,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/pks/{pksSubmission}', [PksSubmissionController::class, 'update'])->name('pks.update');
     Route::put('/pks/{pksSubmission}/status', [PksSubmissionController::class, 'updateStatus'])->name('pks.updateStatus');
     Route::delete('/pks/{pksSubmission}', [PksSubmissionController::class, 'destroy'])->name('pks.destroy');
+    
+    // Mitra PKS Submission Detail Route
+    Route::get('/mitra/pks/{pksSubmission}', [MitraPksSubmissionController::class, '__invoke'])->name('mitra.pks.show');
     
     // Demo route for PKS submission modal
     Route::get('/pks/modal-demo', function () {

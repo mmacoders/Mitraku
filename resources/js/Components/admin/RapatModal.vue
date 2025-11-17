@@ -11,7 +11,7 @@
                 Buat Rapat Baru
               </h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Isi detail rapat
+                Jadwalkan rapat dengan mitra
               </p>
             </div>
           </div>
@@ -33,23 +33,49 @@
                 id="search_mitra"
                 v-model="searchMitra"
                 type="text"
-                class="mt-1 block w-full"
-                placeholder="Cari mitra..."
-                @input="filterMitra"
+                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+                placeholder="Cari mitra berdasarkan nama atau perusahaan..."
               />
               
-              <!-- Selected mitra tags -->
-              <div class="mt-2 flex flex-wrap gap-2">
-                <span
-                  v-for="mitraId in form.invited_mitra"
-                  :key="mitraId"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+              <!-- Mitra selection list -->
+              <div class="mt-2 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md">
+                <div 
+                  v-for="mitra in filteredMitra" 
+                  :key="mitra.id"
+                  @click="toggleMitraSelection(mitra.id)"
+                  class="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  :class="{ 'bg-blue-50 dark:bg-blue-900/30': form.invited_mitra.includes(mitra.id) }"
                 >
-                  {{ getMitraName(mitraId) }}
+                  <input
+                    type="checkbox"
+                    :checked="form.invited_mitra.includes(mitra.id)"
+                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                    @click.stop
+                  />
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ mitra.name }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ mitra.company }}</p>
+                  </div>
+                </div>
+                
+                <!-- No results message -->
+                <div v-if="filteredMitra.length === 0" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  Tidak ada mitra yang ditemukan
+                </div>
+              </div>
+              
+              <!-- Selected mitra tags -->
+              <div v-if="selectedMitraNames.length > 0" class="mt-2 flex flex-wrap gap-2">
+                <span
+                  v-for="(name, index) in selectedMitraNames"
+                  :key="index"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                >
+                  {{ name }}
                   <button
                     type="button"
-                    @click="removeMitra(mitraId)"
-                    class="ml-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:bg-blue-500 focus:text-white focus:outline-none dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 dark:hover:text-blue-100 dark:focus:bg-blue-500"
+                    @click="removeMitra(index)"
+                    class="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:outline-none focus:bg-blue-500 focus:text-white dark:hover:bg-blue-800 dark:hover:text-blue-200 dark:focus:bg-blue-600 dark:focus:text-white"
                   >
                     <span class="sr-only">Hapus</span>
                     <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
@@ -58,92 +84,65 @@
                   </button>
                 </span>
               </div>
-              
-              <!-- Dropdown for mitra selection -->
-              <div 
-                v-show="filteredMitra.length > 0 && searchMitra" 
-                class="mt-1 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg z-10 absolute w-[calc(100%-3rem)]"
-              >
-                <div 
-                  v-for="mitra in filteredMitra" 
-                  :key="mitra.id" 
-                  class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                  @click="selectMitra(mitra)"
-                >
-                  {{ mitra.name }} ({{ mitra.company || 'Perusahaan tidak diatur' }})
-                </div>
-                <div 
-                  v-if="filteredMitra.length === 0" 
-                  class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
-                >
-                  Tidak ada mitra yang ditemukan
-                </div>
-              </div>
             </div>
             <InputError class="mt-2" :message="form.errors.invited_mitra" />
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Cari dan pilih mitra yang ingin Anda undang ke rapat ini
-            </p>
-          </div>
-
-          <!-- Judul PKS - Only show when mitra is selected -->
-          <div v-if="form.invited_mitra.length > 0 && pksSubmissions && pksSubmissions.length > 0">
-            <InputLabel for="pks_submission_id" value="Judul PKS" />
-            <select
-              id="pks_submission_id"
-              v-model="form.pks_submission_id"
-              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
-              :disabled="form.processing"
-            >
-              <option value="">Pilih PKS yang akan di bahas</option>
-              <option v-for="pks in filteredPksSubmissions" :key="pks.id" :value="pks.id">
-                {{ pks.title }} - {{ pks.user ? pks.user.name : 'User tidak ditemukan' }}
-              </option>
-            </select>
-            <InputError class="mt-2" :message="form.errors.pks_submission_id" />
           </div>
 
           <!-- Judul Rapat -->
           <div>
-            <InputLabel for="judul" value="Judul Rapat" />
+            <InputLabel for="judul" value="Judul Rapat *" />
             <TextInput
               id="judul"
               v-model="form.judul"
               type="text"
-              class="mt-1 block w-full"
-              required
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
               :disabled="form.processing"
+              placeholder="Masukkan judul rapat..."
+              required
             />
             <InputError class="mt-2" :message="form.errors.judul" />
           </div>
 
           <!-- Tanggal & Waktu -->
           <div>
-            <InputLabel for="tanggal_waktu" value="Tanggal & Waktu" />
+            <InputLabel for="tanggal_waktu" value="Tanggal & Waktu *" />
             <TextInput
               id="tanggal_waktu"
               v-model="form.tanggal_waktu"
               type="datetime-local"
-              class="mt-1 block w-full"
-              required
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
               :disabled="form.processing"
+              required
             />
             <InputError class="mt-2" :message="form.errors.tanggal_waktu" />
           </div>
 
           <!-- Lokasi/Link Meeting -->
           <div>
-            <InputLabel for="lokasi" value="Link Meeting / Lokasi Meeting" />
+            <InputLabel for="lokasi" value="Lokasi/Link Meeting" />
             <TextInput
               id="lokasi"
               v-model="form.lokasi"
               type="text"
-              class="mt-1 block w-full"
-              required
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
               :disabled="form.processing"
-              placeholder="Masukkan lokasi fisik atau link meeting"
+              placeholder="Masukkan lokasi fisik atau link meeting (Zoom, Google Meet, dll)..."
             />
             <InputError class="mt-2" :message="form.errors.lokasi" />
+          </div>
+
+          <!-- Deskripsi -->
+          <div>
+            <InputLabel for="deskripsi" value="Deskripsi" />
+            <textarea
+              id="deskripsi"
+              v-model="form.deskripsi"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+              rows="4"
+              :disabled="form.processing"
+              placeholder="Deskripsikan agenda rapat..."
+            ></textarea>
+            <InputError class="mt-2" :message="form.errors.deskripsi" />
           </div>
 
           <!-- Status -->
@@ -155,25 +154,83 @@
               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
               :disabled="form.processing"
             >
-              <option value="akan_datang">Proses</option>
+              <option value="akan_datang">Akan Datang</option>
               <option value="selesai">Selesai</option>
               <option value="dibatalkan">Dibatalkan</option>
             </select>
             <InputError class="mt-2" :message="form.errors.status" />
           </div>
 
-          <!-- Deskripsi Agenda Rapat -->
-          <div>
-            <InputLabel for="deskripsi" value="Deskripsi Agenda Rapat (Opsional)" />
-            <textarea
-              id="deskripsi"
-              v-model="form.deskripsi"
+          <!-- PKS Submission (if available) -->
+          <div v-if="pksSubmissions && pksSubmissions.length > 0">
+            <InputLabel for="pks_submission_id" value="Pengajuan PKS Terkait" />
+            <select
+              id="pks_submission_id"
+              v-model="form.pks_submission_id"
               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
-              rows="4"
               :disabled="form.processing"
-              placeholder="Deskripsikan agenda rapat..."
-            ></textarea>
-            <InputError class="mt-2" :message="form.errors.deskripsi" />
+            >
+              <option value="">Pilih pengajuan PKS (opsional)</option>
+              <option
+                v-for="submission in pksSubmissions"
+                :key="submission.id"
+                :value="submission.id"
+              >
+                {{ submission.title }} - {{ submission.user.name }}
+              </option>
+            </select>
+            <InputError class="mt-2" :message="form.errors.pks_submission_id" />
+          </div>
+
+          <!-- Upload Dokumen PKS -->
+          <div>
+            <InputLabel for="pks_document" value="Upload Dokumen PKS" />
+            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-md">
+              <div class="space-y-1 text-center">
+                <div v-if="!form.pks_document" class="flex text-sm text-gray-600 dark:text-gray-400">
+                  <label
+                    for="pks_document"
+                    class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                  >
+                    <span>Upload file</span>
+                    <input
+                      id="pks_document"
+                      ref="fileInput"
+                      type="file"
+                      class="sr-only"
+                      @change="handleFileChange"
+                      :disabled="form.processing"
+                      accept=".pdf,.doc,.docx"
+                    />
+                  </label>
+                  <p class="pl-1">atau drag and drop</p>
+                </div>
+                <p v-if="!form.pks_document" class="text-xs text-gray-500 dark:text-gray-400">
+                  PDF, DOC, DOCX hingga 2MB
+                </p>
+                <div v-if="form.pks_document" class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <span class="text-2xl mr-3">{{ getFileIcon(form.pks_document.type) }}</span>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.pks_document.name }}
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ formatFileSize(form.pks_document.size) }}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    @click="removeFile('pks_document')"
+                    class="ml-4 bg-white dark:bg-gray-800 rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+                  >
+                    <X class="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <InputError class="mt-2" :message="form.errors.pks_document" />
           </div>
 
           <!-- Submit buttons -->
@@ -197,7 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Modal from '@/Components/Modal.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
@@ -205,28 +262,19 @@ import SecondaryButton from '@/Components/SecondaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import InputError from '@/Components/InputError.vue'
+import { X } from 'lucide-vue-next'
 
-const props = defineProps<{
-  show: boolean
-  onClose: () => void
-  availableMitra: Array<{
-    id: number
-    name: string
-    company: string
-  }>
-  pksSubmissions?: Array<{
-    id: number
-    title: string
-    user: {
-      id: number
-      name: string
-    }
-    status: string
-  }>
-}>()
+const props = defineProps({
+  show: Boolean,
+  onClose: Function,
+  onCreate: Function,
+  availableMitra: Array,
+  pksSubmissions: Array as () => Array<{id: number, title: string, user: {name: string}}>
+})
 
 const emit = defineEmits(['created'])
 
+const fileInput = ref<HTMLInputElement | null>(null)
 const searchMitra = ref('')
 
 // Form setup
@@ -236,91 +284,142 @@ const form = useForm({
   lokasi: '',
   deskripsi: '',
   status: 'akan_datang',
-  pks_submission_id: '' as string | number,
-  invited_mitra: [] as number[]
+  pks_document: null as File | null,
+  invited_mitra: [] as number[],
+  pks_submission_id: '' as string | number
 })
 
 // Filtered mitra based on search
 const filteredMitra = computed(() => {
-  if (!searchMitra.value) return []
-  return props.availableMitra.filter(mitra => 
-    mitra.name.toLowerCase().includes(searchMitra.value.toLowerCase()) ||
-    (mitra.company && mitra.company.toLowerCase().includes(searchMitra.value.toLowerCase()))
-  )
+  if (!props.availableMitra) return []
+  
+  return (props.availableMitra as Array<{id: number, name: string, company: string}>)
+    .filter(mitra => 
+      mitra.name.toLowerCase().includes(searchMitra.value.toLowerCase()) ||
+      (mitra.company && mitra.company.toLowerCase().includes(searchMitra.value.toLowerCase()))
+    )
 })
 
-// Filtered PKS submissions - only show "proses" status submissions from selected mitra
-const filteredPksSubmissions = computed(() => {
-  if (!props.pksSubmissions || form.invited_mitra.length === 0) return []
+// Get selected mitra names for display
+const selectedMitraNames = computed(() => {
+  if (!props.availableMitra) return []
   
-  // Get user IDs of selected mitra
-  const selectedMitraIds = form.invited_mitra
-  
-  // Filter PKS submissions:
-  // 1. Only "proses" status submissions
-  // 2. Only from selected mitra
-  return props.pksSubmissions.filter(pks => 
-    pks.status === 'proses' && 
-    pks.user && 
-    selectedMitraIds.includes(pks.user.id)
-  )
+  return (props.availableMitra as Array<{id: number, name: string, company: string}>)
+    .filter(mitra => form.invited_mitra.includes(mitra.id))
+    .map(mitra => mitra.name)
 })
 
-// Get mitra name by ID
-const getMitraName = (mitraId: number) => {
-  const mitra = props.availableMitra.find(m => m.id === mitraId)
-  return mitra ? mitra.name : ''
-}
-
-// Select mitra
-const selectMitra = (mitra: { id: number }) => {
-  if (!form.invited_mitra.includes(mitra.id)) {
-    form.invited_mitra.push(mitra.id)
-  }
-  searchMitra.value = ''
-  
-  // Clear PKS selection when mitra changes
-  form.pks_submission_id = ''
-}
-
-// Remove mitra
-const removeMitra = (mitraId: number) => {
+// Toggle mitra selection
+const toggleMitraSelection = (mitraId: number) => {
   const index = form.invited_mitra.indexOf(mitraId)
-  if (index !== -1) {
+  if (index > -1) {
     form.invited_mitra.splice(index, 1)
+  } else {
+    form.invited_mitra.push(mitraId)
+  }
+}
+
+// Remove mitra from selection
+const removeMitra = (index: number) => {
+  const mitraId = form.invited_mitra[index]
+  form.invited_mitra.splice(index, 1)
+  
+  // Also update the UI selection if needed
+  const checkbox = document.querySelector(`input[type="checkbox"][value="${mitraId}"]`) as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = false
+  }
+}
+
+// Handle file change
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    if (validateFile(file)) {
+      form.pks_document = file
+    }
+  }
+}
+
+// Validate file
+const validateFile = (file: File) => {
+  const maxSize = 2 * 1024 * 1024 // 2MB in bytes
+  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  
+  if (file.size > maxSize) {
+    alert('Ukuran file tidak boleh lebih dari 2MB')
+    return false
   }
   
-  // Clear PKS selection if no mitra selected
-  if (form.invited_mitra.length === 0) {
-    form.pks_submission_id = ''
+  if (!allowedTypes.includes(file.type)) {
+    alert('Format file tidak didukung. Hanya PDF, DOC, dan DOCX yang diizinkan.')
+    return false
+  }
+  
+  return true
+}
+
+// Remove file
+const removeFile = (field: 'pks_document') => {
+  if (field === 'pks_document') {
+    form.pks_document = null
+    if (fileInput.value) fileInput.value.value = ''
   }
 }
 
-// Filter mitra (called on input)
-const filterMitra = () => {
-  // Filtering is handled by the computed property
+// Format file size
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// Close modal
-const closeModal = () => {
-  props.onClose()
-  form.reset()
-  form.clearErrors()
-  searchMitra.value = ''
+// Get file icon based on MIME type
+const getFileIcon = (mimeType: string) => {
+  if (mimeType.includes('pdf')) {
+    return '📄'
+  } else if (mimeType.includes('word')) {
+    return '📝'
+  } else if (mimeType.includes('excel')) {
+    return '📊'
+  } else if (mimeType.includes('image')) {
+    return '🖼️'
+  } else {
+    return '📁'
+  }
 }
 
 // Submit form
 const submit = () => {
   form.post(route('rapat.store'), {
     onSuccess: () => {
-      closeModal()
       emit('created')
+      closeModal()
     },
-    onError: (errors) => {
-      console.error('Form submission error:', errors)
-      // Show a user-friendly error message
-      alert('Terjadi kesalahan saat menyimpan rapat. Silakan periksa kembali data yang dimasukkan.')
+    onError: () => {
+      console.log('Error creating rapat')
     }
   })
+}
+
+// Close modal
+const closeModal = () => {
+  // Reset form
+  form.reset()
+  form.clearErrors()
+  
+  // Reset file inputs
+  if (fileInput.value) fileInput.value.value = ''
+  
+  // Reset search
+  searchMitra.value = ''
+  
+  // Call onClose if provided
+  if (props.onClose) {
+    props.onClose()
+  }
 }
 </script>

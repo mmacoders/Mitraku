@@ -23,7 +23,7 @@
     />
 
     <!-- Rapat Edit Modal -->
-    <Edit 
+    <EditRapatModal 
       :show="showEditModal" 
       :on-close="closeEditModal"
       :rapat="selectedRapat"
@@ -224,6 +224,7 @@ import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import RapatModal from '@/Components/admin/RapatModal.vue';
 import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
+import EditRapatModal from '@/Pages/admin/kelola-rapat/Edit.vue';
 import {Eye, Edit3, Trash2} from 'lucide-vue-next'
 
 const props = defineProps({

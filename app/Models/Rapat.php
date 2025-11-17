@@ -29,7 +29,10 @@ class Rapat extends Model
         'user_id',
         'status',
         'pks_document_path',
-        'pks_submission_id', // Add this field
+        'pks_submission_id',
+        'draft_document_path',
+        'signed_document_path',
+        'signing_schedule',
     ];
 
     /**
@@ -39,6 +42,7 @@ class Rapat extends Model
      */
     protected $casts = [
         'tanggal_waktu' => 'datetime',
+        'signing_schedule' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -76,6 +80,28 @@ class Rapat extends Model
     {
         if ($this->pks_document_path) {
             return asset('storage/' . $this->pks_document_path);
+        }
+        return null;
+    }
+    
+    /**
+     * Get the full URL to the draft document.
+     */
+    public function getDraftDocumentUrlAttribute()
+    {
+        if ($this->draft_document_path) {
+            return asset('storage/' . $this->draft_document_path);
+        }
+        return null;
+    }
+    
+    /**
+     * Get the full URL to the signed document.
+     */
+    public function getSignedDocumentUrlAttribute()
+    {
+        if ($this->signed_document_path) {
+            return asset('storage/' . $this->signed_document_path);
         }
         return null;
     }

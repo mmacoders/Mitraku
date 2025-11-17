@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\GmailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\Rapat;
+use Illuminate\Support\Facades\Auth;
 
 class PksSubmissionController extends Controller
 {
@@ -165,7 +166,13 @@ class PksSubmissionController extends Controller
      */
     public function create()
     {
-        return Inertia::render('mitra/CreatePksSubmission');
+        // For mitra users, we'll use a modal on the dashboard
+        // For admin users, we'll use the admin create page
+        if (Auth::user()->role === 'mitra') {
+            return redirect()->route('mitra.dashboard');
+        } else {
+            return Inertia::render('admin/kelola-pks/Create');
+        }
     }
     
     /**

@@ -6,6 +6,8 @@ use App\Models\PksSubmission;
 use App\Models\Rapat;
 use App\Models\User;
 use App\Notifications\RapatScheduled;
+use App\Notifications\DraftDocumentUploaded;
+use App\Notifications\SigningScheduleSet;
 use App\Http\Requests\RapatRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -38,6 +40,8 @@ class RapatController extends Controller
         // Append document URL to each rapat
         $rapat->getCollection()->each(function ($item) {
             $item->append('pks_document_url');
+            $item->append('draft_document_url');
+            $item->append('signed_document_url');
         });
         
         // Get all mitra users for invitation in the modal
@@ -54,6 +58,59 @@ class RapatController extends Controller
             'rapat' => $rapat,
             'mitraUsers' => $mitraUsers,
             'pksSubmissions' => $pksSubmissions,
+        ]);
+    }
+
+    /**
+     * Display a listing of post-meeting documents.
+     */
+    public function indexPostMeetingDocuments(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow admin users to access this page
+        if (!$user->isAdmin()) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Build query for rapat with status 'selesai'
+        $query = Rapat::with(['creator'])
+            ->where('user_id', $user->id)
+            ->where('status', 'selesai');
+            
+        // Apply search filter
+        if ($request->has('search') && $request->search) {
+            $query->where('judul', 'like', '%' . $request->search . '%');
+        }
+        
+        // Apply process filter
+        if ($request->has('process') && $request->process) {
+            switch ($request->process) {
+                case 'draft_fix':
+                    $query->whereNotNull('draft_document_path');
+                    break;
+                case 'signing_schedule':
+                    $query->whereNotNull('signing_schedule');
+                    break;
+                case 'signed_document':
+                    $query->whereNotNull('signed_document_path');
+                    break;
+            }
+        }
+        
+        // Get paginated results
+        $rapat = $query->latest()->paginate(10);
+        
+        // Append document URLs
+        $rapat->getCollection()->each(function ($item) {
+            $item->append('pks_document_url');
+            $item->append('draft_document_url');
+            $item->append('signed_document_url');
+        });
+        
+        return Inertia::render('admin/kelola-dokumen-pasca-rapat/Index', [
+            'rapat' => $rapat,
         ]);
     }
 
@@ -183,6 +240,8 @@ class RapatController extends Controller
         
         $rapat->load(['creator', 'invitedMitra']);
         $rapat->append('pks_document_url');
+        $rapat->append('draft_document_url');
+        $rapat->append('signed_document_url');
         
         return Inertia::render('admin/kelola-rapat/Show', [
             'rapat' => $rapat,
@@ -204,6 +263,8 @@ class RapatController extends Controller
         
         $rapat->load(['invitedMitra']);
         $rapat->append('pks_document_url');
+        $rapat->append('draft_document_url');
+        $rapat->append('signed_document_url');
         
         // Format the tanggal_waktu for datetime-local input
         if ($rapat->tanggal_waktu instanceof Carbon) {
@@ -353,13 +414,140 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        // Delete associated document if exists
+        // Delete associated documents if exists
         if ($rapat->pks_document_path) {
             Storage::disk('public')->delete($rapat->pks_document_path);
+        }
+        
+        if ($rapat->draft_document_path) {
+            Storage::disk('public')->delete($rapat->draft_document_path);
+        }
+        
+        if ($rapat->signed_document_path) {
+            Storage::disk('public')->delete($rapat->signed_document_path);
         }
         
         $rapat->delete();
         
         return redirect()->route('rapat.index')->with('success', 'Rapat berhasil dihapus.');
+    }
+    
+    /**
+     * Upload draft document for a completed meeting.
+     */
+    public function uploadDraftDocument(Request $request, Rapat $rapat)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow the creator (admin) to upload draft document
+        if ($rapat->user_id !== $user->id) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Validate the request
+        $request->validate([
+            'draft_document' => 'required|file|mimes:pdf,doc,docx|max:2048', // 2MB max
+        ]);
+        
+        // Handle draft document upload
+        if ($request->hasFile('draft_document')) {
+            // Delete old draft document if exists
+            if ($rapat->draft_document_path) {
+                Storage::disk('public')->delete($rapat->draft_document_path);
+            }
+            
+            // Store new draft document
+            $draftDocumentPath = $request->file('draft_document')->store('pks_drafts', 'public');
+            
+            // Update the rapat
+            $rapat->update([
+                'draft_document_path' => $draftDocumentPath,
+            ]);
+            
+            // Send notification to invited mitra
+            $invitedMitraUsers = $rapat->invitedMitra;
+            foreach ($invitedMitraUsers as $mitra) {
+                $mitra->notify(new DraftDocumentUploaded($rapat));
+            }
+            
+            return redirect()->back()->with('success', 'Draft dokumen berhasil diunggah dan notifikasi telah dikirim ke mitra yang diundang.');
+        }
+        
+        return redirect()->back()->with('error', 'Gagal mengunggah draft dokumen.');
+    }
+    
+    /**
+     * Set signing schedule for a completed meeting.
+     */
+    public function setSigningSchedule(Request $request, Rapat $rapat)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow the creator (admin) to set signing schedule
+        if ($rapat->user_id !== $user->id) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Validate the request
+        $request->validate([
+            'signing_schedule' => 'required|date',
+        ]);
+        
+        // Format signing_schedule for database storage
+        $signingSchedule = Carbon::parse($request->signing_schedule);
+        
+        // Update the rapat
+        $rapat->update([
+            'signing_schedule' => $signingSchedule,
+        ]);
+        
+        // Send notification to invited mitra
+        $invitedMitraUsers = $rapat->invitedMitra;
+        foreach ($invitedMitraUsers as $mitra) {
+            $mitra->notify(new SigningScheduleSet($rapat));
+        }
+        
+        return redirect()->back()->with('success', 'Jadwal penandatanganan berhasil diatur dan notifikasi telah dikirim ke mitra yang diundang.');
+    }
+    
+    /**
+     * Upload signed document for a completed meeting.
+     */
+    public function uploadSignedDocument(Request $request, Rapat $rapat)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow the creator (admin) to upload signed document
+        if ($rapat->user_id !== $user->id) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Validate the request
+        $request->validate([
+            'signed_document' => 'required|file|mimes:pdf,doc,docx|max:2048', // 2MB max
+        ]);
+        
+        // Handle signed document upload
+        if ($request->hasFile('signed_document')) {
+            // Delete old signed document if exists
+            if ($rapat->signed_document_path) {
+                Storage::disk('public')->delete($rapat->signed_document_path);
+            }
+            
+            // Store new signed document
+            $signedDocumentPath = $request->file('signed_document')->store('pks_signatures', 'public');
+            
+            // Update the rapat
+            $rapat->update([
+                'signed_document_path' => $signedDocumentPath,
+            ]);
+            
+            return redirect()->back()->with('success', 'Dokumen yang ditandatangani berhasil diunggah.');
+        }
+        
+        return redirect()->back()->with('error', 'Gagal mengunggah dokumen yang ditandatangani.');
     }
 }
