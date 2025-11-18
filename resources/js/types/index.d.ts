@@ -5,6 +5,9 @@ export interface User {
     email_verified_at?: string;
     role: 'admin' | 'mitra';
     profile_picture?: string;
+    phone?: string;
+    company?: string;
+    profile_pict?: string; // Add profile_pict property
 }
 
 export interface PksSubmission {

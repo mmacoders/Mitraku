@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'company', // Add company field
+        'profile_pict', // Add profile_pict field
     ];
 
     /**

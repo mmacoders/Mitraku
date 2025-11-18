@@ -32,6 +32,11 @@ Route::get('/admin/dashboard', [PksSubmissionController::class, 'dashboard'])
     ->middleware(['auth', 'verified'])
     ->name('admin.dashboard');
 
+// Settings route
+Route::get('/settings', [ProfileController::class, 'edit'])
+    ->middleware(['auth', 'verified'])
+    ->name('settings');
+
 // Kelola PKS route (replaces pengajuan-pks)
 Route::get('/admin/kelola-pks', [PksSubmissionController::class, 'index'])
     ->middleware(['auth', 'verified'])

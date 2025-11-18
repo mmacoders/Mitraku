@@ -23,45 +23,44 @@
         </div>
         
         <!-- User Profile with Dropdown -->
-        <div class="relative ml-3">
-          <div class="flex items-center">
+        <div class="relative">
+          <div 
+            class="flex items-center cursor-pointer"
+            @click="toggleDropdown"
+          >
             <Vue3Avatar 
               :name="username" 
               :size="40"
               :imageSrc="profilePicture"
-              class="rounded-full border-2 border-white/30 dark:border-white/20 shadow-sm cursor-pointer"
-              @click="toggleDropdown"
+              class="rounded-full border-2 border-white/30 dark:border-white/20 shadow-sm"
             />
+            <ChevronDown class="h-4 w-4 ml-1 text-gray-600 dark:text-gray-300" />
           </div>
           
-          <!-- Dropdown menu -->
-          <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
+          <!-- Dropdown Menu -->
+          <div 
+            v-show="dropdownOpen" 
+            class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
+            @click.outside="closeDropdown"
           >
-            <div 
-              v-show="dropdownOpen"
-              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-            >
-              <Link
-                :href="route('profile.edit')"
+            <div class="py-1">
+              <Link 
+                :href="route('profile.edit')" 
                 class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
+                <Settings class="h-4 w-4 inline mr-2" />
                 Settings
-              </Link>
-              <a
-                href="#"
-                @click.prevent="logout"
+            </Link>
+              <a 
+                href="#" 
                 class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                @click.prevent="logout"
               >
+                <LogOut class="h-4 w-4 inline mr-2" />
                 Logout
               </a>
             </div>
-          </transition>
+          </div>
         </div>
       </div>
     </div>
@@ -134,35 +133,47 @@
               <div v-if="submissions?.data?.length > 0" class="overflow-hidden rounded-lg">
                 <ul class="divide-y divide-white/20 dark:divide-white/10">
                   <li v-for="submission in submissions.data" :key="submission.id">
-                    <Link 
-                      :href="route('mitra.pks.show', submission.id)" 
-                      class="block hover:bg-white/20 dark:hover:bg-white/10 transition-colors duration-150 rounded-lg px-4 py-4"
-                    >
-                      <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {{ submission.title }}
-                          </p>
+                    <div class="block hover:bg-white/20 dark:hover:bg-white/10 transition-colors duration-150 rounded-lg px-4 py-4">
+                      <Link 
+                        :href="route('mitra.pks.show', submission.id)" 
+                        class="block"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {{ submission.title }}
+                            </p>
+                          </div>
+                          <div class="ml-4 flex-shrink-0">
+                            <StatusBadge :status="submission.status" />
+                          </div>
                         </div>
-                        <div class="ml-4 flex-shrink-0">
-                          <StatusBadge :status="submission.status" />
+                        <div class="mt-2 sm:flex sm:justify-between">
+                          <div class="sm:flex">
+                            <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                              <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                              {{ submission.pks_tujuan || 'Tujuan tidak ditentukan' }}
+                            </p>
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
+                            <Calendar class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                            <p>
+                              {{ formatDate(submission.created_at) }}
+                            </p>
+                          </div>
                         </div>
+                      </Link>
+                      <!-- Delete button for 'proses' status submissions -->
+                      <div v-if="submission.status === 'proses'" class="mt-2 flex justify-end">
+                        <button
+                          @click="deleteSubmission(submission)"
+                          class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-800/50 transition-colors duration-200"
+                        >
+                          <Trash2 class="h-3 w-3 mr-1" />
+                          Hapus
+                        </button>
                       </div>
-                      <div class="mt-2 sm:flex sm:justify-between">
-                        <div class="sm:flex">
-                          <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                            <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                            {{ submission.user?.name || 'Unknown User' }}
-                          </p>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
-                          <Calendar class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                          <p>
-                            {{ formatDate(submission.created_at) }}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -298,9 +309,59 @@
 
   <!-- Create PKS Submission Modal -->
   <CreatePksSubmissionModal 
-    :show="showCreatePksModal" 
+    :is-open="showCreatePksModal" 
     @close="closeCreatePksModal" 
   />
+  
+  <!-- Delete Confirmation Modal -->
+  <Modal :show="showDeleteConfirmation" @close="cancelDelete">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
+          Konfirmasi Hapus Pengajuan
+        </h3>
+      </div>
+      <div class="px-6 py-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30">
+              <Trash2 class="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              Hapus Pengajuan PKS?
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Apakah Anda yakin ingin menghapus pengajuan PKS 
+                <span class="font-medium text-gray-900 dark:text-white">
+                  "{{ submissionToDelete?.title }}"
+                </span>? 
+                Tindakan ini tidak dapat dibatalkan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+        <button
+          @click="cancelDelete"
+          type="button"
+          class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+        >
+          Batal
+        </button>
+        <button
+          @click="confirmDelete"
+          type="button"
+          class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 active:bg-red-700 transition ease-in-out duration-150"
+        >
+          Hapus
+        </button>
+      </div>
+    </div>
+  </Modal>
 </template>
 
 <script setup>
@@ -326,7 +387,11 @@ import {
   MapPin, 
   Text, 
   Download, 
-  FileSignature 
+  FileSignature,
+  ChevronDown,
+  Settings,
+  LogOut,
+  Trash2
 } from 'lucide-vue-next'
 
 // Components
@@ -360,6 +425,9 @@ const profilePicture = computed(() => {
 const showMeetingDetail = ref(false)
 const selectedMeeting = ref(null)
 const showCreatePksModal = ref(false)
+const dropdownOpen = ref(false)
+const showDeleteConfirmation = ref(false)
+const submissionToDelete = ref(null)
 
 // Computed properties
 const infoCards = computed(() => [
@@ -444,6 +512,44 @@ const getMeetingStatusText = (status) => {
     default:
       return status
   }
+}
+
+const toggleDropdown = () => {
+  dropdownOpen.value = !dropdownOpen.value
+}
+
+const closeDropdown = () => {
+  dropdownOpen.value = false
+}
+
+const goToSettings = () => {
+  router.visit(route('settings'))
+}
+
+const logout = () => {
+  router.post(route('logout'))
+}
+
+const deleteSubmission = (submission) => {
+  submissionToDelete.value = submission
+  showDeleteConfirmation.value = true
+}
+
+const confirmDelete = () => {
+  if (submissionToDelete.value) {
+    router.delete(route('pks.destroy', submissionToDelete.value.id), {
+      onSuccess: () => {
+        router.reload({ only: ['submissions', 'statistics'] })
+        showDeleteConfirmation.value = false
+        submissionToDelete.value = null
+      }
+    })
+  }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirmation.value = false
+  submissionToDelete.value = null
 }
 
 // Fetch notifications periodically

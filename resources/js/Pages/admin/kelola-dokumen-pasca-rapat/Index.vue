@@ -266,6 +266,7 @@ import { router } from '@inertiajs/vue3';
 import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
 import PostMeetingDocumentModal from '@/Components/admin/PostMeetingDocumentModal.vue';
 import { Eye, Upload, Calendar, Edit3, Trash2 } from 'lucide-vue-next';
+import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';
 
 const props = defineProps({
   rapat: Object,

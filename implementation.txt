@@ -1,22 +1,85 @@
- “Ubah tampilan Dashboard Mitra dengan gaya modern glassmorphism. Dashboard tidak menggunakan sidebar — hanya header minimalis di bagian atas dengan background transparan blur, berisi nama aplikasi ‘SI-Huyula’ di kiri beserta logonya dan foto profil mitra di kanan.
+ Ubah desain halaman Edit Profile yang modern, minimalis, elegan, dan responsif. Gunakan gaya UI/UX premium seperti Apple, Linear, atau Notion.
 
- Bagian atas halaman tampilkan greeting section dengan gaya glass card transparan:
+ Spesifikasi Desain:
 
- * Sapaan: *“Selamat datang kembali, [Nama Mitra]!”*
- * Subtext: *“Kelola pengajuan PKS Anda dengan mudah.”*
- * Efek: background glass (blur 20–30px), opacity 0.4–0.6, border semi-transparent, glowing subtle shadow.
- * Ikon kecil ilustrasi modern (linear icon).
+ ### 1. Layout Utama
 
- Layout harus full responsive:
+ * Gunakan card container dengan rounded-2xl, shadow halus.
+ * Tambahkan efek glassmorphism lembut (background putih/transparan 20–30%).
+ * Padding besar (px-6 md:px-10 py-8).
+ * Layout harus centered dan responsif.
+ * Di atas halaman tampilkan judul:
 
- * Mobile: stack column
- * Tablet/Desktop: grid modern
- * Semua elemen memiliki efek glassmorphism konsisten (blur, gradient subtle, transparent border, soft shadow).
+   * Edit Profil Anda
+   * Subtitle kecil: "Perbarui informasi akun dan identitas Anda."
 
- Tone warna:
+ ### 2. Foto Profil (Avatar Section)
 
- * Dasar: kombinasi putih transparan / abu soft dengan efek blur
- * Aksen: biru neon lembut atau purple soft
- * Dark mode: glass gelap (black/30%) dengan subtle neon edges.
+ * Foto profil berbentuk lingkaran diameter 100px.
+ * Ada button Upload Foto kecil modern.
+ * Tambahkan preview instant setelah foto dipilih.
+ * Gunakan style: outline-button, icon kecil, hover subtle.
+ * Letakkan di tengah.
 
- Tampilan keseluruhan harus elegan, clean, futuristik, dan tidak berlebihan.”
+ ### 3. Form Input
+
+ Gunakan field dengan style premium:
+
+ * Rounded-xl
+ * Border halus `border-gray-300 dark:border-gray-600`
+ * Focus ring glow `focus:ring-2 focus:ring-blue-500`
+ * Label kecil yang elegan
+
+ Field yang diperlukan:
+
+ * Nama Lengkap
+ * Email 
+ * Nomor Telepon
+ * Alamat / Instansi (mitra only)
+ * Password Baru
+ * Konfirmasi Password
+
+ Input harus responsif dan rapi (grid 1 kolom di mobile, 2 kolom di desktop).
+
+ ### 4. Notifikasi Validasi
+
+ * Berikan error message kecil berwarna merah dengan icon ⚠️ minimalis.
+ * Success message menggunakan green soft dengan icon ✔️.
+
+ ### 5. Tombol CTA
+
+ Letakkan di bawah dalam bar sticky (di mobile) atau di bawah card (desktop).
+
+ * Primary button: Simpan Perubahan
+
+   * Warna biru modern
+   * Rounded-xl
+   * Shadow soft
+   * Hover: sedikit naik (translate-y) dan glow
+ * Secondary button: Batalkan
+
+   * Outline, subtle gray
+
+ ### 6. Dark Mode Friendly
+
+ * Background gelap gradasi `from-gray-900 to-gray-800`
+ * Card menjadi `bg-white/10` dengan border `border-white/10`
+ * Text menjadi `text-gray-200`
+
+ ### 7. Responsiveness
+
+ * Mobile: semua menjadi 1 kolom
+ * Tablet: Avatar dan form bersebelahan
+ * Desktop: Grid lebih longgar, max width 700–800px
+
+ ### 8. Aesthetic Touch
+
+ * Gunakan icon dari Heroicons / Lucide
+
+ * Tambahkan animasi halus ketika hover/focus
+
+ * Transisi 200–300ms
+
+ * Gunakan spacing nyaman seperti aplikasi modern
+
+ Buatkan kode lengkap untuk tampilan ini dengan Tailwind CSS dan Vue.js (Composition API). Pastikan tampilan sangat bersih, premium, dan seperti aplikasi profesional.

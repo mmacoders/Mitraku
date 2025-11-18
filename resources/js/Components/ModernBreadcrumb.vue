@@ -45,7 +45,8 @@ const routeToBreadcrumbMap = {
   'kelola.pks': { title: 'Kelola Pengajuan PKS', icon: FileText, shortTitle: 'PKS' },
   'kelola.mitra': { title: 'Kelola Mitra', icon: Users, shortTitle: 'Mitra' },
   'rapat.index': { title: 'Kelola Rapat', icon: CalendarDays, shortTitle: 'Rapat' },
-  'profile.edit': { title: 'Profil', icon: User, shortTitle: 'Profil' }
+  'profile.edit': { title: 'Profil', icon: User, shortTitle: 'Profil' },
+  'kelola.dokumen.pasca.rapat': { title: 'Dokumen Pasca Rapat', icon: FileText, shortTitle: 'Pasca Rapat' }
 }
 
 // Get the current route name
