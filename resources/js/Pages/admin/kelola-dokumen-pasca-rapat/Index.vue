@@ -120,9 +120,9 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center space-x-2">
                         <!-- Signing Schedule Actions -->
-                        <template v-if="!rapat.signing_schedule">
+                        <template v-if="!rapat?.signing_schedule">
                           <button
-                            v-if="rapat.draft_document_path"
+                            v-if="rapat?.draft_document_path"
                             @click="openProcessModal('signing_schedule', rapat)"
                             class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                           >
@@ -141,7 +141,7 @@
                             {{ formatDate(rapat.signing_schedule) }}
                           </span>
                           <button
-                            v-if="rapat.draft_document_path"
+                            v-if="rapat?.draft_document_path"
                             @click="openProcessModal('signing_schedule', rapat)"
                             class="inline-flex items-center px-2 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                           >
@@ -153,9 +153,9 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center space-x-2">
                         <!-- Signed Document Actions -->
-                        <template v-if="!rapat.signed_document_path">
+                        <template v-if="!rapat?.signed_document_path">
                           <button
-                            v-if="rapat.draft_document_path && rapat.signing_schedule"
+                            v-if="rapat?.draft_document_path && rapat?.signing_schedule"
                             @click="openProcessModal('signed_document', rapat)"
                             class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                           >
@@ -310,12 +310,12 @@ document.addEventListener('click', (event) => {
 // Open process modal
 const openProcessModal = (processType, rapat) => {
   // Check if the process can be performed based on the workflow
-  if (processType === 'signing_schedule' && !rapat.draft_document_path) {
+  if (processType === 'signing_schedule' && !rapat?.draft_document_path) {
     alert('Draft Fix harus diupload terlebih dahulu sebelum mengatur jadwal TTD.');
     return;
   }
   
-  if (processType === 'signed_document' && (!rapat.draft_document_path || !rapat.signing_schedule)) {
+  if (processType === 'signed_document' && (!rapat?.draft_document_path || !rapat?.signing_schedule)) {
     alert('Draft Fix harus diupload dan jadwal TTD harus diatur terlebih dahulu sebelum mengupload dokumen final.');
     return;
   }
@@ -346,7 +346,7 @@ const handleProcessSuccess = () => {
 // Delete draft document
 const deleteDraftDocument = (rapat) => {
   if (confirm('Apakah Anda yakin ingin menghapus draft dokumen ini?')) {
-    router.delete(route('rapat.deleteDraftDocument', rapat.id), {
+    router.delete(route('rapat.deleteDraftDocument', rapat?.id), {
       onSuccess: () => {
         router.reload({
           only: ['rapat'],
@@ -361,7 +361,7 @@ const deleteDraftDocument = (rapat) => {
 // Delete signed document
 const deleteSignedDocument = (rapat) => {
   if (confirm('Apakah Anda yakin ingin menghapus dokumen yang ditandatangani ini?')) {
-    router.delete(route('rapat.deleteSignedDocument', rapat.id), {
+    router.delete(route('rapat.deleteSignedDocument', rapat?.id), {
       onSuccess: () => {
         router.reload({
           only: ['rapat'],

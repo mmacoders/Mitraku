@@ -88,4 +88,17 @@ class MitraController extends Controller
 
         return redirect()->back()->with('success', 'Mitra deleted successfully');
     }
+
+    /**
+     * Get all mitra users for API.
+     */
+    public function getMitraUsers()
+    {
+        $mitraUsers = User::where('role', 'mitra')
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($mitraUsers);
+    }
 }

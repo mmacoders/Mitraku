@@ -250,6 +250,17 @@
             <a href="{{ config('app.url') }}/mitra/dashboard" class="action-button">
                 Lihat Dashboard
             </a>
+            
+            <!-- Contact Information -->
+            <div style="background-color: #EFF6FF; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #DBEAFE;">
+                <p style="margin: 0 0 10px 0; font-weight: 600; color: #1E40AF;">Informasi Kontak</p>
+                <p style="margin: 0 0 10px 0; color: #374151;">
+                    Untuk informasi lebih lanjut terkait pengajuan PKS ini, silakan hubungi kami melalui:
+                </p>
+                <p style="margin: 0; color: #374151;">
+                    <strong>Telp. +62 821-9000-2618</strong> atau <strong>WhatsApp: 0821-9000-2618</strong>
+                </p>
+            </div>
         </div>
         
         <!-- Footer -->

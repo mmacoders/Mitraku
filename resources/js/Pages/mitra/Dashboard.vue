@@ -195,6 +195,66 @@
               </div>
             </div>
           </div>
+
+          <!-- Active PKS Section -->
+          <div class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 overflow-hidden mt-8">
+            <div class="px-6 py-5 border-b border-white/20 dark:border-white/10">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                  PKS yang Sedang Berjalan
+                </h3>
+              </div>
+            </div>
+            <div class="p-6">
+              <div v-if="activeSubmissions?.length > 0" class="overflow-hidden rounded-lg">
+                <ul class="divide-y divide-white/20 dark:divide-white/10">
+                  <li v-for="submission in activeSubmissions" :key="submission.id">
+                    <div class="block hover:bg-white/20 dark:hover:bg-white/10 transition-colors duration-150 rounded-lg px-4 py-4">
+                      <Link 
+                        :href="route('mitra.pks.show', submission.id)" 
+                        class="block"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {{ submission.title }}
+                            </p>
+                          </div>
+                          <div class="ml-4 flex-shrink-0">
+                            <StatusBadge :status="submission.status" />
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                          <div class="sm:flex">
+                            <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                              <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                              {{ submission.pks_tujuan || 'Tujuan tidak ditentukan' }}
+                            </p>
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
+                            <Calendar class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                            <p>
+                              {{ formatDate(submission.created_at) }}
+                            </p>
+                          </div>
+                        </div>
+                        <div v-if="submission.validity_period_start && submission.validity_period_end" class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                          Berlaku: {{ formatDate(submission.validity_period_start) }} - {{ formatDate(submission.validity_period_end) }}
+                        </div>
+                      </Link>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div v-else class="text-center py-12">
+                <FileText class="mx-auto h-12 w-12 text-gray-500 dark:text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Tidak ada PKS aktif</h3>
+                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                  Anda tidak memiliki PKS yang sedang berjalan.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Right Sidebar -->
@@ -464,6 +524,19 @@ const infoCards = computed(() => [
     iconColor: 'text-red-600 dark:text-red-400'
   }
 ])
+
+// Filter active submissions (disetujui and within validity period)
+const activeSubmissions = computed(() => {
+  if (!props.submissions?.data) return []
+  
+  return props.submissions.data.filter(submission => 
+    submission.status === 'disetujui' && 
+    submission.validity_period_start && 
+    submission.validity_period_end &&
+    new Date(submission.validity_period_end) > new Date() &&
+    new Date(submission.validity_period_start) <= new Date()
+  )
+})
 
 const openMeetingDetail = (meeting) => {
   selectedMeeting.value = meeting

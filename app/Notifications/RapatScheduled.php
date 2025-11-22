@@ -47,6 +47,7 @@ class RapatScheduled extends Notification implements ShouldQueue
             ->line('**Lokasi/Link Meeting:** ' . $this->rapat->lokasi)
             ->line('**Deskripsi:** ' . ($this->rapat->deskripsi ?? 'Tidak ada deskripsi'))
             ->action('Lihat Detail Rapat', url('/mitra/rapat/' . $this->rapat->id))
+            ->line('Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618')
             ->line('Terima kasih telah menggunakan aplikasi kami!');
     }
 
@@ -78,7 +79,7 @@ class RapatScheduled extends Notification implements ShouldQueue
     {
         return [
             'type' => 'rapat_scheduled',
-            'message' => 'Rapat dijadwalkan: ' . $this->rapat->judul,
+            'message' => 'Rapat dijadwalkan: ' . $this->rapat->judul . '. Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618',
             'rapat_id' => $this->rapat->id,
             'rapat_title' => $this->rapat->judul,
             'tanggal_waktu' => $this->rapat->tanggal_waktu,

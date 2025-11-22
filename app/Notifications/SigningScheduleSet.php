@@ -44,6 +44,7 @@ class SigningScheduleSet extends Notification
             ->line('Jadwal penandatanganan: ' . $this->rapat->signing_schedule->format('d F Y H:i'))
             ->action('Lihat Detail Rapat', url('/mitra/dashboard'))
             ->line('Silakan pastikan Anda hadir pada jadwal yang telah ditentukan.')
+            ->line('Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618')
             ->line('Terima kasih telah menggunakan sistem SI-Huyula.');
     }
 
@@ -55,7 +56,7 @@ class SigningScheduleSet extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Jadwal penandatanganan dokumen untuk rapat "' . $this->rapat->judul . '" telah ditetapkan.',
+            'message' => 'Jadwal penandatanganan dokumen untuk rapat "' . $this->rapat->judul . '" telah ditetapkan. Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618',
             'rapat_id' => $this->rapat->id,
             'title' => 'Jadwal Penandatanganan Ditentukan',
             'type' => 'signing_scheduled',

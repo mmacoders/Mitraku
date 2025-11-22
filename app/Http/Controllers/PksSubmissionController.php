@@ -92,7 +92,7 @@ class PksSubmissionController extends Controller
                 $query->whereDate('created_at', $request->date);
             }
             
-            // Get submissions with pagination
+            // Get submissions with pagination and include validity period fields
             $submissions = $query->orderBy('created_at', 'desc')->paginate(10);
             
             // Get dashboard data for admin
@@ -199,37 +199,56 @@ class PksSubmissionController extends Controller
         // Map purpose to description for backward compatibility
         $validated['description'] = $validated['purpose'];
         
-        // Create the submission with default status 'proses'
+        // Check if this is an existing PKS being added by admin with approved status
+        $isExistingPks = $request->user()->role === 'admin' && $request->input('is_existing_pks') && $request->input('status') === 'disetujui';
+        
+        // Set the status based on whether it's an existing PKS or new submission
+        $status = $isExistingPks ? 'disetujui' : 'proses';
+        
+        // For existing PKS, use the provided user_id, otherwise use the authenticated user
+        $userId = $isExistingPks && isset($validated['user_id']) ? $validated['user_id'] : $request->user()->id;
+        
+        // Create the submission
         $submission = PksSubmission::create(array_merge($validated, [
-            'user_id' => $request->user()->id,
-            'status' => 'proses',
+            'user_id' => $userId,
+            'status' => $status,
         ]));
         
-        // Create initial status history
+        // Create status history
         StatusHistory::create([
             'pks_submission_id' => $submission->id,
-            'status' => 'proses',
-            'notes' => 'Dokumen diajukan oleh mitra',
+            'status' => $status,
+            'notes' => $isExistingPks ? 'PKS yang sudah berjalan sebelum sistem ini dibuat' : 'Dokumen diajukan oleh mitra',
         ]);
         
-        // Notify admins about the new submission
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new PksSubmitted($submission));
-            // Send email notification to admins
-            $admin->notify(new AdminPksSubmissionNotification($submission));
-        }
+        // Only send notifications for new submissions, not existing PKS
+        if (!$isExistingPks) {
+            // Notify admins about the new submission
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new PksSubmitted($submission));
+                // Send email notification to admins
+                $admin->notify(new AdminPksSubmissionNotification($submission));
+            }
 
-        //Notify Send email to gmail
-        try {
-            $gmail = new GmailService();
-            $gmail->sendEmail(
-                $request->user()->email,
-                'Pengajuan PKS Diterima',
-                "Halo {$request->user()->name},\n\nPengajuan PKS Anda berhasil dikirim dan sedang diproses.\n\nTerima kasih."
-            );
-        } catch (\Exception $e) {
-            Log::error('Gagal kirim notifikasi Gmail: '.$e->getMessage());
+            //Notify Send email to gmail
+            try {
+                $gmail = new GmailService();
+                $gmail->sendEmail(
+                    $request->user()->email,
+                    'Pengajuan PKS Diterima',
+                    "Halo {$request->user()->name},\n\nPengajuan PKS Anda berhasil dikirim dan sedang diproses.\n\nTerima kasih."
+                );
+            } catch (\Exception $e) {
+                Log::error('Gagal kirim notifikasi Gmail: '.$e->getMessage());
+            }
+        }
+        
+        // For Inertia requests, return a proper response
+        if ($request->header('X-Inertia')) {
+            return back()->with([
+                'success' => 'Pengajuan PKS berhasil disimpan.'
+            ]);
         }
         
         // Redirect mitra users back to their dashboard instead of admin page

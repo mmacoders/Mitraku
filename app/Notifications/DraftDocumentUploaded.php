@@ -43,6 +43,7 @@ class DraftDocumentUploaded extends Notification
             ->line('Admin telah mengunggah draft dokumen untuk rapat "' . $this->rapat->judul . '" yang dijadwalkan pada ' . $this->rapat->tanggal_waktu->format('d F Y H:i') . '.')
             ->action('Lihat Detail Rapat', url('/mitra/dashboard'))
             ->line('Silakan login ke dashboard Anda untuk melihat dan mengunduh draft dokumen tersebut.')
+            ->line('Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618')
             ->line('Terima kasih telah menggunakan sistem SI-Huyula.');
     }
 
@@ -54,7 +55,7 @@ class DraftDocumentUploaded extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Draft dokumen untuk rapat "' . $this->rapat->judul . '" telah diunggah.',
+            'message' => 'Draft dokumen untuk rapat "' . $this->rapat->judul . '" telah diunggah. Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618',
             'rapat_id' => $this->rapat->id,
             'title' => 'Draft Dokumen Diunggah',
             'type' => 'draft_uploaded',

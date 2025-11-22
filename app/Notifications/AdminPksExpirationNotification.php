@@ -78,7 +78,7 @@ class AdminPksExpirationNotification extends Notification implements ShouldQueue
         
         return [
             'type' => 'admin_pks_expiration_notification',
-            'message' => 'PKS "' . $this->pksSubmission->title . '" milik ' . $this->pksSubmission->user->name . ' akan kedaluwarsa dalam ' . ceil(\Carbon\Carbon::now()->floatDiffInDays(\Carbon\Carbon::parse($this->pksSubmission->validity_period_end))) . ' hari.',
+            'message' => 'PKS "' . $this->pksSubmission->title . '" milik ' . $this->pksSubmission->user->name . ' akan kedaluwarsa dalam ' . ceil(\Carbon\Carbon::now()->floatDiffInDays(\Carbon\Carbon::parse($this->pksSubmission->validity_period_end))) . ' hari. Untuk menghubungi mitra, gunakan nomor: +62 821-9000-2618',
             'pks_submission_id' => $this->pksSubmission->id,
             'pks_submission_title' => $this->pksSubmission->title,
             'mitra_name' => $this->pksSubmission->user->name,

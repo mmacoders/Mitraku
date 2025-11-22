@@ -78,7 +78,7 @@ class PksExpirationNotification extends Notification implements ShouldQueue
         
         return [
             'type' => 'pks_expiration_notification',
-            'message' => 'PKS "' . $this->pksSubmission->title . '" akan kedaluwarsa dalam ' . ceil(\Carbon\Carbon::now()->floatDiffInDays(\Carbon\Carbon::parse($this->pksSubmission->validity_period_end))) . ' hari. Segera lakukan perpanjangan.',
+            'message' => 'PKS "' . $this->pksSubmission->title . '" akan kedaluwarsa dalam ' . ceil(\Carbon\Carbon::now()->floatDiffInDays(\Carbon\Carbon::parse($this->pksSubmission->validity_period_end))) . ' hari. Segera lakukan perpanjangan. Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618',
             'pks_submission_id' => $this->pksSubmission->id,
             'pks_submission_title' => $this->pksSubmission->title,
             'mitra_name' => $this->pksSubmission->user->name,

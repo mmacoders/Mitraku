@@ -177,28 +177,14 @@
           <Link
             :href="route('rapat.index')"
             :class="[
-              route().current('rapat.*') 
+              route().current('rapat.*') || route().current('kelola.rapat.merged')
                 ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
                 : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
               'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
             ]"
           >
-            <CalendarDays class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
+            <CalendarDays class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') || route().current('kelola.rapat.merged') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Kelola Rapat</span>
-          </Link>
-          
-          <!-- Pasca Rapat -->
-          <Link
-            :href="route('kelola.dokumen.pasca.rapat')"
-            :class="[
-              route().current('kelola.dokumen.pasca.rapat') 
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
-              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
-            ]"
-          >
-            <FileText class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.dokumen.pasca.rapat') ? 'text-white' : ''" />
-            <span v-if="!sidebarCollapsed" class="ml-3">Pasca Rapat</span>
           </Link>
         </nav>
         <div class="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">

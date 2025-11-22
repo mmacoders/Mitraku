@@ -20,12 +20,48 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
               <div>
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                  Semua Pengajuan PKS
+                  {{ activeTab === 'berjalan' ? 'PKS yang Berjalan' : 'Semua Pengajuan PKS' }}
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Kelola semua pengajuan PKS Anda
+                  {{ activeTab === 'berjalan' ? 'Daftar PKS yang sedang berjalan' : 'Kelola semua pengajuan PKS Anda' }}
                 </p>
               </div>
+              <button 
+                v-if="activeTab === 'berjalan'"
+                @click="openAddExistingPksModal"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 mt-4 md:mt-0"
+              >
+                <Plus class="h-4 w-4 mr-1" />
+                Tambah PKS yang Sudah Berjalan
+              </button>
+            </div>
+
+            <!-- Tabs for different views -->
+            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+              <nav class="flex space-x-8" aria-label="Tabs">
+                <button
+                  @click="activeTab = 'semua'"
+                  :class="[
+                    activeTab === 'semua' 
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                  ]"
+                >
+                  Semua Pengajuan
+                </button>
+                <button
+                  @click="activeTab = 'berjalan'"
+                  :class="[
+                    activeTab === 'berjalan' 
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                  ]"
+                >
+                  PKS yang Berjalan
+                </button>
+              </nav>
             </div>
 
             <!-- Filter and Search -->
@@ -48,7 +84,7 @@
                 </div>
               </div>
               
-              <div class="w-full sm:w-40">
+              <div class="w-full sm:w-40" v-show="activeTab !== 'berjalan'">
                 <select
                   id="status"
                   v-model="statusFilter"
@@ -220,15 +256,143 @@
       @close="closeEditModal" 
       @success="handleEditSuccess"
     />
+    
+    <!-- Add Existing PKS Modal -->
+    <Modal :show="showAddExistingPksModal" @close="closeAddExistingPksModal" max-width="md">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
+              Tambah PKS yang Sudah Berjalan
+            </h3>
+            <button @click="closeAddExistingPksModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+              <X class="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+        <form @submit.prevent="submitExistingPks">
+          <div class="px-6 py-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul PKS *</label>
+              <input
+                v-model="existingPksForm.title"
+                type="text"
+                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3 text-sm"
+                required
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Mitra *</label>
+              <select
+                v-model="existingPksForm.user_id"
+                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3 text-sm"
+                required
+              >
+                <option value="">Pilih Mitra</option>
+                <option v-for="mitra in mitraUsers" :key="mitra.id" :value="mitra.id">
+                  {{ mitra.name }}
+                </option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Mulai Berlaku *</label>
+              <input
+                v-model="existingPksForm.validity_period_start"
+                type="date"
+                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3 text-sm"
+                required
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Akhir Berlaku *</label>
+              <input
+                v-model="existingPksForm.validity_period_end"
+                type="date"
+                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3 text-sm"
+                required
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
+              <textarea
+                v-model="existingPksForm.description"
+                rows="3"
+                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm py-2 px-3 text-sm"
+              ></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen KAK (Opsional)</label>
+              <input
+                type="file"
+                @change="handleKakDocumentChange"
+                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100
+                  dark:file:bg-blue-900/30 dark:file:text-blue-300
+                  dark:hover:file:bg-blue-800/50
+                  rounded-lg border border-gray-300 dark:border-gray-600
+                  shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  dark:bg-gray-700"
+              />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Format: PDF atau DOCX. Maksimal 2MB</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen MoU (Opsional)</label>
+              <input
+                type="file"
+                @change="handleMouDocumentChange"
+                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100
+                  dark:file:bg-blue-900/30 dark:file:text-blue-300
+                  dark:hover:file:bg-blue-800/50
+                  rounded-lg border border-gray-300 dark:border-gray-600
+                  shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  dark:bg-gray-700"
+              />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Format: PDF atau DOCX. Maksimal 2MB</p>
+            </div>
+          </div>
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <button
+              @click="closeAddExistingPksModal"
+              type="button"
+              class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 active:bg-blue-700 transition ease-in-out duration-150"
+            >
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
 </template>
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import Modal from '@/Components/Modal.vue'
 import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue'
 import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue'
-import { Eye, Edit3, Trash2 } from 'lucide-vue-next'
+import { Eye, Edit3, Trash2, Plus, X } from 'lucide-vue-next'
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -241,14 +405,41 @@ const user = props.auth.user
 const searchQuery = ref('')
 const statusFilter = ref('')
 const dateFilter = ref('')
+const activeTab = ref('semua') // 'semua' or 'berjalan'
 
 // Modal state
 const showDetailModal = ref(false)
 const showEditModal = ref(false)
+const showAddExistingPksModal = ref(false)
 const selectedSubmission = ref(null)
+
+// Form data for existing PKS
+const existingPksForm = ref({
+  title: '',
+  user_id: '',
+  validity_period_start: '',
+  validity_period_end: '',
+  description: '',
+  kak_document: null,
+  mou_document: null
+})
+
+// Mitra users data
+const mitraUsers = ref([])
 
 const filteredSubmissions = computed(() => {
   let result = props.submissions.data
+  
+  // Apply tab filter for active PKS
+  if (activeTab.value === 'berjalan') {
+    result = result.filter(submission => 
+      submission.status === 'disetujui' && 
+      submission.validity_period_start && 
+      submission.validity_period_end &&
+      new Date(submission.validity_period_end) > new Date() &&
+      new Date(submission.validity_period_start) <= new Date()
+    )
+  }
   
   // Apply search filter
   if (searchQuery.value) {
@@ -257,8 +448,8 @@ const filteredSubmissions = computed(() => {
     )
   }
   
-  // Apply status filter
-  if (statusFilter.value) {
+  // Apply status filter (only when not on active tab)
+  if (statusFilter.value && activeTab.value !== 'berjalan') {
     result = result.filter(submission => submission.status === statusFilter.value)
   }
   
@@ -381,6 +572,95 @@ const openEditModal = (submission) => {
   selectedSubmission.value = submission
   showEditModal.value = true
 }
+
+// Add Existing PKS Modal functions
+const openAddExistingPksModal = () => {
+  showAddExistingPksModal.value = true
+}
+
+const closeAddExistingPksModal = () => {
+  showAddExistingPksModal.value = false
+  // Reset form
+  existingPksForm.value = {
+    title: '',
+    user_id: '',
+    validity_period_start: '',
+    validity_period_end: '',
+    description: '',
+    kak_document: null,
+    mou_document: null
+  }
+}
+
+// Submit existing PKS form
+const submitExistingPks = () => {
+  // Validate dates
+  if (new Date(existingPksForm.value.validity_period_end) <= new Date(existingPksForm.value.validity_period_start)) {
+    alert('Tanggal akhir harus setelah tanggal mulai')
+    return
+  }
+  
+  // Submit form with file uploads
+  const formData = new FormData()
+  
+  // Add form fields
+  formData.append('title', existingPksForm.value.title)
+  formData.append('user_id', existingPksForm.value.user_id)
+  formData.append('validity_period_start', existingPksForm.value.validity_period_start)
+  formData.append('validity_period_end', existingPksForm.value.validity_period_end)
+  formData.append('description', existingPksForm.value.description || '')
+  formData.append('purpose', existingPksForm.value.description || '')
+  formData.append('status', 'disetujui')
+  formData.append('is_existing_pks', 'true')
+  
+  // Add documents if provided
+  if (existingPksForm.value.kak_document) {
+    formData.append('kak_document', existingPksForm.value.kak_document)
+  }
+  
+  if (existingPksForm.value.mou_document) {
+    formData.append('mou_document', existingPksForm.value.mou_document)
+  }
+  
+  router.post(route('pks.store'), formData, {
+    forceFormData: true,
+    onSuccess: () => {
+      closeAddExistingPksModal()
+      // Reload submissions
+      router.reload({
+        only: ['submissions']
+      })
+    },
+    onError: (errors) => {
+      console.error('Error submitting form:', errors)
+    },
+    preserveState: true,
+    preserveScroll: true
+  })
+}
+
+// Fetch mitra users
+const fetchMitraUsers = async () => {
+  try {
+    const response = await fetch(route('api.mitra.users'))
+    const data = await response.json()
+    mitraUsers.value = data
+  } catch (error) {
+    console.error('Error fetching mitra users:', error)
+  }
+}
+
+// Handle file changes
+const handleKakDocumentChange = (event) => {
+  existingPksForm.value.kak_document = event.target.files[0]
+}
+
+const handleMouDocumentChange = (event) => {
+  existingPksForm.value.mou_document = event.target.files[0]
+}
+
+// Fetch mitra users when component mounts
+fetchMitraUsers()
 
 const closeEditModal = () => {
   showEditModal.value = false

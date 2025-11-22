@@ -21,14 +21,31 @@ class PksSubmissionRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $isExistingPks = $this->input('is_existing_pks', false);
+        
+        $rules = [
             'partner_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'title' => 'required|string|max:255',
             'purpose' => 'required|string',
-            'kak_document' => 'required|file|mimes:pdf,docx|max:2048',
-            'mou_document' => 'required|file|mimes:pdf,docx|max:2048',
+            'user_id' => 'required|exists:users,id',
+            'validity_period_start' => 'required|date',
+            'validity_period_end' => 'required|date|after:validity_period_start',
+            'status' => 'sometimes|in:disetujui',
         ];
+        
+        // For new submissions, documents are required
+        // For existing PKS added by admin, documents are optional
+        if (!$isExistingPks) {
+            $rules['kak_document'] = 'required|file|mimes:pdf,docx|max:2048';
+            $rules['mou_document'] = 'required|file|mimes:pdf,docx|max:2048';
+        } else {
+            // For existing PKS, documents are optional
+            $rules['kak_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
+            $rules['mou_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
+        }
+        
+        return $rules;
     }
 
     /**
@@ -49,6 +66,12 @@ class PksSubmissionRequest extends FormRequest
             'mou_document.file' => 'File dokumen MoU tidak valid.',
             'mou_document.mimes' => 'File dokumen MoU harus berupa PDF atau DOCX.',
             'mou_document.max' => 'Ukuran file dokumen MoU tidak boleh lebih dari 2MB.',
+            'user_id.required' => 'Nama mitra harus dipilih.',
+            'user_id.exists' => 'Mitra yang dipilih tidak valid.',
+            'validity_period_start.required' => 'Tanggal mulai berlaku harus diisi.',
+            'validity_period_end.required' => 'Tanggal akhir berlaku harus diisi.',
+            'validity_period_end.after' => 'Tanggal akhir harus setelah tanggal mulai.',
+            'status.in' => 'Status tidak valid untuk PKS yang sudah berjalan.',
         ];
     }
 }

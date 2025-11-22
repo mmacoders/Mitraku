@@ -21,7 +21,7 @@ class RapatController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -31,20 +31,164 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        // Get all rapat created by this admin
-        $rapat = Rapat::with(['creator'])
-            ->where('user_id', $user->id)
-            ->latest()
-            ->paginate(10);
+        // Check if we're on the pasca rapat tab
+        $isPascaTab = $request->tab === 'pasca';
         
-        // Append document URL to each rapat
+        if ($isPascaTab) {
+            // Handle pasca rapat tab
+            return $this->handlePascaRapatTab($request, $user);
+        }
+        
+        // Build query for rapat
+        $query = Rapat::with(['creator', 'invitedMitra'])
+            ->where('user_id', $user->id);
+            
+        // Apply search filter
+        if ($request->has('search') && $request->search) {
+            $query->where('judul', 'like', '%' . $request->search . '%');
+        }
+        
+        // Apply status filter
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply date filter
+        if ($request->has('date') && $request->date) {
+            $query->whereDate('tanggal_waktu', $request->date);
+        }
+        
+        // Get paginated results
+        $rapat = $query->latest()->paginate(10);
+        
+        // Append document URLs
         $rapat->getCollection()->each(function ($item) {
             $item->append('pks_document_url');
             $item->append('draft_document_url');
             $item->append('signed_document_url');
         });
         
-        // Get all mitra users for invitation in the modal
+        // Get all mitra users for invitation
+        $mitraUsers = User::where('role', 'mitra')
+            ->select('id', 'name', 'company')
+            ->get();
+            
+        // Get PKS submissions that need meetings
+        $pksSubmissions = PksSubmission::where('status', 'proses')
+            ->with('user')
+            ->get();
+            
+        // Also get pasca rapat data for the second tab
+        $pascaQuery = Rapat::with(['creator'])
+            ->where('user_id', $user->id)
+            ->where('status', 'selesai');
+            
+        // Apply search filter for pasca rapat
+        if ($request->has('search_pasca') && $request->search_pasca) {
+            $pascaQuery->where('judul', 'like', '%' . $request->search_pasca . '%');
+        }
+        
+        // Apply process filter for pasca rapat
+        if ($request->has('process') && $request->process) {
+            switch ($request->process) {
+                case 'draft_fix':
+                    $pascaQuery->whereNotNull('draft_document_path');
+                    break;
+                case 'signing_schedule':
+                    $pascaQuery->whereNotNull('signing_schedule');
+                    break;
+                case 'signed_document':
+                    $pascaQuery->whereNotNull('signed_document_path');
+                    break;
+            }
+        }
+        
+        $pascaRapat = $pascaQuery->latest()->paginate(10);
+        
+        // Append document URLs for pasca rapat
+        $pascaRapat->getCollection()->each(function ($item) {
+            $item->append('pks_document_url');
+            $item->append('draft_document_url');
+            $item->append('signed_document_url');
+        });
+        
+        return Inertia::render('admin/kelola-rapat/Index', [
+            'rapat' => $rapat,
+            'pascaRapat' => $pascaRapat,
+            'mitraUsers' => $mitraUsers,
+            'pksSubmissions' => $pksSubmissions,
+        ]);
+    }
+    
+    /**
+     * Handle pasca rapat tab data.
+     */
+    private function handlePascaRapatTab(Request $request, User $user)
+    {
+        // Build query for rapat with status 'selesai'
+        $query = Rapat::with(['creator'])
+            ->where('user_id', $user->id)
+            ->where('status', 'selesai');
+            
+        // Apply search filter
+        if ($request->has('search_pasca') && $request->search_pasca) {
+            $query->where('judul', 'like', '%' . $request->search_pasca . '%');
+        }
+        
+        // Apply process filter
+        if ($request->has('process') && $request->process) {
+            switch ($request->process) {
+                case 'draft_fix':
+                    $query->whereNotNull('draft_document_path');
+                    break;
+                case 'signing_schedule':
+                    $query->whereNotNull('signing_schedule');
+                    break;
+                case 'signed_document':
+                    $query->whereNotNull('signed_document_path');
+                    break;
+            }
+        }
+        
+        // Get paginated results
+        $pascaRapat = $query->latest()->paginate(10);
+        
+        // Append document URLs
+        $pascaRapat->getCollection()->each(function ($item) {
+            $item->append('pks_document_url');
+            $item->append('draft_document_url');
+            $item->append('signed_document_url');
+        });
+        
+        // Also get jadwal rapat data for the first tab
+        $jadwalQuery = Rapat::with(['creator', 'invitedMitra'])
+            ->where('user_id', $user->id);
+            
+        // Apply search filter for jadwal rapat
+        if ($request->has('search') && $request->search) {
+            $jadwalQuery->where('judul', 'like', '%' . $request->search . '%');
+        }
+        
+        // Apply status filter for jadwal rapat
+        if ($request->has('status') && $request->status) {
+            $jadwalQuery->where('status', $request->status);
+        }
+        
+        // Apply date filter for jadwal rapat
+        if ($request->has('date') && $request->date) {
+            $jadwalQuery->whereDate('tanggal_waktu', $request->date);
+        }
+        
+        $rapat = $jadwalQuery->latest()->paginate(10);
+        
+        // Append document URLs for jadwal rapat
+        $rapat->getCollection()->each(function ($item) {
+            $item->append('pks_document_url');
+            $item->append('draft_document_url');
+            $item->append('signed_document_url');
+        });
+        
+        // Get all mitra users for invitation
         $mitraUsers = User::where('role', 'mitra')
             ->select('id', 'name', 'company')
             ->get();
@@ -56,6 +200,7 @@ class RapatController extends Controller
         
         return Inertia::render('admin/kelola-rapat/Index', [
             'rapat' => $rapat,
+            'pascaRapat' => $pascaRapat,
             'mitraUsers' => $mitraUsers,
             'pksSubmissions' => $pksSubmissions,
         ]);
@@ -549,5 +694,61 @@ class RapatController extends Controller
         }
         
         return redirect()->back()->with('error', 'Gagal mengunggah dokumen yang ditandatangani.');
+    }
+    
+    /**
+     * Delete draft document for a completed meeting.
+     */
+    public function deleteDraftDocument(Rapat $rapat)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow the creator (admin) to delete draft document
+        if ($rapat->user_id !== $user->id) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Delete draft document if exists
+        if ($rapat->draft_document_path) {
+            Storage::disk('public')->delete($rapat->draft_document_path);
+            
+            // Update the rapat
+            $rapat->update([
+                'draft_document_path' => null,
+            ]);
+            
+            return redirect()->back()->with('success', 'Draft dokumen berhasil dihapus.');
+        }
+        
+        return redirect()->back()->with('error', 'Tidak ada draft dokumen untuk dihapus.');
+    }
+    
+    /**
+     * Delete signed document for a completed meeting.
+     */
+    public function deleteSignedDocument(Rapat $rapat)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // Only allow the creator (admin) to delete signed document
+        if ($rapat->user_id !== $user->id) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Delete signed document if exists
+        if ($rapat->signed_document_path) {
+            Storage::disk('public')->delete($rapat->signed_document_path);
+            
+            // Update the rapat
+            $rapat->update([
+                'signed_document_path' => null,
+            ]);
+            
+            return redirect()->back()->with('success', 'Dokumen yang ditandatangani berhasil dihapus.');
+        }
+        
+        return redirect()->back()->with('error', 'Tidak ada dokumen yang ditandatangani untuk dihapus.');
     }
 }

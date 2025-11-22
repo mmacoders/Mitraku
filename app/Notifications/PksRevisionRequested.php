@@ -43,7 +43,7 @@ class PksRevisionRequested extends Notification
     {
         return [
             'type' => 'pks_revision_requested',
-            'message' => 'Revisi diminta untuk pengajuan PKS: ' . $this->pksSubmission->title,
+            'message' => 'Revisi diminta untuk pengajuan PKS: ' . $this->pksSubmission->title . '. Untuk informasi lebih lanjut, hubungi nomor: +62 821-9000-2618',
             'pks_submission_id' => $this->pksSubmission->id,
             'pks_submission_title' => $this->pksSubmission->title,
             'revision_notes' => $this->revisionNotes,
