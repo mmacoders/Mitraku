@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import MitraLayout from '@/Layouts/MitraLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Camera, User as UserIcon, Mail, Phone, Building, Lock, Save } from 'lucide-vue-next';
@@ -17,6 +18,7 @@ const isMitra = computed(() => user.role === 'mitra');
 
 // Forms for profile information and password update
 const profileForm = useForm({
+    _method: 'PATCH',
     name: user.name,
     email: user.email,
     phone: user.phone || '',
@@ -53,12 +55,14 @@ const handleAvatarChange = (event: Event) => {
 
 // Submit profile update
 const updateProfile = () => {
-    profileForm.patch(route('profile.update'), {
+    profileForm.post(route('profile.update'), {
         forceFormData: true,
         onSuccess: () => {
             // Reset avatar state after successful update
             avatarFile.value = null;
             avatarPreview.value = null;
+            // Reset _method to PATCH just in case (though it shouldn't change)
+            profileForm._method = 'PATCH'; 
         },
         onError: () => {
             console.error('Failed to update profile');
@@ -83,8 +87,8 @@ const updatePassword = () => {
 <template>
     <Head title="Edit Profil Anda" />
     
-    <AdminLayout>
-        <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6">
+    <component :is="isMitra ? MitraLayout : AdminLayout">
+        <div class="min-h-screen py-8 px-4 sm:px-6" :class="!isMitra ? 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800' : ''">
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-col lg:flex-row gap-8">
                     <!-- Profile Information Section -->
@@ -346,5 +350,5 @@ const updatePassword = () => {
                 </div>
             </div>
         </div>
-    </AdminLayout>
+    </component>
 </template>
