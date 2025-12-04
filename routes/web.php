@@ -173,6 +173,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->where('path', '.*')->name('pks.documents.serve');
     
     // PKS Submission Routes
+    Route::get('/pks', function () {
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('kelola.pks');
+        }
+        return redirect()->route('mitra.dashboard');
+    })->name('pks.index.redirect');
+
     Route::get('/pks/create', [PksSubmissionController::class, 'create'])->name('pks.create');
     Route::post('/pks', [PksSubmissionController::class, 'store'])->name('pks.store');
     Route::get('/pks/{pksSubmission}', [PksSubmissionController::class, 'show'])->name('pks.show');

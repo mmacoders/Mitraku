@@ -28,9 +28,9 @@ class PksSubmissionRequest extends FormRequest
             'phone' => 'nullable|string|max:20',
             'title' => 'required|string|max:255',
             'purpose' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'validity_period_start' => 'required|date',
-            'validity_period_end' => 'required|date|after:validity_period_start',
+            'user_id' => $isExistingPks ? 'required|exists:users,id' : 'nullable',
+            'validity_period_start' => $isExistingPks ? 'required|date' : 'nullable',
+            'validity_period_end' => $isExistingPks ? 'required|date|after:validity_period_start' : 'nullable',
             'status' => 'sometimes|in:disetujui',
         ];
         
