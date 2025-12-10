@@ -40,7 +40,7 @@ class RapatController extends Controller
         }
         
         // Build query for rapat
-        $query = Rapat::with(['creator', 'invitedMitra'])
+        $query = Rapat::with(['creator', 'invitedMitra', 'pksSubmission'])
             ->where('user_id', $user->id);
             
         // Apply search filter
@@ -79,7 +79,7 @@ class RapatController extends Controller
             ->get();
             
         // Also get pasca rapat data for the second tab
-        $pascaQuery = Rapat::with(['creator'])
+        $pascaQuery = Rapat::with(['creator', 'pksSubmission'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -126,7 +126,7 @@ class RapatController extends Controller
     private function handlePascaRapatTab(Request $request, User $user)
     {
         // Build query for rapat with status 'selesai'
-        $query = Rapat::with(['creator'])
+        $query = Rapat::with(['creator', 'pksSubmission'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -161,7 +161,7 @@ class RapatController extends Controller
         });
         
         // Also get jadwal rapat data for the first tab
-        $jadwalQuery = Rapat::with(['creator', 'invitedMitra'])
+        $jadwalQuery = Rapat::with(['creator', 'invitedMitra', 'pksSubmission'])
             ->where('user_id', $user->id);
             
         // Apply search filter for jadwal rapat
@@ -220,7 +220,7 @@ class RapatController extends Controller
         }
         
         // Build query for rapat with status 'selesai'
-        $query = Rapat::with(['creator'])
+        $query = Rapat::with(['creator', 'pksSubmission'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -383,7 +383,7 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        $rapat->load(['creator', 'invitedMitra']);
+        $rapat->load(['creator', 'invitedMitra', 'pksSubmission']);
         $rapat->append('pks_document_url');
         $rapat->append('draft_document_url');
         $rapat->append('signed_document_url');

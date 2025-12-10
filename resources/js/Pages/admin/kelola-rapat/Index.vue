@@ -235,7 +235,7 @@
               <!-- Pagination -->
               <div class="mt-6 flex justify-between items-center">
                 <div class="text-sm text-gray-700 dark:text-gray-300">
-                  Menampilkan <span class="font-medium">{{ rapat.from }}</span> sampai <span class="font-medium">{{ rapat.to }}</span> dari <span class="font-medium">{{ rapat.total }}</span> hasil
+                  Menampilkan <span class="font-medium">{{ rapat.from }}</span> dari <span class="font-medium">{{ rapat.total }}</span> jadwal rapat
                 </div>
                 <div class="flex space-x-2">
                   <Link
@@ -302,6 +302,9 @@
                         Judul Rapat
                       </th>
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        PKS Terkait
+                      </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Tanggal Rapat
                       </th>
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -324,6 +327,9 @@
                         <div class="text-sm font-medium text-gray-900 dark:text-white">
                           {{ rapat.judul }}
                         </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ rapat.pks_submission?.title || '-' }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ formatDate(rapat.tanggal_waktu) }}
@@ -654,14 +660,20 @@ const applyPascaFilters = () => {
 // Delete rapat
 const deleteRapat = (id) => {
   if (confirm('Apakah Anda yakin ingin menghapus rapat ini?')) {
-    router.delete(route('rapat.destroy', id));
+    // Use POST with _method spoofing to avoid preflight issues on some hosting environments
+    router.post(route('rapat.destroy', id), {
+      _method: 'delete'
+    });
   }
 };
 
 // Delete draft document
 const deleteDraftDocument = (rapat) => {
   if (confirm('Apakah Anda yakin ingin menghapus draft dokumen ini?')) {
-    router.delete(route('rapat.deleteDraftDocument', rapat?.id), {
+    // Use POST with _method spoofing
+    router.post(route('rapat.deleteDraftDocument', rapat?.id), {
+      _method: 'delete'
+    }, {
       onSuccess: () => {
         router.reload({
           only: ['pascaRapat'],
@@ -676,7 +688,10 @@ const deleteDraftDocument = (rapat) => {
 // Delete signed document
 const deleteSignedDocument = (rapat) => {
   if (confirm('Apakah Anda yakin ingin menghapus dokumen yang ditandatangani ini?')) {
-    router.delete(route('rapat.deleteSignedDocument', rapat?.id), {
+    // Use POST with _method spoofing
+    router.post(route('rapat.deleteSignedDocument', rapat?.id), {
+      _method: 'delete'
+    }, {
       onSuccess: () => {
         router.reload({
           only: ['pascaRapat'],

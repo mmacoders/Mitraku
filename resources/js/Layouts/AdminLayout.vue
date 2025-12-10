@@ -40,7 +40,7 @@
               ]"
             >
               <FileText class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.pks') || route().current('pks.*') ? 'text-white' : ''" />
-              <span>Kelola Pengajuan PKS</span>
+              <span>Kelola PKS</span>
             </Link>
             <Link
               :href="route('kelola.mitra')"
@@ -66,18 +66,7 @@
               <CalendarDays class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('rapat.*') ? 'text-white' : ''" />
               <span>Kelola Rapat</span>
             </Link>
-            <Link
-              :href="route('kelola.dokumen.pasca.rapat')"
-              :class="[
-                route().current('kelola.dokumen.pasca.rapat') 
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
-                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
-              ]"
-            >
-              <FileText class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.dokumen.pasca.rapat') ? 'text-white' : ''" />
-              <span>Pasca Rapat</span>
-            </Link>
+
           </nav>
         </div>
         <div class="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">

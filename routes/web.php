@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -65,10 +66,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('api.notifications');
     Route::post('/api/notifications/{id}/read', [PksSubmissionController::class, 'markNotificationAsRead'])
         ->name('api.notifications.read');
+        
+    // Mitra API routes
+    Route::get('/api/mitra-users', [MitraController::class, 'getMitraUsers'])
+        ->name('api.mitra.users');
     
     // Mitra management routes
     Route::post('/admin/mitra', [MitraController::class, 'store'])->name('mitra.store');
-    Route::put('/admin/mitra/{mitra}', [MitraController::class, 'update'])->name('mitra.update');
+    Route::post('/admin/mitra/{mitra}', [MitraController::class, 'update'])->name('mitra.update');
     Route::delete('/admin/mitra/{mitra}', [MitraController::class, 'destroy'])->name('mitra.destroy');
 });
 
@@ -79,13 +84,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/kelola-rapat', [RapatController::class, 'store'])->name('rapat.store');
     Route::get('/admin/kelola-rapat/{rapat}', [RapatController::class, 'show'])->name('rapat.show');
     Route::get('/admin/kelola-rapat/{rapat}/edit', [RapatController::class, 'edit'])->name('rapat.edit');
-    Route::put('/admin/kelola-rapat/{rapat}', [RapatController::class, 'update'])->name('rapat.update');
+    Route::post('/admin/kelola-rapat/{rapat}', [RapatController::class, 'update'])->name('rapat.update');
     Route::delete('/admin/kelola-rapat/{rapat}', [RapatController::class, 'destroy'])->name('rapat.destroy');
     
     // Post-meeting document handling routes
     Route::post('/admin/kelola-rapat/{rapat}/upload-draft', [RapatController::class, 'uploadDraftDocument'])->name('rapat.uploadDraftDocument');
     Route::post('/admin/kelola-rapat/{rapat}/set-signing-schedule', [RapatController::class, 'setSigningSchedule'])->name('rapat.setSigningSchedule');
-    Route::post('/admin/kelola-rapat/{rapat}/upload-signed', [RapatController::class, 'uploadSignedDocument'])->name('rapat.uploadSignedDocument');
+    Route::post('/admin/kelola-rapat/{rapat}/upload -signed', [RapatController::class, 'uploadSignedDocument'])->name('rapat.uploadSignedDocument');
     
     // Document deletion routes
     Route::delete('/admin/kelola-rapat/{rapat}/delete-draft', [RapatController::class, 'deleteDraftDocument'])->name('rapat.deleteDraftDocument');
@@ -184,8 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pks', [PksSubmissionController::class, 'store'])->name('pks.store');
     Route::get('/pks/{pksSubmission}', [PksSubmissionController::class, 'show'])->name('pks.show');
     Route::get('/pks/{pksSubmission}/edit', [PksSubmissionController::class, 'edit'])->name('pks.edit');
-    Route::put('/pks/{pksSubmission}', [PksSubmissionController::class, 'update'])->name('pks.update');
-    Route::put('/pks/{pksSubmission}/status', [PksSubmissionController::class, 'updateStatus'])->name('pks.updateStatus');
+    Route::post('/pks/{pksSubmission}', [PksSubmissionController::class, 'update'])->name('pks.update');
+    Route::post('/pks/{pksSubmission}/status', [PksSubmissionController::class, 'updateStatus'])->name('pks.updateStatus');
     Route::delete('/pks/{pksSubmission}', [PksSubmissionController::class, 'destroy'])->name('pks.destroy');
     
     // Mitra PKS Submission Detail Route
@@ -195,6 +200,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pks/modal-demo', function () {
         return Inertia::render('admin/kelola-pks/ModalDemo');
     })->name('pks.modal-demo');
+});
+
+// Temporary route to clear cache on shared hosting
+Route::get('/fix-routes', function() {
+    $exitCode = Artisan::call('route:clear');
+    $exitCode .= Artisan::call('config:clear');
+    $exitCode .= Artisan::call('cache:clear');
+    $exitCode .= Artisan::call('view:clear');
+    $exitCode .= Artisan::call('optimize:clear');
+    return 'Routes, Config, Cache, View, and Optimize cleared! Exit Code: ' . $exitCode;
 });
 
 require __DIR__.'/auth.php';

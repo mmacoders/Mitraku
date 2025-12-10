@@ -172,11 +172,11 @@
             >
               <option value="">Pilih pengajuan PKS (opsional)</option>
               <option
-                v-for="submission in pksSubmissions"
+                v-for="submission in filteredPksSubmissions"
                 :key="submission.id"
                 :value="submission.id"
               >
-                {{ submission.title }} - {{ submission.user.name }}
+                {{ submission.title }}
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.pks_submission_id" />
@@ -359,26 +359,36 @@ const selectedMitraNames = computed(() => {
     .map(mitra => mitra.name)
 })
 
-// Toggle mitra selection
+// Filter PKS submissions based on selected mitra
+const filteredPksSubmissions = computed(() => {
+  if (!props.pksSubmissions) return []
+  
+  if (form.invited_mitra.length === 0) {
+    return []
+  }
+  
+  const selectedMitraId = form.invited_mitra[0]
+  
+  return props.pksSubmissions.filter(submission => submission.user.id === selectedMitraId)
+})
+
+// Toggle mitra selection (Enforce Single Selection)
 const toggleMitraSelection = (mitraId: number) => {
-  const index = form.invited_mitra.indexOf(mitraId)
-  if (index > -1) {
-    form.invited_mitra.splice(index, 1)
+  // If clicked one is already selected, deselect it
+  if (form.invited_mitra.includes(mitraId)) {
+    form.invited_mitra = []
+    form.pks_submission_id = '' // Reset PKS when mitra removed
   } else {
-    form.invited_mitra.push(mitraId)
+    // Select the new one (replacing any existing)
+    form.invited_mitra = [mitraId]
+    form.pks_submission_id = '' // Reset PKS when mitra changes
   }
 }
 
 // Remove mitra from selection
 const removeMitra = (index: number) => {
-  const mitraId = form.invited_mitra[index]
-  form.invited_mitra.splice(index, 1)
-  
-  // Also update the UI selection if needed
-  const checkbox = document.querySelector(`input[type="checkbox"][value="${mitraId}"]`) as HTMLInputElement
-  if (checkbox) {
-    checkbox.checked = false
-  }
+  form.invited_mitra = []
+  form.pks_submission_id = ''
 }
 
 // Format date for datetime-local input
@@ -484,7 +494,7 @@ const getFileNameFromUrl = (url: string) => {
 const submit = () => {
   if (!props.rapat) return
   
-  form.put(route('rapat.update', props.rapat.id), {
+  form.post(route('rapat.update', props.rapat.id), {
     onSuccess: () => {
       emit('updated')
       closeModal()

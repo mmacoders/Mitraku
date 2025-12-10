@@ -43,7 +43,6 @@
                       <option value="">Pilih Status</option>
                       <option value="disetujui">Disetujui</option>
                       <option value="ditolak">Ditolak</option>
-                      <!-- Removed 'revisi' option -->
                     </select>
                   </div>
                   
@@ -73,8 +72,6 @@
                       />
                     </div>
                   </div>
-                  
-                  <!-- Removed revision notes section -->
                 </div>
                 
                 <div class="mt-8 flex gap-3">
@@ -141,7 +138,6 @@ const emit = defineEmits(['close', 'success'])
 // Form data
 const formData = ref({
   status: '',
-  // Removed notes field
   validityPeriodStart: '',
   validityPeriodEnd: ''
 })
@@ -166,7 +162,6 @@ watch(() => props.show, (newValue) => {
   if (newValue) {
     // Reset form when modal opens
     formData.value.status = ''
-    // Removed notes reset
     formData.value.validityPeriodStart = ''
     formData.value.validityPeriodEnd = ''
     isProcessing.value = false
@@ -186,7 +181,6 @@ const updateStatus = () => {
   // Prepare data for submission
   const data = {
     status: formData.value.status
-    // Removed revision_notes
   }
   
   // Add validity period data if status is disetujui
@@ -196,7 +190,7 @@ const updateStatus = () => {
   }
   
   // Actual implementation to update status
-  router.put(route('pks.updateStatus', props.submission.id), data, {
+  router.post(route('pks.updateStatus', props.submission.id), data, {
     onSuccess: (response) => {
       isProcessing.value = false
       emit('success')

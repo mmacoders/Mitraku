@@ -119,6 +119,15 @@ class PksSubmissionController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
             
+        // Get upcoming meetings for the mitra
+        $upcomingMeetings = Rapat::whereHas('invitedMitra', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->where('status', 'akan_datang')
+            ->where('tanggal_waktu', '>=', now())
+            ->orderBy('tanggal_waktu', 'asc')
+            ->get();
+            
         // Get statistics for mitra dashboard
         $totalSubmissions = PksSubmission::where('user_id', $user->id)->count();
         $approvedSubmissions = PksSubmission::where('user_id', $user->id)->where('status', 'disetujui')->count();
@@ -147,6 +156,10 @@ class PksSubmissionController extends Controller
                 $responseData['statistics'] = $statistics;
             }
             
+            if (in_array('upcomingMeetings', $partialData)) {
+                $responseData['upcomingMeetings'] = $upcomingMeetings;
+            }
+            
             // If this is a partial reload but no specific data is requested, 
             // or if submissions/statistics are requested, return the data
             if (!empty($responseData)) {
@@ -157,7 +170,8 @@ class PksSubmissionController extends Controller
         // Full render
         return Inertia::render('mitra/Dashboard', [
             'submissions' => $submissions,
-            'statistics' => $statistics
+            'statistics' => $statistics,
+            'upcomingMeetings' => $upcomingMeetings
         ]);
     }
     

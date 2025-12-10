@@ -417,7 +417,7 @@ const formatDate = (dateString: string) => {
                 </div>
               </div>
               <div v-if="recentActivities.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
-                Tidak ada aktivitas terbaru. Jika Anda seharusnya melihat aktivitas di sini, coba refresh halaman atau periksa apakah ada notifikasi baru.
+                Tidak ada aktivitas terbaru. Anda seharusnya melihat aktivitas di sini, coba refresh halaman atau periksa apakah ada notifikasi baru.
               </div>
             </div>
           </div>

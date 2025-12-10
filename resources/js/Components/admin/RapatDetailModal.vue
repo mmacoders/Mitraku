@@ -39,6 +39,21 @@
             </div>
           </div>
 
+          <!-- Judul PKS Terkait Card -->
+          <div v-if="rapat?.pks_submission" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                <FileText class="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div class="ml-3 flex-1">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Judul PKS Terkait</p>
+                <p class="text-base text-gray-900 dark:text-gray-100 mt-1">
+                  {{ rapat.pks_submission.title }}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <!-- Status Card -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-start">

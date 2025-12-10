@@ -172,11 +172,11 @@
             >
               <option value="">Pilih pengajuan PKS (opsional)</option>
               <option
-                v-for="submission in pksSubmissions"
+                v-for="submission in filteredPksSubmissions"
                 :key="submission.id"
                 :value="submission.id"
               >
-                {{ submission.title }} - {{ submission.user.name }}
+                {{ submission.title }}
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.pks_submission_id" />
@@ -184,7 +184,7 @@
 
           <!-- Upload Dokumen PKS -->
           <div>
-            <InputLabel for="pks_document" value="Upload Dokumen PKS" />
+            <InputLabel for="pks_document" value="Upload Dokumen Pembasahan Rapat" />
             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-md">
               <div class="space-y-1 text-center">
                 <div v-if="!form.pks_document" class="flex text-sm text-gray-600 dark:text-gray-400">
@@ -269,7 +269,7 @@ const props = defineProps({
   onClose: Function,
   onCreate: Function,
   availableMitra: Array,
-  pksSubmissions: Array as () => Array<{id: number, title: string, user: {name: string}}>
+  pksSubmissions: Array as () => Array<{id: number, title: string, user: {id: number, name: string}}>
 })
 
 const emit = defineEmits(['created'])
@@ -309,26 +309,42 @@ const selectedMitraNames = computed(() => {
     .map(mitra => mitra.name)
 })
 
-// Toggle mitra selection
+// Filter PKS submissions based on selected mitra
+const filteredPksSubmissions = computed(() => {
+  if (!props.pksSubmissions) return []
+  
+  // If no mitra is selected, show all (or none? User said "pks yang diajukan malah muncul juga pks oleh mitra lain", usually implies filtering by selected)
+  // Let's show none or all? If I invite a partner, I only want to see THEIR submissions.
+  // If I haven't selected a partner, maybe I shouldn't see any, or see all. 
+  // Given the request, "pilih mitra -> pks sesuai", I'll filter by selected mitra.
+  
+  if (form.invited_mitra.length === 0) {
+    return [] // Don't show any if no partner selected, or maybe return props.pksSubmissions if that's preferred. But "sesuai dengan yang diajukan" implies strict filtering.
+  }
+  
+  const selectedMitraId = form.invited_mitra[0]
+  
+  // Note: pksSubmissions prop structure has user object
+  return props.pksSubmissions.filter(submission => submission.user.id === selectedMitraId)
+})
+
+// Toggle mitra selection (Enforce Single Selection)
 const toggleMitraSelection = (mitraId: number) => {
-  const index = form.invited_mitra.indexOf(mitraId)
-  if (index > -1) {
-    form.invited_mitra.splice(index, 1)
+  // If clicked one is already selected, deselect it
+  if (form.invited_mitra.includes(mitraId)) {
+    form.invited_mitra = []
+    form.pks_submission_id = '' // Reset PKS selection when partner is removed
   } else {
-    form.invited_mitra.push(mitraId)
+    // Select the new one (replacing any existing)
+    form.invited_mitra = [mitraId]
+    form.pks_submission_id = '' // Reset PKS selection when partner changes
   }
 }
 
 // Remove mitra from selection
 const removeMitra = (index: number) => {
-  const mitraId = form.invited_mitra[index]
-  form.invited_mitra.splice(index, 1)
-  
-  // Also update the UI selection if needed
-  const checkbox = document.querySelector(`input[type="checkbox"][value="${mitraId}"]`) as HTMLInputElement
-  if (checkbox) {
-    checkbox.checked = false
-  }
+  form.invited_mitra = []
+  form.pks_submission_id = ''
 }
 
 // Handle file change
