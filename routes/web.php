@@ -184,6 +184,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
         return redirect()->route('mitra.dashboard');
     })->name('pks.index.redirect');
+    
+    // Export PDF route
+    Route::get('/admin/pks/export-pdf', [PksSubmissionController::class, 'exportPdf'])->name('pks.export-pdf');
 
     Route::get('/pks/create', [PksSubmissionController::class, 'create'])->name('pks.create');
     Route::post('/pks', [PksSubmissionController::class, 'store'])->name('pks.store');

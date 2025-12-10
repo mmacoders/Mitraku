@@ -34,6 +34,16 @@
                 <Plus class="h-4 w-4 mr-1" />
                 Tambah PKS yang Sudah Berjalan
               </button>
+              
+              <a
+                v-if="user.role === 'admin'"
+                :href="getPdfExportUrl()"
+                target="_blank"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 mt-4 md:mt-0 md:ml-3"
+              >
+                <Download class="h-4 w-4 mr-1" />
+                Export PDF
+              </a>
             </div>
 
             <!-- Tabs for different views -->
@@ -392,7 +402,7 @@ import { ref, computed } from 'vue'
 import Modal from '@/Components/Modal.vue'
 import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue'
 import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue'
-import { Eye, Edit3, Trash2, Plus, X } from 'lucide-vue-next'
+import { Eye, Edit3, Trash2, Plus, X, Download } from 'lucide-vue-next'
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -657,6 +667,22 @@ const handleKakDocumentChange = (event) => {
 
 const handleMouDocumentChange = (event) => {
   existingPksForm.value.mou_document = event.target.files[0]
+}
+
+// Get PDF Export URL with current filters
+const getPdfExportUrl = () => {
+  const params = new URLSearchParams()
+  
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value && activeTab.value !== 'berjalan') params.append('status', statusFilter.value)
+  if (dateFilter.value) params.append('date', dateFilter.value)
+  
+  // If active tab is 'berjalan', we might want to filter by valid period in backend too, 
+  // but for now let's just export what's visible or all if 'semua'
+  // Actually, filtering logic in frontend is complex. 
+  // For 'berjalan', we rely on standard filters passed to backend.
+  
+  return route('pks.export-pdf') + '?' + params.toString()
 }
 
 // Fetch mitra users when component mounts

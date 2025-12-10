@@ -17,6 +17,7 @@ use App\Services\GmailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\Rapat;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PksSubmissionController extends Controller
 {
@@ -525,6 +526,47 @@ class PksSubmissionController extends Controller
         return response()->json([
             'statistics' => $statistics
         ]);
+    }
+    
+    /**
+     * Export PKS submissions to PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->role !== 'admin') {
+            abort(403);
+        }
+        
+        $query = PksSubmission::with(['user']);
+        
+        // Use the same filters as index
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+        
+        $submissions = $query->orderBy('created_at', 'desc')->get();
+        
+        $pdf = Pdf::loadView('pdf.laporan-pks', compact('submissions'))
+            ->setPaper('a4', 'landscape');
+            
+        return $pdf->download('laporan-pks-' . now()->format('Y-m-d') . '.pdf');
     }
     
     /**
