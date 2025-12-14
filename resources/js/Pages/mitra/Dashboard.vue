@@ -163,8 +163,9 @@
                           </div>
                         </div>
                       </Link>
-                      <!-- Delete button for 'proses' status submissions -->
-                      <div v-if="submission.status === 'proses'" class="mt-2 flex justify-end">
+                      <!-- Actions for 'proses' status submissions -->
+                      <div v-if="submission.status === 'proses'" class="mt-2 flex justify-end gap-2">
+
                         <button
                           @click="deleteSubmission(submission)"
                           class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-800/50 transition-colors duration-200"
@@ -429,6 +430,8 @@
     @close="closeCreatePksModal" 
   />
   
+
+  
   <!-- Delete Confirmation Modal -->
   <Modal :show="showDeleteConfirmation" @close="cancelDelete">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
@@ -514,6 +517,7 @@ import {
 import StatusBadge from '@/Components/StatusBadge.vue'
 import CreatePksSubmissionModal from '@/Components/mitra/CreatePksSubmissionModal.vue'
 
+
 // Props
 const props = defineProps({
   submissions: Object,
@@ -541,6 +545,7 @@ const profilePicture = computed(() => {
 const showMeetingDetail = ref(false)
 const selectedMeeting = ref(null)
 const showCreatePksModal = ref(false)
+
 const dropdownOpen = ref(false)
 const showDeleteConfirmation = ref(false)
 const submissionToDelete = ref(null)
@@ -680,6 +685,8 @@ const cancelDelete = () => {
   showDeleteConfirmation.value = false
   submissionToDelete.value = null
 }
+
+
 
 // Fetch notifications periodically
 onMounted(() => {

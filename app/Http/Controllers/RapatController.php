@@ -689,8 +689,39 @@ class RapatController extends Controller
             $rapat->update([
                 'signed_document_path' => $signedDocumentPath,
             ]);
+
+            // Synchronize with PKS Submission
+            if ($rapat->pks_submission_id) {
+                $pksSubmission = PksSubmission::find($rapat->pks_submission_id);
+                if ($pksSubmission) {
+                    $oldStatus = $pksSubmission->status;
+                    
+                    // Update PKS Submission details
+                    // We associate the same document path and set default validity if missing
+                    $pksSubmission->update([
+                        'status' => 'disetujui',
+                        'final_document_path' => $signedDocumentPath,
+                        // Set default validity to 1 year from now if not already set, to prevent data incompleteness
+                        'validity_period_start' => $pksSubmission->validity_period_start ?? now(),
+                        'validity_period_end' => $pksSubmission->validity_period_end ?? now()->addYear(),
+                    ]);
+
+                    // Add entry to Status History
+                    \App\Models\StatusHistory::create([
+                        'pks_submission_id' => $pksSubmission->id,
+                        'status' => 'disetujui',
+                        'notes' => 'Status otomatis disetujui setelah dokumen final diunggah melalui menu Rapat',
+                    ]);
+
+                    // Send notification to Mitra if status changed
+                    if ($oldStatus !== 'disetujui') {
+                         $mitra = $pksSubmission->user;
+                         $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'disetujui'));
+                    }
+                }
+            }
             
-            return redirect()->back()->with('success', 'Dokumen yang ditandatangani berhasil diunggah.');
+            return redirect()->back()->with('success', 'Dokumen yang ditandatangani berhasil diunggah. Status PKS otomatis diperbarui menjadi Disetujui.');
         }
         
         return redirect()->back()->with('error', 'Gagal mengunggah dokumen yang ditandatangani.');

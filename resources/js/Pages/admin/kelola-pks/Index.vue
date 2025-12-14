@@ -203,13 +203,6 @@
                           <Eye class="w-4 h-4" /> 
                         </button>
                         <button
-                          v-if="canEditSubmission(submission)"
-                          @click="openEditModal(submission)"
-                          class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 p-1"
-                        >
-                          <Edit3 class="w-4 h-4" />
-                        </button>
-                        <button
                           v-if="canDeleteSubmission(submission)"
                           @click="deleteSubmission(submission.id)"
                           class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1"
@@ -259,13 +252,6 @@
       @close="closeDetailModal" 
     />
     
-    <!-- PKS Submission Edit Modal -->
-    <EditPksStatusModal 
-      :show="showEditModal" 
-      :submission="selectedSubmission" 
-      @close="closeEditModal" 
-      @success="handleEditSuccess"
-    />
     
     <!-- Add Existing PKS Modal -->
     <Modal :show="showAddExistingPksModal" @close="closeAddExistingPksModal" max-width="md">
@@ -401,7 +387,6 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import Modal from '@/Components/Modal.vue'
 import PksSubmissionDetailModal from '@/Components/admin/PksSubmissionDetailModal.vue'
-import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue'
 import { Eye, Edit3, Trash2, Plus, X, Download } from 'lucide-vue-next'
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -419,7 +404,6 @@ const activeTab = ref('semua') // 'semua' or 'berjalan'
 
 // Modal state
 const showDetailModal = ref(false)
-const showEditModal = ref(false)
 const showAddExistingPksModal = ref(false)
 const selectedSubmission = ref(null)
 
@@ -546,17 +530,6 @@ const getStatusText = (status) => {
   }
 }
 
-// Check if user can edit submission
-const canEditSubmission = (submission) => {
-  if (user.role === 'mitra') {
-    // Removed revision status check
-    return false;
-  } else if (user.role === 'admin') {
-    return true
-  }
-  return false
-}
-
 // Check if user can delete submission
 const canDeleteSubmission = (submission) => {
   if (user.role === 'mitra') {
@@ -576,11 +549,6 @@ const openDetailModal = (submission) => {
 const closeDetailModal = () => {
   showDetailModal.value = false
   selectedSubmission.value = null
-}
-
-const openEditModal = (submission) => {
-  selectedSubmission.value = submission
-  showEditModal.value = true
 }
 
 // Add Existing PKS Modal functions
@@ -687,18 +655,4 @@ const getPdfExportUrl = () => {
 
 // Fetch mitra users when component mounts
 fetchMitraUsers()
-
-const closeEditModal = () => {
-  showEditModal.value = false
-  selectedSubmission.value = null
-}
-
-const handleEditSuccess = () => {
-  // Refresh the submissions data
-  router.reload({
-    only: ['submissions'],
-    preserveState: true,
-    preserveScroll: true
-  })
-}
 </script>

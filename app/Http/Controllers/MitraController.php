@@ -23,6 +23,7 @@ class MitraController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'phone' => $user->phone ?? null,
                     'company' => $user->company ?? null,
                     'pks_count' => $user->pks_submissions_count,
                     'created_at' => $user->created_at->toISOString(),

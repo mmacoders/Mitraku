@@ -25,7 +25,7 @@
     <!-- Rapat Edit Modal -->
     <EditRapatModal 
       :show="showEditModal" 
-      :on-close="closeEditModal"
+      @close="closeEditModal"
       :rapat="selectedRapat"
       :available-mitra="mitraUsers"
       :pks-submissions="pksSubmissions"
@@ -46,6 +46,14 @@
       :rapat="selectedRapat"
       @close="closeProcessModal"
       @success="handleProcessSuccess"
+    />
+    
+    <!-- PKS Status Modal -->
+    <EditPksStatusModal 
+      :show="showPksModal" 
+      :submission="selectedPksSubmission" 
+      @close="closePksModal" 
+      @success="handlePksSuccess"
     />
 
     <div class="py-6">
@@ -316,6 +324,9 @@
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Dokumen Final
                       </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Keputusan PKS
+                      </th>
                       <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Aksi
                       </th>
@@ -376,12 +387,7 @@
                               <Calendar class="h-3 w-3 mr-1" />
                               Atur
                             </button>
-                            <span 
-                              v-else
-                              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                              Tunggu Draft Fix
-                            </span>
+                            <span v-else class="text-sm text-gray-400">-</span>
                           </template>
                           <template v-else>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -433,6 +439,37 @@
                             </button>
                           </template>
                         </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <template v-if="rapat.pks_submission">
+                          <template v-if="rapat.pks_submission.status === 'proses'">
+                            <button
+                              v-if="rapat.signed_document_path"
+                              @click="openPksModal(rapat.pks_submission)"
+                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              <CheckCircle class="h-3 w-3 mr-1" />
+                              Ambil Keputusan
+                            </button>
+                            <span 
+                              v-else
+                              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            >
+                              Tunggu Dokumen Final
+                            </span>
+                          </template>
+                          <div v-else>
+                             <span 
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                              :class="getPksStatusClass(rapat.pks_submission.status)"
+                            >
+                              {{ getPksStatusText(rapat.pks_submission.status) }}
+                            </span>
+                          </div>
+                        </template>
+                        <span v-else class="text-sm text-gray-400">
+                          -
+                        </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -499,7 +536,8 @@ import RapatModal from '@/Components/admin/RapatModal.vue';
 import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
 import EditRapatModal from '@/Pages/admin/kelola-rapat/Edit.vue';
 import PostMeetingDocumentModal from '@/Components/admin/PostMeetingDocumentModal.vue';
-import { Eye, Edit3, Trash2, Upload, Calendar } from 'lucide-vue-next';
+import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue';
+import { Eye, Edit3, Trash2, Upload, Calendar, CheckCircle } from 'lucide-vue-next';
 
 const props = defineProps({
   rapat: Object,
@@ -516,7 +554,9 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDetailModal = ref(false);
 const showProcessModal = ref(false);
+const showPksModal = ref(false);
 const selectedRapat = ref(null);
+const selectedPksSubmission = ref(null);
 const currentProcessType = ref('');
 const openedMenu = ref(null);
 
@@ -735,6 +775,51 @@ const getStatusText = (status) => {
       return 'Dibatalkan';
     default:
       return status;
+  }
+};
+
+// Open PKS modal
+const openPksModal = (submission) => {
+  selectedPksSubmission.value = submission;
+  showPksModal.value = true;
+};
+
+// Close PKS modal
+const closePksModal = () => {
+  showPksModal.value = false;
+  selectedPksSubmission.value = null;
+};
+
+// Handle PKS success
+const handlePksSuccess = () => {
+  router.reload({
+    only: ['pascaRapat'],
+    preserveState: true,
+    preserveScroll: true
+  });
+};
+
+// Get PKS status class
+const getPksStatusClass = (status) => {
+  switch (status) {
+    case 'proses':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    case 'ditolak':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    case 'disetujui':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  }
+};
+
+// Get PKS status text
+const getPksStatusText = (status) => {
+  switch (status) {
+    case 'proses': return 'Proses';
+    case 'ditolak': return 'Ditolak';
+    case 'disetujui': return 'Disetujui';
+    default: return status;
   }
 };
 </script>

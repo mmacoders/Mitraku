@@ -1,5 +1,5 @@
 <template>
-  <Modal :show="show" @close="closeModal" max-width="2xl">
+  <Modal :show="show" @close="closeModal" max-width="lg">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
       <!-- Modal header -->
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -294,7 +294,6 @@ import { Eye, Trash2, X } from 'lucide-vue-next'
 
 const props = defineProps<{
   show: boolean
-  onClose: () => void
   rapat: {
     id: number
     judul: string
@@ -322,7 +321,7 @@ const props = defineProps<{
   }>
 }>()
 
-const emit = defineEmits(['updated', 'onClose'])
+const emit = defineEmits(['updated', 'close'])
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const existingDocumentUrl = ref<string | null>(null)
@@ -520,7 +519,7 @@ const closeModal = () => {
   // Reset search
   searchMitra.value = ''
   
-  // Call onClose if provided
-  props.onClose && props.onClose()
+  // Emit close event
+  emit('close')
 }
 </script>

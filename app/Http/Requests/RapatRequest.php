@@ -30,7 +30,7 @@ class RapatRequest extends FormRequest
             'status' => 'required|in:akan_datang,selesai,dibatalkan',
             'pks_document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB max
             'shouldRemoveExistingDocument' => 'nullable|boolean',
-            'pks_submission_id' => 'nullable|integer|exists:pks_submissions,id',
+            'pks_submission_id' => 'required|integer|exists:pks_submissions,id',
             'invited_mitra' => 'nullable|array',
             'invited_mitra.*' => 'integer|exists:users,id',
         ];
@@ -51,6 +51,7 @@ class RapatRequest extends FormRequest
             'pks_document.file' => 'File dokumen PKS tidak valid.',
             'pks_document.mimes' => 'File dokumen PKS harus berupa PDF, DOC, atau DOCX.',
             'pks_document.max' => 'Ukuran file dokumen PKS tidak boleh lebih dari 2MB.',
+            'pks_submission_id.required' => 'PKS terkait harus dipilih.',
             'pks_submission_id.integer' => 'ID pengajuan PKS tidak valid.',
             'pks_submission_id.exists' => 'Pengajuan PKS tidak ditemukan.',
             'invited_mitra.array' => 'Daftar mitra yang diundang tidak valid.',

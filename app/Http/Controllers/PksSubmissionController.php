@@ -300,8 +300,42 @@ class PksSubmissionController extends Controller
      */
     public function update(PksSubmissionRequest $request, PksSubmission $pksSubmission)
     {
-        // Removed revision status check - no longer allow updating
-        return redirect()->back()->with('error', 'Dokumen ini tidak dapat diperbarui.');
+        // Ensure Mitra can only update their own submission
+        if ($request->user()->role === 'mitra' && $pksSubmission->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validated();
+        
+        // Update basic fields
+        $pksSubmission->title = $validated['title'];
+        $pksSubmission->description = $validated['purpose']; // Map purpose to description
+        
+        // Handle KAK document upload
+        if ($request->hasFile('kak_document')) {
+            // Delete old file if exists
+            if ($pksSubmission->kak_document_path) {
+                Storage::disk('public')->delete($pksSubmission->kak_document_path);
+            }
+            // Store new file
+            $path = $request->file('kak_document')->store('pks-documents', 'public');
+            $pksSubmission->kak_document_path = $path;
+        }
+        
+        // Handle MoU document upload
+        if ($request->hasFile('mou_document')) {
+            // Delete old file if exists
+            if ($pksSubmission->mou_document_path) {
+                Storage::disk('public')->delete($pksSubmission->mou_document_path);
+            }
+            // Store new file
+            $path = $request->file('mou_document')->store('pks-documents', 'public');
+            $pksSubmission->mou_document_path = $path;
+        }
+        
+        $pksSubmission->save();
+        
+        return redirect()->back()->with('success', 'Konten pengajuan PKS berhasil diperbarui.');
     }
 
     /**
@@ -357,6 +391,11 @@ class PksSubmissionController extends Controller
             'validity_period_end' => 'nullable|date|required_if:status,disetujui|after:validity_period_start',
         ]);
         
+        // Check if the submission is already finalized
+        if (in_array($pksSubmission->status, ['disetujui', 'ditolak'])) {
+            return back()->with('error', 'Pengajuan PKS yang sudah disetujui atau ditolak tidak dapat diubah statusnya.');
+        }
+
         // Store the old status
         $oldStatus = $pksSubmission->status;
         Log::info('Old status: ' . $oldStatus);

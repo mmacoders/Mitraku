@@ -45,6 +45,17 @@ class PksSubmissionRequest extends FormRequest
             $rules['mou_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
         }
         
+        if ($this->isMethod('put') || $this->isMethod('patch')) {
+             $rules = [
+                'title' => 'required|string|max:255',
+                'purpose' => 'required|string',
+                'kak_document' => 'nullable|file|mimes:pdf,docx|max:2048',
+                'mou_document' => 'nullable|file|mimes:pdf,docx|max:2048',
+                'status' => 'nullable', 
+            ];
+            return $rules;
+        }
+
         return $rules;
     }
 

@@ -163,14 +163,15 @@
 
           <!-- PKS Submission (if available) -->
           <div v-if="pksSubmissions && pksSubmissions.length > 0">
-            <InputLabel for="pks_submission_id" value="Pengajuan PKS Terkait" />
+            <InputLabel for="pks_submission_id" value="Pengajuan PKS Terkait *" />
             <select
               id="pks_submission_id"
               v-model="form.pks_submission_id"
               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
               :disabled="form.processing"
+              required
             >
-              <option value="">Pilih pengajuan PKS (opsional)</option>
+              <option value="">Pilih pengajuan PKS</option>
               <option
                 v-for="submission in filteredPksSubmissions"
                 :key="submission.id"
