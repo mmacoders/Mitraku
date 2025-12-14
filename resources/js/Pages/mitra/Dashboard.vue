@@ -165,7 +165,13 @@
                       </Link>
                       <!-- Actions for 'proses' status submissions -->
                       <div v-if="submission.status === 'proses'" class="mt-2 flex justify-end gap-2">
-
+                        <button
+                          @click="openEditPksModal(submission)"
+                          class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-300 dark:hover:bg-yellow-800/50 transition-colors duration-200"
+                        >
+                          <Edit3 class="h-3 w-3 mr-1" />
+                          Edit
+                        </button>
                         <button
                           @click="deleteSubmission(submission)"
                           class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-800/50 transition-colors duration-200"
@@ -430,6 +436,14 @@
     @close="closeCreatePksModal" 
   />
   
+  <!-- Edit PKS Content Modal -->
+  <EditPksContentModal 
+    :show="showEditPksModal" 
+    :submission="submissionToEdit" 
+    @close="closeEditPksModal" 
+    @success="handleEditSuccess"
+  />
+  
 
   
   <!-- Delete Confirmation Modal -->
@@ -516,6 +530,8 @@ import {
 // Components
 import StatusBadge from '@/Components/StatusBadge.vue'
 import CreatePksSubmissionModal from '@/Components/mitra/CreatePksSubmissionModal.vue'
+import EditPksContentModal from '@/Components/admin/EditPksContentModal.vue'
+import { Edit3 } from 'lucide-vue-next'
 
 
 // Props
@@ -545,6 +561,8 @@ const profilePicture = computed(() => {
 const showMeetingDetail = ref(false)
 const selectedMeeting = ref(null)
 const showCreatePksModal = ref(false)
+const showEditPksModal = ref(false)
+const submissionToEdit = ref(null)
 
 const dropdownOpen = ref(false)
 const showDeleteConfirmation = ref(false)
@@ -684,6 +702,23 @@ const confirmDelete = () => {
 const cancelDelete = () => {
   showDeleteConfirmation.value = false
   submissionToDelete.value = null
+}
+
+const openEditPksModal = (submission) => {
+  submissionToEdit.value = submission
+  showEditPksModal.value = true
+}
+
+const closeEditPksModal = () => {
+  showEditPksModal.value = false
+  setTimeout(() => {
+    submissionToEdit.value = null
+  }, 200) // Small delay to prevent content jump during transition
+}
+
+const handleEditSuccess = () => {
+  router.reload({ only: ['submissions'] })
+  closeEditPksModal()
 }
 
 

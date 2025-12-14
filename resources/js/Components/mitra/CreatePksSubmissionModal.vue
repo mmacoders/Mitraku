@@ -225,12 +225,12 @@ const submitForm = () => {
   }
   
   if (!form.kak_document) {
-    form.setError('kak_document', 'Dokumen KAK harus diunggah.')
+    form.setError('kak_document', 'Dokumen MOU harus diunggah.')
     hasErrors = true
   }
   
   if (!form.mou_document) {
-    form.setError('mou_document', 'Dokumen MoU harus diunggah.')
+    form.setError('mou_document', 'Dokumen PKS harus diunggah.')
     hasErrors = true
   }
   
@@ -345,13 +345,13 @@ const submitForm = () => {
                         <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        <span>Dokumen KAK: {{ form.errors.kak_document }}</span>
+                        <span>Dokumen MOU: {{ form.errors.kak_document }}</span>
                       </li>
                       <li v-if="form.errors.mou_document" class="flex items-start">
                         <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        <span>Dokumen MoU: {{ form.errors.mou_document }}</span>
+                        <span>Dokumen PKS: {{ form.errors.mou_document }}</span>
                       </li>
                     </ul>
                   </div>
@@ -370,13 +370,13 @@ const submitForm = () => {
                         <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Dokumen KAK: {{ form.kak_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
+                        <span>Dokumen MOU: {{ form.kak_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
                       </li>
                       <li class="flex items-start">
                         <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Dokumen MoU: {{ form.mou_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
+                        <span>Dokumen PKS: {{ form.mou_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
                       </li>
                     </ul>
                   </div>
@@ -464,7 +464,7 @@ const submitForm = () => {
                     <!-- Upload Dokumen KAK -->
                     <div class="space-y-2">
                       <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        Dokumen KAK
+                        Dokumen MOU
                       </label>
                       <div 
                         class="relative h-28 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
@@ -525,7 +525,7 @@ const submitForm = () => {
                     <!-- Upload Dokumen MoU/PKS -->
                     <div class="space-y-2">
                       <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        Dokumen MoU/PKS
+                        Dokumen PKS
                       </label>
                       <div 
                         class="relative h-28 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
