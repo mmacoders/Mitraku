@@ -26,24 +26,27 @@
                   {{ activeTab === 'berjalan' ? 'Daftar PKS yang sedang berjalan' : 'Kelola semua pengajuan PKS Anda' }}
                 </p>
               </div>
-              <button 
-                v-if="activeTab === 'berjalan'"
-                @click="openAddExistingPksModal"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 mt-4 md:mt-0"
-              >
-                <Plus class="h-4 w-4 mr-1" />
-                Tambah PKS yang Sudah Berjalan
-              </button>
               
-              <a
-                v-if="user.role === 'admin'"
-                :href="getPdfExportUrl()"
-                target="_blank"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 mt-4 md:mt-0 md:ml-3"
-              >
-                <Download class="h-4 w-4 mr-1" />
-                Export PDF
-              </a>
+              <div class="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
+                <button 
+                  v-if="activeTab === 'berjalan'"
+                  @click="openAddExistingPksModal"
+                  class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                >
+                  <Plus class="h-4 w-4 mr-1" />
+                  Tambah PKS yang Sudah Berjalan
+                </button>
+                
+                <a
+                  v-if="user.role === 'admin'"
+                  :href="getPdfExportUrl()"
+                  target="_blank"
+                  class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                >
+                  <Download class="h-4 w-4 mr-1" />
+                  Export PDF
+                </a>
+              </div>
             </div>
 
             <!-- Tabs for different views -->
