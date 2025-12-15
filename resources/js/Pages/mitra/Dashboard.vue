@@ -151,8 +151,8 @@
                         <div class="mt-2 sm:flex sm:justify-between">
                           <div class="sm:flex">
                             <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                              <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                              {{ submission.pks_tujuan || 'Tujuan tidak ditentukan' }}
+                              <FileText class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                              {{ submission.description || 'Tujuan tidak ditentukan' }}
                             </p>
                           </div>
                           <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
@@ -242,7 +242,7 @@
                           <div class="sm:flex">
                             <p class="flex items-center text-sm text-gray-700 dark:text-gray-300">
                               <User class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                              {{ submission.pks_tujuan || 'Tujuan tidak ditentukan' }}
+                              {{ submission.description || 'Tujuan tidak ditentukan' }}
                             </p>
                           </div>
                           <div class="mt-2 flex items-center text-sm text-gray-700 dark:text-gray-300 sm:mt-0">
