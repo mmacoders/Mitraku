@@ -37,12 +37,14 @@ class PksSubmissionRequest extends FormRequest
         // For new submissions, documents are required
         // For existing PKS added by admin, documents are optional
         if (!$isExistingPks) {
-            $rules['kak_document'] = 'required|file|mimes:pdf,docx|max:2048';
+            $rules['kak_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
             $rules['mou_document'] = 'required|file|mimes:pdf,docx|max:2048';
+            $rules['mou_id'] = 'required|exists:mous,id';
         } else {
             // For existing PKS, documents are optional
             $rules['kak_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
             $rules['mou_document'] = 'nullable|file|mimes:pdf,docx|max:2048';
+            $rules['mou_id'] = 'nullable|exists:mous,id';
         }
         
         if ($this->isMethod('put') || $this->isMethod('patch')) {
@@ -83,6 +85,8 @@ class PksSubmissionRequest extends FormRequest
             'validity_period_end.required' => 'Tanggal akhir berlaku harus diisi.',
             'validity_period_end.after' => 'Tanggal akhir harus setelah tanggal mulai.',
             'status.in' => 'Status tidak valid untuk PKS yang sudah berjalan.',
+            'mou_id.required' => 'Dasar MoU harus dipilih.',
+            'mou_id.exists' => 'MoU yang dipilih tidak valid.',
         ];
     }
 }

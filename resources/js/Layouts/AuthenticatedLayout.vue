@@ -52,6 +52,24 @@ const isMitra = computed(() => user.value.role === 'mitra');
                                 >
                                     <h2>Dashboard</h2>
                                 </NavLink>
+                                
+                                <!-- Mitra MoU Menu -->
+                                <NavLink
+                                    v-if="isMitra"
+                                    :href="route('mitra.mou.index')"
+                                    :active="route().current('mitra.mou.index')"
+                                >
+                                    <h2>Pengajuan MoU</h2>
+                                </NavLink>
+
+                                <!-- Admin MoU Menu -->
+                                <NavLink
+                                    v-if="isAdmin"
+                                    :href="route('admin.mou.index')"
+                                    :active="route().current('admin.mou.index')"
+                                >
+                                    <h2>Kelola MoU</h2>
+                                </NavLink>
                             </div>
                         </div>
 

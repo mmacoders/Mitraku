@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, Link } from '@inertiajs/vue3'
 import { 
   Dialog, 
   DialogPanel, 
@@ -11,22 +11,22 @@ import {
 
 interface Props {
   isOpen: boolean
+  mous: Array<any>
 }
 
 interface Emits {
   (e: 'close'): void
   (e: 'success'): void
+  (e: 'create-mou'): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 // File input references
-const kakFileInput = ref<HTMLInputElement | null>(null)
 const mouFileInput = ref<HTMLInputElement | null>(null)
 
 // Drag state
-const isDraggingKak = ref(false)
 const isDraggingMou = ref(false)
 
 // Confirmation dialog state
@@ -40,28 +40,9 @@ const toastMessage = ref('')
 const form = useForm({
   title: '',
   purpose: '',
-  kak_document: null as File | null,
+  mou_id: '',
   mou_document: null as File | null
 })
-
-// Handle drag events for KAK
-const handleDragOverKak = () => {
-  isDraggingKak.value = true
-}
-
-const handleDragLeaveKak = () => {
-  isDraggingKak.value = false
-}
-
-const handleDropKak = (e: DragEvent) => {
-  isDraggingKak.value = false
-  if (e.dataTransfer?.files?.length) {
-    const file = e.dataTransfer.files[0]
-    if (validateFile(file)) {
-      form.kak_document = file
-    }
-  }
-}
 
 // Handle drag events for MoU
 const handleDragOverMou = () => {
@@ -83,25 +64,19 @@ const handleDropMou = (e: DragEvent) => {
 }
 
 // Trigger file input
-const triggerFileInput = (type: 'kak' | 'mou') => {
-  if (type === 'kak' && kakFileInput.value) {
-    kakFileInput.value.click()
-  } else if (type === 'mou' && mouFileInput.value) {
+const triggerFileInput = () => {
+  if (mouFileInput.value) {
     mouFileInput.value.click()
   }
 }
 
 // Handle file change
-const handleFileChange = (e: Event, type: 'kak' | 'mou') => {
+const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
     if (validateFile(file)) {
-      if (type === 'kak') {
-        form.kak_document = file
-      } else {
-        form.mou_document = file
-      }
+      form.mou_document = file
     }
   }
 }
@@ -112,13 +87,11 @@ const validateFile = (file: File): boolean => {
   const maxSize = 2 * 1024 * 1024 // 2MB
   
   if (!validTypes.includes(file.type)) {
-    form.setError('kak_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
     form.setError('mou_document', 'Format file tidak didukung. Harap unggah file PDF atau DOCX.')
     return false
   }
   
   if (file.size > maxSize) {
-    form.setError('kak_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
     form.setError('mou_document', 'Ukuran file terlalu besar. Maksimal 2MB.')
     return false
   }
@@ -127,17 +100,10 @@ const validateFile = (file: File): boolean => {
 }
 
 // Remove file
-const removeFile = (type: 'kak' | 'mou') => {
-  if (type === 'kak') {
-    form.kak_document = null
-    if (kakFileInput.value) {
-      kakFileInput.value.value = ''
-    }
-  } else {
-    form.mou_document = null
-    if (mouFileInput.value) {
-      mouFileInput.value.value = ''
-    }
+const removeFile = () => {
+  form.mou_document = null
+  if (mouFileInput.value) {
+    mouFileInput.value.value = ''
   }
 }
 
@@ -157,12 +123,21 @@ const formatFileSize = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+// Format date
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
 // Close modal
 const closeModal = () => {
   emit('close')
   form.reset()
   form.clearErrors()
-  if (kakFileInput.value) kakFileInput.value.value = ''
   if (mouFileInput.value) mouFileInput.value.value = ''
   showConfirmation.value = false
 }
@@ -189,7 +164,7 @@ const confirmSubmit = () => {
       // Handle validation errors from server
       Object.keys(errors).forEach(key => {
         // Type-safe error setting
-        if (key === 'title' || key === 'purpose' || key === 'kak_document' || key === 'mou_document') {
+        if (key === 'title' || key === 'purpose' || key === 'mou_document' || key === 'mou_id') {
           form.setError(key, errors[key])
         }
       })
@@ -223,9 +198,9 @@ const submitForm = () => {
     form.setError('purpose', 'Tujuan harus diisi.')
     hasErrors = true
   }
-  
-  if (!form.kak_document) {
-    form.setError('kak_document', 'Dokumen MOU harus diunggah.')
+
+  if (!form.mou_id) {
+    form.setError('mou_id', 'Dasar MoU harus dipilih.')
     hasErrors = true
   }
   
@@ -299,10 +274,10 @@ const submitForm = () => {
                   <!-- Icon - Warning for errors, Info for confirmation -->
                   <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4"
                     :class="{
-                      'bg-rose-50 dark:bg-rose-900/20': form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document,
-                      'bg-amber-50 dark:bg-amber-900/20': !form.errors.title && !form.errors.purpose && !form.errors.kak_document && !form.errors.mou_document
+                      'bg-rose-50 dark:bg-rose-900/20': form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id,
+                      'bg-amber-50 dark:bg-amber-900/20': !form.errors.title && !form.errors.purpose && !form.errors.mou_document && !form.errors.mou_id
                     }">
-                    <svg v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="h-8 w-8 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg v-if="form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id" class="h-8 w-8 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <svg v-else class="h-8 w-8 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -312,12 +287,12 @@ const submitForm = () => {
                   
                   <!-- Title -->
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    {{ form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document ? 'Form Tidak Lengkap' : 'Konfirmasi Pengajuan PKS' }}
+                    {{ form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id ? 'Form Tidak Lengkap' : 'Konfirmasi Pengajuan PKS' }}
                   </h3>
                   
                   <!-- Description -->
                   <div class="mt-2 mb-6">
-                    <p v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p v-if="form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id" class="text-gray-600 dark:text-gray-300 leading-relaxed">
                       Mohon lengkapi semua field yang diperlukan sebelum mengirimkan pengajuan.
                     </p>
                     <p v-else class="text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -326,7 +301,7 @@ const submitForm = () => {
                   </div>
                   
                   <!-- Error Messages -->
-                  <div v-if="form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document" class="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 mb-6 text-left">
+                  <div v-if="form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id" class="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 mb-6 text-left">
                     <h4 class="font-medium text-rose-800 dark:text-rose-200 mb-2">Field yang harus dilengkapi:</h4>
                     <ul class="space-y-2 text-sm text-rose-700 dark:text-rose-300">
                       <li v-if="form.errors.title" class="flex items-start">
@@ -341,11 +316,11 @@ const submitForm = () => {
                         </svg>
                         <span>Tujuan: {{ form.errors.purpose }}</span>
                       </li>
-                      <li v-if="form.errors.kak_document" class="flex items-start">
+                      <li v-if="form.errors.mou_id" class="flex items-start">
                         <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        <span>Dokumen MOU: {{ form.errors.kak_document }}</span>
+                        <span>Dasar MoU: {{ form.errors.mou_id }}</span>
                       </li>
                       <li v-if="form.errors.mou_document" class="flex items-start">
                         <svg class="h-5 w-5 text-rose-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -370,7 +345,7 @@ const submitForm = () => {
                         <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Dokumen MOU: {{ form.kak_document ? 'Sudah diunggah' : 'Belum diunggah' }}</span>
+                        <span>Dasar MoU: {{ mous.find(m => m.id === form.mou_id)?.title || '-' }}</span>
                       </li>
                       <li class="flex items-start">
                         <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -384,7 +359,7 @@ const submitForm = () => {
                   <!-- Action Buttons -->
                   <div class="flex flex-col sm:flex-row gap-3">
                     <button
-                      v-if="!(form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document)"
+                      v-if="!(form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id)"
                       type="button"
                       class="w-full inline-flex justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-4 py-3 text-sm font-medium text-white shadow-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5"
                       @click="confirmSubmit"
@@ -395,12 +370,12 @@ const submitForm = () => {
                       type="button"
                       class="w-full inline-flex justify-center rounded-xl"
                       :class="{
-                        'bg-rose-500 hover:bg-rose-600 text-white': form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document,
-                        'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 ease-in-out': !(form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document)
+                        'bg-rose-500 hover:bg-rose-600 text-white': form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id,
+                        'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 ease-in-out': !(form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id)
                       }"
                       @click="cancelSubmit"
                     >
-                      {{ form.errors.title || form.errors.purpose || form.errors.kak_document || form.errors.mou_document ? 'Perbaiki Form' : 'Periksa Kembali' }}
+                      {{ form.errors.title || form.errors.purpose || form.errors.mou_document || form.errors.mou_id ? 'Perbaiki Form' : 'Periksa Kembali' }}
                     </button>
                   </div>
                 </div>
@@ -454,134 +429,104 @@ const submitForm = () => {
                   </p>
                 </div>
 
+                <!-- Dasar MoU (Wajib) -->
+                <div>
+                  <label for="mou_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Dasar MoU (Payung Hukum)
+                  </label>
+                  <div class="mt-1">
+                    <select
+                      id="mou_id"
+                      v-model="form.mou_id"
+                      class="block w-full rounded-lg border-0 bg-gray-50 dark:bg-gray-800 py-3 px-4 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-indigo-300 dark:focus:ring-indigo-400 sm:text-sm sm:leading-6 transition-all duration-200 ease-in-out"
+                      :class="{ 'border-rose-300/50 ring-rose-300/50': form.errors.mou_id }"
+                    >
+                      <option value="" disabled>Pilih MoU yang menjadi dasar...</option>
+                      <option v-for="mou in mous" :key="mou.id" :value="mou.id">
+                        {{ mou.title }} ({{ mou.validity_period_end ? 'Berlaku s/d ' + formatDate(mou.validity_period_end) : '-' }})
+                      </option>
+                    </select>
+                  </div>
+                   <div v-if="mous.length === 0" class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <p class="text-sm text-amber-700 dark:text-amber-300 flex items-center">
+                      <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span>Anda belum memiliki MoU yang disetujui.</span>
+                    </p>
+                    <button type="button" @click="$emit('create-mou')" class="mt-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center bg-transparent border-0 p-0 focus:outline-none focus:underline cursor-pointer">
+                      Ajukan MoU Sekarang &rarr;
+                    </button>
+                  </div>
+                  <p v-if="form.errors.mou_id" class="mt-2 text-sm text-rose-400">
+                    {{ form.errors.mou_id }}
+                  </p>
+                </div>
+
                 <!-- Upload Dokumen Section -->
                 <div>
                   <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Dokumen Pendukung
+                    Upload Dokumen PKS
                   </h4>
                   
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Upload Dokumen KAK -->
-                    <div class="space-y-2">
-                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        Dokumen MOU
-                      </label>
-                      <div 
-                        class="relative h-28 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
-                        :class="{
-                          'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700': isDraggingKak,
-                          'hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20': !isDraggingKak
-                        }"
-                        @dragover.prevent="handleDragOverKak"
-                        @dragleave.prevent="handleDragLeaveKak"
-                        @drop.prevent="handleDropKak"
-                        @click="triggerFileInput('kak')"
-                      >
-                        <input
-                          ref="kakFileInput"
-                          type="file"
-                          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          accept=".pdf,.docx"
-                          @change="handleFileChange($event, 'kak')"
-                        />
-                        <div class="text-center">
-                          <div class="text-2xl">📂</div>
-                          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Klik atau seret file
+                  <div class="space-y-2">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Dokumen PKS
+                    </label>
+                    <div 
+                      class="relative h-28 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
+                      :class="{
+                        'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700': isDraggingMou,
+                        'hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20': !isDraggingMou
+                      }"
+                      @dragover.prevent="handleDragOverMou"
+                      @dragleave.prevent="handleDragLeaveMou"
+                      @drop.prevent="handleDropMou"
+                      @click="triggerFileInput"
+                    >
+                      <input
+                        ref="mouFileInput"
+                        type="file"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        accept=".pdf,.docx"
+                        @change="handleFileChange($event)"
+                      />
+                      <div class="text-center">
+                        <div class="text-2xl">📂</div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          Klik atau seret file
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <!-- File preview for MoU -->
+                    <div v-if="form.mou_document" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
+                      <div class="flex items-center">
+                        <span class="text-lg mr-2">
+                          {{ getFileIcon(form.mou_document.type) }}
+                        </span>
+                        <div class="text-xs">
+                          <p class="font-medium text-gray-900 dark:text-white truncate max-w-[100px]">
+                            {{ form.mou_document.name }}
+                          </p>
+                          <p class="text-gray-500 dark:text-gray-400">
+                            {{ formatFileSize(form.mou_document.size) }}
                           </p>
                         </div>
                       </div>
-                      
-                      <!-- File preview for KAK -->
-                      <div v-if="form.kak_document" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
-                        <div class="flex items-center">
-                          <span class="text-lg mr-2">
-                            {{ getFileIcon(form.kak_document.type) }}
-                          </span>
-                          <div class="text-xs">
-                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[100px]">
-                              {{ form.kak_document.name }}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400">
-                              {{ formatFileSize(form.kak_document.size) }}
-                            </p>
-                          </div>
-                        </div>
-                        <button 
-                          type="button"
-                          @click="removeFile('kak')"
-                          class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
-                          title="Hapus file"
-                        >
-                          ❌
-                        </button>
-                      </div>
-                      
-                      <p v-if="form.errors.kak_document" class="text-sm text-rose-400">
-                        {{ form.errors.kak_document }}
-                      </p>
-                    </div>
-
-                    <!-- Upload Dokumen MoU/PKS -->
-                    <div class="space-y-2">
-                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        Dokumen PKS
-                      </label>
-                      <div 
-                        class="relative h-28 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
-                        :class="{
-                          'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700': isDraggingMou,
-                          'hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20': !isDraggingMou
-                        }"
-                        @dragover.prevent="handleDragOverMou"
-                        @dragleave.prevent="handleDragLeaveMou"
-                        @drop.prevent="handleDropMou"
-                        @click="triggerFileInput('mou')"
+                      <button 
+                        type="button"
+                        @click="removeFile"
+                        class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                        title="Hapus file"
                       >
-                        <input
-                          ref="mouFileInput"
-                          type="file"
-                          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          accept=".pdf,.docx"
-                          @change="handleFileChange($event, 'mou')"
-                        />
-                        <div class="text-center">
-                          <div class="text-2xl">📂</div>
-                          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Klik atau seret file
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <!-- File preview for MoU -->
-                      <div v-if="form.mou_document" class="mt-2 flex items-center justify-between p-2 bg-gray-50 rounded-lg dark:bg-gray-700">
-                        <div class="flex items-center">
-                          <span class="text-lg mr-2">
-                            {{ getFileIcon(form.mou_document.type) }}
-                          </span>
-                          <div class="text-xs">
-                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[100px]">
-                              {{ form.mou_document.name }}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400">
-                              {{ formatFileSize(form.mou_document.size) }}
-                            </p>
-                          </div>
-                        </div>
-                        <button 
-                          type="button"
-                          @click="removeFile('mou')"
-                          class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
-                          title="Hapus file"
-                        >
-                          ❌
-                        </button>
-                      </div>
-                      
-                      <p v-if="form.errors.mou_document" class="text-sm text-rose-400">
-                        {{ form.errors.mou_document }}
-                      </p>
+                        ❌
+                      </button>
                     </div>
+                    
+                    <p v-if="form.errors.mou_document" class="text-sm text-rose-400">
+                      {{ form.errors.mou_document }}
+                    </p>
                   </div>
                 </div>
 

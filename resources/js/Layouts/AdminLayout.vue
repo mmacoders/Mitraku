@@ -43,6 +43,18 @@
               <span>Kelola PKS</span>
             </Link>
             <Link
+              :href="route('admin.mou.index')"
+              :class="[
+                route().current('admin.mou.*') 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+                'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
+              ]"
+            >
+              <FileCheck class="mr-4 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('admin.mou.*') ? 'text-white' : ''" />
+              <span>Kelola MoU</span>
+            </Link>
+            <Link
               :href="route('kelola.mitra')"
               :class="[
                 route().current('kelola.mitra') 
@@ -146,6 +158,20 @@
           >
             <FileText class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('kelola.pks') || route().current('pks.*') ? 'text-white' : ''" />
             <span v-if="!sidebarCollapsed" class="ml-3">Kelola Pengajuan PKS</span>
+          </Link>
+
+          <!-- Kelola MoU -->
+          <Link
+            :href="route('admin.mou.index')"
+            :class="[
+              route().current('admin.mou.*') 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 border-l-4 border-white' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-blue-400',
+              'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out transform hover:translate-x-1'
+            ]"
+          >
+            <FileCheck class="flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-blue-500" :class="route().current('admin.mou.*') ? 'text-white' : ''" />
+            <span v-if="!sidebarCollapsed" class="ml-3">Kelola MoU</span>
           </Link>
           
           <!-- Kelola Mitra -->
@@ -372,7 +398,8 @@ import {
   Sun,
   Moon,
   Bell,
-  CheckCircle
+  CheckCircle,
+  FileCheck
 } from 'lucide-vue-next';
 import HttpsWarningBanner from '@/Components/HttpsWarningBanner.vue';
 import ModernBreadcrumb from '@/Components/ModernBreadcrumb.vue';

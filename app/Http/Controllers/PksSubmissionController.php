@@ -141,6 +141,22 @@ class PksSubmissionController extends Controller
             'pending' => $pendingSubmissions,
             'rejected' => $rejectedSubmissions
         ];
+
+        // Fetch approved MoUs for dropdown
+        $approvedMous = \App\Models\Mou::where('user_id', $user->id)
+            ->where('status', 'disetujui')
+            ->where(function($query) {
+                $query->whereNull('validity_period_end')
+                      ->orWhere('validity_period_end', '>=', now());
+            })
+            ->select('id', 'title', 'validity_period_end')
+            ->get();
+
+        // Fetch user's recent MoUs for dashboard list
+        $mouSubmissions = \App\Models\Mou::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
             
         // Check if this is a partial reload request for specific data
         if ($request->header('X-Inertia-Partial-Data')) {
@@ -160,6 +176,14 @@ class PksSubmissionController extends Controller
             if (in_array('upcomingMeetings', $partialData)) {
                 $responseData['upcomingMeetings'] = $upcomingMeetings;
             }
+
+            if (in_array('approved_mous', $partialData)) {
+                $responseData['approved_mous'] = $approvedMous;
+            }
+
+            if (in_array('mou_submissions', $partialData)) {
+                $responseData['mou_submissions'] = $mouSubmissions;
+            }
             
             // If this is a partial reload but no specific data is requested, 
             // or if submissions/statistics are requested, return the data
@@ -172,7 +196,9 @@ class PksSubmissionController extends Controller
         return Inertia::render('mitra/Dashboard', [
             'submissions' => $submissions,
             'statistics' => $statistics,
-            'upcomingMeetings' => $upcomingMeetings
+            'upcomingMeetings' => $upcomingMeetings,
+            'approved_mous' => $approvedMous,
+            'mou_submissions' => $mouSubmissions
         ]);
     }
     
@@ -279,7 +305,7 @@ class PksSubmissionController extends Controller
      */
     public function show(PksSubmission $pksSubmission)
     {
-        $pksSubmission->load(['user', 'statusHistories', 'rapat.creator']);
+        $pksSubmission->load(['user', 'statusHistories', 'rapat.creator', 'mou']);
         
         return Inertia::render('admin/kelola-pks/Show', [
             'submission' => $pksSubmission,

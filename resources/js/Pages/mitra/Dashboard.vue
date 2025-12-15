@@ -190,13 +190,20 @@
                 <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
                   Anda belum membuat pengajuan PKS apa pun.
                 </p>
-                <div class="mt-6">
+                <div class="mt-6 flex justify-center space-x-3">
+                  <button
+                    @click="openCreateMouModal"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    <FileText class="h-5 w-5 mr-2" />
+                    Ajukan MoU
+                  </button>
                   <button
                     @click="openCreatePksModal"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                   >
                     <Plus class="h-5 w-5 mr-2" />
-                    Buat Pengajuan PKS Pertama
+                    Buat Pengajuan PKS
                   </button>
                 </div>
               </div>
@@ -266,6 +273,72 @@
 
         <!-- Right Sidebar -->
         <div class="space-y-8">
+
+          <!-- MoU Submissions Card -->
+          <div class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 overflow-hidden">
+            <div class="px-6 py-5 border-b border-white/20 dark:border-white/10">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                  Pengajuan MoU
+                </h3>
+                <button 
+                  @click="openCreateMouModal"
+                  class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-800/50 transition-colors duration-200"
+                >
+                  <Plus class="h-3 w-3 mr-1" />
+                  Baru
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div v-if="mou_submissions?.length > 0" class="flow-root">
+                <ul class="divide-y divide-white/20 dark:divide-white/10">
+                  <li 
+                    v-for="mou in mou_submissions" 
+                    :key="mou.id"
+                    class="py-3"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <div class="flex-shrink-0">
+                         <div class="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+                           <FileText class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                         </div>
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" :title="mou.title">
+                          {{ mou.title }}
+                        </p>
+                        <div class="flex items-center mt-1">
+                           <StatusBadge :status="mou.status" size="xs" />
+                           <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                             {{ formatDate(mou.created_at).split(',')[0] }}
+                           </span>
+                        </div>
+                      </div>
+                      <div v-if="mou.status === 'disetujui' && mou.validity_period_end" class="text-xs text-gray-400 whitespace-nowrap">
+                         Exp: {{ new Date(mou.validity_period_end).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) }}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div v-else class="text-center py-6">
+                <FileText class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Belum ada MoU</h3>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Ajukan MoU sebagai dasar kerjasama.
+                </p>
+                <button
+                  @click="openCreateMouModal"
+                  class="mt-4 inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                >
+                  <Plus class="h-3 w-3 mr-1" />
+                  Ajukan MoU
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Upcoming Meetings -->
           <div class="glass-card bg-white/40 dark:bg-black/30 backdrop-blur-[25px] border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-500/10 dark:shadow-gray-500/5 overflow-hidden">
             <div class="px-6 py-5 border-b border-white/20 dark:border-white/10">
@@ -433,7 +506,16 @@
   <!-- Create PKS Submission Modal -->
   <CreatePksSubmissionModal 
     :is-open="showCreatePksModal" 
+    :mous="approved_mous"
     @close="closeCreatePksModal" 
+    @create-mou="switchToMouModal"
+  />
+
+  <!-- Create MoU Submission Modal -->
+  <CreateMouSubmissionModal
+    :is-open="showCreateMouModal"
+    @close="closeCreateMouModal"
+    @success="handleMouSuccess"
   />
   
   <!-- Edit PKS Content Modal -->
@@ -530,6 +612,7 @@ import {
 // Components
 import StatusBadge from '@/Components/StatusBadge.vue'
 import CreatePksSubmissionModal from '@/Components/mitra/CreatePksSubmissionModal.vue'
+import CreateMouSubmissionModal from '@/Components/mitra/CreateMouSubmissionModal.vue'
 import EditPksContentModal from '@/Components/admin/EditPksContentModal.vue'
 import { Edit3 } from 'lucide-vue-next'
 
@@ -539,7 +622,15 @@ const props = defineProps({
   submissions: Object,
   statistics: Object,
   notifications: Array,
-  upcomingMeetings: Array
+  upcomingMeetings: Array,
+  approved_mous: {
+      type: Array,
+      default: () => []
+  },
+  mou_submissions: {
+      type: Array,
+      default: () => []
+  }
 })
 
 // Get user data from page props
@@ -561,6 +652,7 @@ const profilePicture = computed(() => {
 const showMeetingDetail = ref(false)
 const selectedMeeting = ref(null)
 const showCreatePksModal = ref(false)
+const showCreateMouModal = ref(false)
 const showEditPksModal = ref(false)
 const submissionToEdit = ref(null)
 
@@ -633,6 +725,24 @@ const openCreatePksModal = () => {
 
 const closeCreatePksModal = () => {
   showCreatePksModal.value = false
+}
+
+const openCreateMouModal = () => {
+  showCreateMouModal.value = true
+}
+
+const closeCreateMouModal = () => {
+  showCreateMouModal.value = false
+}
+
+const handleMouSuccess = () => {
+  router.reload({ only: ['mou_submissions'] })
+  closeCreateMouModal()
+}
+
+const switchToMouModal = () => {
+  closeCreatePksModal()
+  openCreateMouModal()
 }
 
 const formatDate = (dateString) => {

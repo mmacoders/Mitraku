@@ -97,6 +97,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/admin/kelola-rapat/{rapat}/delete-signed', [RapatController::class, 'deleteSignedDocument'])->name('rapat.deleteSignedDocument');
 });
 
+// MoU Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Mitra Routes for MoU
+    Route::post('/mitra/mou', [\App\Http\Controllers\MouController::class, 'store'])->name('mitra.mou.store');
+    
+    // Admin Routes for MoU
+    Route::get('/admin/kelola-mou', [\App\Http\Controllers\MouController::class, 'adminIndex'])->name('admin.mou.index');
+    Route::post('/admin/mou/{mou}/update-status', [\App\Http\Controllers\MouController::class, 'updateStatus'])->name('admin.mou.update-status');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -176,6 +186,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // If we can't verify ownership, deny access
         abort(403);
     })->where('path', '.*')->name('pks.documents.serve');
+
+    // Routes to serve uploaded MoU documents
+    Route::get('/mou-documents/{path}', function (string $path) {
+        // Check if file exists in public disk under mou-documents folder
+        // The path parameter might just be the filename if the route is /mou-documents/{filename}
+        // But store() returns "mou-documents/filename.pdf".
+        // Let's assume the URL is /mou-documents/filename.pdf, so {path} is filename.pdf.
+        // Wait, the store method returns full path "mou-documents/filename".
+        // So keeping consistency with pks-documents, let's allow the full path relative to storage root?
+        // But the router prefix is /mou-documents/. 
+        
+        $fullPath = 'mou-documents/' . $path;
+
+        if (!Storage::disk('public')->exists($fullPath)) {
+            abort(404);
+        }
+        
+        $user = Auth::user();
+        if (!$user) {
+            abort(403);
+        }
+
+        // Find MoU
+        $mou = \App\Models\Mou::where('document_path', $fullPath)->first();
+        
+        if ($mou) {
+             if ($user->role === 'admin' || $user->id === $mou->user_id) {
+                return response()->file(Storage::disk('public')->path($fullPath));
+             }
+        }
+        
+        abort(403);
+    })->where('path', '.*')->name('mou.documents.serve');
     
     // PKS Submission Routes
     Route::get('/pks', function () {

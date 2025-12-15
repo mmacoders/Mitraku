@@ -20,7 +20,7 @@ class PksSubmissionController extends Controller
         }
         
         // Load relationships
-        $pksSubmission->load(['user', 'statusHistories', 'rapat.creator']);
+        $pksSubmission->load(['user', 'statusHistories', 'rapat.creator', 'mou']);
         
         // Append document URLs to rapat if exists
         if ($pksSubmission->rapat) {

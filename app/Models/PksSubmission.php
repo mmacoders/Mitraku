@@ -31,9 +31,18 @@ class PksSubmission extends Model
         'mou_document_path',
         'draft_document_path',
         'signed_document_path',
+        'mou_id',
         'validity_period_start',
         'validity_period_end',
     ];
+
+    /**
+     * Get the MoU that owns the PKS submission.
+     */
+    public function mou()
+    {
+        return $this->belongsTo(Mou::class);
+    }
 
     /**
      * The attributes that should be cast.
