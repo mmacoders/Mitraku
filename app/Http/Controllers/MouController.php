@@ -202,4 +202,27 @@ class MouController extends Controller
 
         return redirect()->back()->with('success', 'Status MoU berhasil diperbarui dan notifikasi email telah dikirim.');
     }
+    public function destroy(Request $request, Mou $mou)
+    {
+        $user = $request->user();
+
+        // Check ownership
+        if ($user->role !== 'admin' && $user->id !== $mou->user_id) {
+            abort(403);
+        }
+
+        // Only allow deleting 'proses' status for Mitra
+        if ($user->role === 'mitra' && $mou->status !== 'proses') {
+            return redirect()->back()->with('error', 'Hanya pengajuan dengan status "Proses" yang dapat dihapus.');
+        }
+
+        // Delete file
+        if ($mou->document_path) {
+            Storage::disk('public')->delete($mou->document_path);
+        }
+
+        $mou->delete();
+
+        return redirect()->back()->with('success', 'Pengajuan MoU berhasil dihapus.');
+    }
 }

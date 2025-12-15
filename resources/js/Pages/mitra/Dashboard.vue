@@ -298,25 +298,39 @@
                     :key="mou.id"
                     class="py-3"
                   >
-                    <div class="flex items-center space-x-3">
-                      <div class="flex-shrink-0">
-                         <div class="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-                           <FileText class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                         </div>
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" :title="mou.title">
-                          {{ mou.title }}
-                        </p>
-                        <div class="flex items-center mt-1">
-                           <StatusBadge :status="mou.status" size="xs" />
-                           <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                             {{ formatDate(mou.created_at).split(',')[0] }}
-                           </span>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center space-x-3 min-w-0 flex-1">
+                        <div class="flex-shrink-0">
+                           <div class="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+                             <FileText class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                           </div>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate" :title="mou.title">
+                            {{ mou.title }}
+                          </p>
+                          <div class="flex items-center mt-1">
+                             <StatusBadge :status="mou.status" size="xs" />
+                             <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                               {{ formatDate(mou.created_at).split(',')[0] }}
+                             </span>
+                          </div>
                         </div>
                       </div>
-                      <div v-if="mou.status === 'disetujui' && mou.validity_period_end" class="text-xs text-gray-400 whitespace-nowrap">
-                         Exp: {{ new Date(mou.validity_period_end).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) }}
+                      
+                      <div class="ml-2 flex-shrink-0 flex items-center">
+                          <div v-if="mou.status === 'disetujui' && mou.validity_period_end" class="text-xs text-gray-400 whitespace-nowrap">
+                             Exp: {{ new Date(mou.validity_period_end).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) }}
+                          </div>
+                          
+                          <button 
+                            v-if="mou.status === 'proses'" 
+                            @click="confirmDeleteMou(mou)"
+                            class="ml-2 p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            title="Hapus Pengajuan MoU"
+                          >
+                            <Trash2 class="h-4 w-4" />
+                          </button>
                       </div>
                     </div>
                   </li>
@@ -577,6 +591,56 @@
       </div>
     </div>
   </Modal>
+
+  <!-- Delete MoU Confirmation Modal -->
+  <Modal :show="showDeleteMouConfirmation" @close="cancelDeleteMou">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold leading-6 text-gray-900 dark:text-white">
+          Konfirmasi Hapus MoU
+        </h3>
+      </div>
+      <div class="px-6 py-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30">
+              <Trash2 class="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              Hapus Pengajuan MoU?
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Apakah Anda yakin ingin menghapus pengajuan MoU 
+                <span class="font-medium text-gray-900 dark:text-white">
+                  "{{ mouToDelete?.title }}"
+                </span>? 
+                Tindakan ini tidak dapat dibatalkan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+        <button
+          @click="cancelDeleteMou"
+          type="button"
+          class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+        >
+          Batal
+        </button>
+        <button
+          @click="deleteMou"
+          type="button"
+          class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 active:bg-red-700 transition ease-in-out duration-150"
+        >
+          Hapus
+        </button>
+      </div>
+    </div>
+  </Modal>
 </template>
 
 <script setup>
@@ -812,6 +876,36 @@ const confirmDelete = () => {
 const cancelDelete = () => {
   showDeleteConfirmation.value = false
   submissionToDelete.value = null
+}
+
+// MoU Deletion Logic
+const showDeleteMouConfirmation = ref(false)
+const mouToDelete = ref(null)
+
+const confirmDeleteMou = (mou) => {
+  mouToDelete.value = mou
+  showDeleteMouConfirmation.value = true
+}
+
+const cancelDeleteMou = () => {
+  showDeleteMouConfirmation.value = false
+  mouToDelete.value = null
+}
+
+const deleteMou = () => {
+  if (mouToDelete.value) {
+      router.delete(route('mou.destroy', mouToDelete.value.id), {
+          onSuccess: () => {
+              showDeleteMouConfirmation.value = false
+              mouToDelete.value = null
+              router.reload({ only: ['mou_submissions'] })
+          },
+          onError: () => {
+             // Handle error if needed
+             showDeleteMouConfirmation.value = false
+          }
+      })
+  }
 }
 
 const openEditPksModal = (submission) => {

@@ -39,6 +39,7 @@ class GmailService
             $rawMessageString = "From: Admin PKS <" . config('services.gmail.email') . ">\r\n";
             $rawMessageString .= "To: <$to>\r\n";
             $rawMessageString .= "Subject: $subject\r\n";
+            $rawMessageString .= "MIME-Version: 1.0\r\n";
             $rawMessageString .= "Content-Type: text/html; charset=utf-8\r\n\r\n";
             $rawMessageString .= $body;
 

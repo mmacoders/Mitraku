@@ -101,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Mitra Routes for MoU
     Route::post('/mitra/mou', [\App\Http\Controllers\MouController::class, 'store'])->name('mitra.mou.store');
+    Route::delete('/mitra/mou/{mou}', [\App\Http\Controllers\MouController::class, 'destroy'])->name('mou.destroy');
     
     // Admin Routes for MoU
     Route::get('/admin/kelola-mou', [\App\Http\Controllers\MouController::class, 'adminIndex'])->name('admin.mou.index');
