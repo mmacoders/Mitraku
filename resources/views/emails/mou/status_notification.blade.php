@@ -13,7 +13,12 @@ Masa berlaku MoU:
 
 Silakan login ke aplikasi untuk melihat detail dan melanjutkan proses pengajuan PKS.
 @elseif($status === 'ditolak')
-Mohon maaf, pengajuan Anda belum dapat disetujui saat ini. Silakan hubungi admin untuk informasi lebih lanjut.
+Mohon maaf, pengajuan Anda belum dapat disetujui saat ini.
+@if(isset($rejectionReason) && $rejectionReason)
+**Alasan Penolakan:**
+{{ $rejectionReason }}
+@endif
+Silakan hubungi admin untuk informasi lebih lanjut.
 @endif
 
 <x-mail::button :url="route('mitra.dashboard')">

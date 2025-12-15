@@ -43,12 +43,14 @@ const selectedMou = ref<any>(null)
 const form = useForm({
   status: '',
   validity_period_start: '',
-  validity_period_end: ''
+  validity_period_end: '',
+  rejection_reason: ''
 })
 
 const openApprovalModal = (mou: any, status: 'disetujui' | 'ditolak') => {
   selectedMou.value = mou
   form.status = status
+  form.rejection_reason = ''
   
   if (status === 'disetujui') {
       // Set default dates if needed, e.g., today and 1 year from now
@@ -161,6 +163,7 @@ const getStatusLabel = (status: string) => {
                   <option value="proses">Proses</option>
                   <option value="disetujui">Disetujui</option>
                   <option value="ditolak">Ditolak</option>
+
                 </select>
               </div>
               
@@ -226,6 +229,8 @@ const getStatusLabel = (status: string) => {
                       >
                           <XCircle class="w-4 h-4 mr-1" /> Tolak
                       </button>
+                      
+
                     </td>
                   </tr>
                    <tr v-if="!mous?.data?.length">
@@ -267,7 +272,7 @@ const getStatusLabel = (status: string) => {
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ form.status === 'disetujui' 
                           ? 'Anda akan menyetujui pengajuan MoU ini. Silakan tentukan masa berlaku MoU.' 
-                          : 'Apakah Anda yakin ingin menolak pengajuan MoU ini?' }}
+                          : 'Anda akan menolak pengajuan MoU ini. Silakan berikan alasan penolakan.' }}
                     </p>
                   </div>
 
@@ -282,6 +287,12 @@ const getStatusLabel = (status: string) => {
                           <input type="date" v-model="form.validity_period_end" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required />
                           <p v-if="form.errors.validity_period_end" class="mt-1 text-sm text-red-600">{{ form.errors.validity_period_end }}</p>
                       </div>
+                  </div>
+
+                  <div v-if="form.status === 'ditolak'" class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alasan Penolakan</label>
+                      <textarea v-model="form.rejection_reason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Jelaskan alasan penolakan..." required></textarea>
+                      <p v-if="form.errors.rejection_reason" class="mt-1 text-sm text-red-600">{{ form.errors.rejection_reason }}</p>
                   </div>
 
                 </div>
