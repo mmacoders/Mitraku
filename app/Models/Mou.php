@@ -31,4 +31,12 @@ class Mou extends Model
     {
         return $this->hasMany(PksSubmission::class);
     }
+
+    /**
+     * Get the rapat associated with the MoU.
+     */
+    public function rapat()
+    {
+        return $this->hasOne(Rapat::class);
+    }
 }

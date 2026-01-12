@@ -43,7 +43,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>LAPORAN KERJA SAMA DAERAH KOTA GORONTALO TAHUN 2023</h1>
+        <h1>LAPORAN KERJA SAMA DAERAH KOTA GORONTALO TAHUN {{ $year }}</h1>
     </div>
 
     <table>

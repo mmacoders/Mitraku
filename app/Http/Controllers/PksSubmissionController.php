@@ -116,7 +116,8 @@ class PksSubmissionController extends Controller
         }
         
         // Handle mitra users - show their submissions
-        $submissions = PksSubmission::where('user_id', $user->id)
+        $submissions = PksSubmission::with('rapat')
+            ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
             
@@ -153,7 +154,8 @@ class PksSubmissionController extends Controller
             ->get();
 
         // Fetch user's recent MoUs for dashboard list
-        $mouSubmissions = \App\Models\Mou::where('user_id', $user->id)
+        $mouSubmissions = \App\Models\Mou::with('rapat')
+            ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

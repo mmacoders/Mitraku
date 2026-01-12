@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PksSubmission;
+use App\Models\Mou;
 use App\Models\Rapat;
 use App\Models\User;
 use App\Notifications\RapatScheduled;
@@ -40,7 +41,7 @@ class RapatController extends Controller
         }
         
         // Build query for rapat
-        $query = Rapat::with(['creator', 'invitedMitra', 'pksSubmission'])
+        $query = Rapat::with(['creator', 'invitedMitra', 'pksSubmission', 'mou'])
             ->where('user_id', $user->id);
             
         // Apply search filter
@@ -75,6 +76,11 @@ class RapatController extends Controller
             
         // Get PKS submissions that need meetings
         $pksSubmissions = PksSubmission::where('status', 'proses')
+            ->with('user')
+            ->get();
+            
+        // Get MOU submissions that need meetings
+        $mouSubmissions = Mou::where('status', 'proses')
             ->with('user')
             ->get();
             
@@ -117,6 +123,7 @@ class RapatController extends Controller
             'pascaRapat' => $pascaRapat,
             'mitraUsers' => $mitraUsers,
             'pksSubmissions' => $pksSubmissions,
+            'mouSubmissions' => $mouSubmissions,
         ]);
     }
     
@@ -161,7 +168,7 @@ class RapatController extends Controller
         });
         
         // Also get jadwal rapat data for the first tab
-        $jadwalQuery = Rapat::with(['creator', 'invitedMitra', 'pksSubmission'])
+        $jadwalQuery = Rapat::with(['creator', 'invitedMitra', 'pksSubmission', 'mou'])
             ->where('user_id', $user->id);
             
         // Apply search filter for jadwal rapat
@@ -197,12 +204,18 @@ class RapatController extends Controller
         $pksSubmissions = PksSubmission::where('status', 'proses')
             ->with('user')
             ->get();
+
+        // Get MOU submissions that need meetings
+        $mouSubmissions = Mou::where('status', 'proses')
+            ->with('user')
+            ->get();
         
         return Inertia::render('admin/kelola-rapat/Index', [
             'rapat' => $rapat,
             'pascaRapat' => $pascaRapat,
             'mitraUsers' => $mitraUsers,
             'pksSubmissions' => $pksSubmissions,
+            'mouSubmissions' => $mouSubmissions,
         ]);
     }
 
@@ -284,6 +297,11 @@ class RapatController extends Controller
             ->with('user')
             ->get();
             
+        // Get MOU submissions that need meetings
+        $mouSubmissions = Mou::where('status', 'proses')
+            ->with('user')
+            ->get();
+            
         // Get all mitra users
         $mitraUsers = User::where('role', 'mitra')
             ->select('id', 'name', 'company')
@@ -292,6 +310,7 @@ class RapatController extends Controller
         return Inertia::render('admin/kelola-rapat/Create', [
             'recentRapat' => $recentRapat,
             'pksSubmissions' => $pksSubmissions,
+            'mouSubmissions' => $mouSubmissions,
             'mitraUsers' => $mitraUsers,
         ]);
     }
@@ -331,6 +350,7 @@ class RapatController extends Controller
             'status' => $validatedData['status'] ?? 'akan_datang',
             'pks_document_path' => $pksDocumentPath,
             'pks_submission_id' => $validatedData['pks_submission_id'] ?? null,
+            'mou_id' => $validatedData['mou_id'] ?? null,
         ]);
         
         // Update PKS status to "proses" if mitra are invited and PKS submission exists
@@ -353,6 +373,21 @@ class RapatController extends Controller
                 // Notify the mitra about the status update
                 $mitra = $pksSubmission->user;
                 $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'proses'));
+            }
+        }
+        
+        // Update MOU status to "proses" if mitra are invited and MOU submission exists
+        if (!empty($validatedData['invited_mitra']) && !empty($validatedData['mou_id'])) {
+            $mou = Mou::find($validatedData['mou_id']);
+            if ($mou && $mou->status !== 'proses') {
+                // Store the old status
+                $oldStatus = $mou->status;
+                
+                // Update the status
+                $mou->update(['status' => 'proses']);
+                
+                // Not using StatusHistory/Notifications for MOU yet as I'm not sure if they exist similarly
+                // Assuming status 'proses' is correct.
             }
         }
         
@@ -383,7 +418,7 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        $rapat->load(['creator', 'invitedMitra', 'pksSubmission']);
+        $rapat->load(['creator', 'invitedMitra', 'pksSubmission', 'mou']);
         $rapat->append('pks_document_url');
         $rapat->append('draft_document_url');
         $rapat->append('signed_document_url');
@@ -406,7 +441,7 @@ class RapatController extends Controller
             return redirect()->route('dashboard');
         }
         
-        $rapat->load(['invitedMitra']);
+        $rapat->load(['invitedMitra', 'mou']);
         $rapat->append('pks_document_url');
         $rapat->append('draft_document_url');
         $rapat->append('signed_document_url');
@@ -718,6 +753,19 @@ class RapatController extends Controller
                          $mitra = $pksSubmission->user;
                          $mitra->notify(new \App\Notifications\PksStatusUpdated($pksSubmission, $oldStatus, 'disetujui'));
                     }
+                }
+            }
+
+            // Synchronize with MOU
+            if ($rapat->mou_id) {
+                $mou = Mou::find($rapat->mou_id);
+                if ($mou) {
+                    $mou->update([
+                        'status' => 'disetujui',
+                        'document_path' => $signedDocumentPath,
+                    ]);
+                    
+                    // No Status History for MOU yet
                 }
             }
             

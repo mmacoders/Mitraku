@@ -30,6 +30,7 @@ class Rapat extends Model
         'status',
         'pks_document_path',
         'pks_submission_id',
+        'mou_id',
         'draft_document_path',
         'signed_document_path',
         'signing_schedule',
@@ -71,6 +72,14 @@ class Rapat extends Model
     public function pksSubmission()
     {
         return $this->belongsTo(PksSubmission::class, 'pks_submission_id');
+    }
+
+    /**
+     * Get the MoU associated with this meeting.
+     */
+    public function mou()
+    {
+        return $this->belongsTo(Mou::class, 'mou_id');
     }
     
     /**

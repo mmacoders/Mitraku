@@ -13,12 +13,21 @@
       </div>
     </template>
 
+    <!-- Type Selection Modal -->
+    <MeetingTypeSelectionModal
+      :show="showTypeSelectionModal"
+      @close="closeTypeSelectionModal"
+      @select="handleTypeSelection"
+    />
+
     <!-- Rapat Create Modal -->
     <RapatModal 
       :show="showCreateModal" 
       :on-close="closeCreateModal"
       :available-mitra="mitraUsers"
       :pks-submissions="pksSubmissions"
+      :mou-submissions="mouSubmissions"
+      :type="creationType"
       @created="refreshRapatList"
     />
 
@@ -533,6 +542,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import RapatModal from '@/Components/admin/RapatModal.vue';
+import MeetingTypeSelectionModal from '@/Components/admin/MeetingTypeSelectionModal.vue';
 import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
 import EditRapatModal from '@/Pages/admin/kelola-rapat/Edit.vue';
 import PostMeetingDocumentModal from '@/Components/admin/PostMeetingDocumentModal.vue';
@@ -543,6 +553,7 @@ const props = defineProps({
   rapat: Object,
   mitraUsers: Array,
   pksSubmissions: Array,
+  mouSubmissions: Array,
   pascaRapat: Object,
 });
 
@@ -550,6 +561,7 @@ const props = defineProps({
 const activeTab = ref('jadwal');
 
 // Modal states
+const showTypeSelectionModal = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDetailModal = ref(false);
@@ -559,6 +571,7 @@ const selectedRapat = ref(null);
 const selectedPksSubmission = ref(null);
 const currentProcessType = ref('');
 const openedMenu = ref(null);
+const creationType = ref('pks'); // 'pks' or 'mou'
 
 // Filters for jadwal rapat
 const filters = ref({
@@ -575,6 +588,16 @@ const pascaFilters = ref({
 
 // Open create modal
 const openCreateModal = () => {
+  showTypeSelectionModal.value = true;
+};
+
+const closeTypeSelectionModal = () => {
+  showTypeSelectionModal.value = false;
+};
+
+const handleTypeSelection = (type) => {
+  creationType.value = type;
+  showTypeSelectionModal.value = false;
   showCreateModal.value = true;
 };
 

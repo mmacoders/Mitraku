@@ -30,7 +30,8 @@ class RapatRequest extends FormRequest
             'status' => 'required|in:akan_datang,selesai,dibatalkan',
             'pks_document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB max
             'shouldRemoveExistingDocument' => 'nullable|boolean',
-            'pks_submission_id' => 'required|integer|exists:pks_submissions,id',
+            'pks_submission_id' => 'nullable|integer|exists:pks_submissions,id|required_without:mou_id',
+            'mou_id' => 'nullable|integer|exists:mous,id|required_without:pks_submission_id',
             'invited_mitra' => 'nullable|array',
             'invited_mitra.*' => 'integer|exists:users,id',
         ];
@@ -77,6 +78,11 @@ class RapatRequest extends FormRequest
         // Handle pks_submission_id
         if ($this->pks_submission_id === '') {
             $this->merge(['pks_submission_id' => null]);
+        }
+        
+        // Handle mou_id
+        if ($this->mou_id === '') {
+            $this->merge(['mou_id' => null]);
         }
         
         // Handle invited_mitra if it's not an array

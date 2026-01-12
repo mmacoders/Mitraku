@@ -121,6 +121,7 @@
                   Pengajuan PKS Terbaru
                 </h3>
                 <button 
+                  v-if="approved_mous.length > 0"
                   @click="openCreatePksModal"
                   class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
@@ -163,6 +164,15 @@
                           </div>
                         </div>
                       </Link>
+                      
+                       <!-- Process Tracker -->
+                       <SubmissionTracker 
+                         v-if="submission.status !== 'dibatalkan'"
+                         :submission="submission" 
+                         type="pks" 
+                         class="mb-3 px-2"
+                      />
+
                       <!-- Actions for 'proses' status submissions -->
                       <div v-if="submission.status === 'proses'" class="mt-2 flex justify-end gap-2">
                         <button
@@ -188,10 +198,12 @@
                 <FileText class="mx-auto h-12 w-12 text-gray-500 dark:text-gray-400" />
                 <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Tidak ada pengajuan</h3>
                 <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                  Anda belum membuat pengajuan PKS apa pun.
+                  <span v-if="approved_mous.length === 0">Silahkan mengajukan MOU terlebih dahulu.</span>
+                  <span v-else>Anda belum membuat pengajuan PKS apa pun.</span>
                 </p>
                 <div class="mt-6 flex justify-center space-x-3">
                   <button
+                    v-if="approved_mous.length === 0"
                     @click="openCreateMouModal"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200"
                   >
@@ -199,6 +211,7 @@
                     Ajukan MoU
                   </button>
                   <button
+                    v-if="approved_mous.length > 0"
                     @click="openCreatePksModal"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                   >
@@ -332,6 +345,15 @@
                             <Trash2 class="h-4 w-4" />
                           </button>
                       </div>
+                    </div>
+                    
+                    <!-- Tracker for MOU -->
+                    <div class="mt-2 px-2">
+                         <SubmissionTracker 
+                             v-if="mou.status !== 'dibatalkan'"
+                             :submission="mou" 
+                             type="mou" 
+                          />
                     </div>
                   </li>
                 </ul>
@@ -678,6 +700,7 @@ import StatusBadge from '@/Components/StatusBadge.vue'
 import CreatePksSubmissionModal from '@/Components/mitra/CreatePksSubmissionModal.vue'
 import CreateMouSubmissionModal from '@/Components/mitra/CreateMouSubmissionModal.vue'
 import EditPksContentModal from '@/Components/admin/EditPksContentModal.vue'
+import SubmissionTracker from '@/Components/mitra/SubmissionTracker.vue'
 import { Edit3 } from 'lucide-vue-next'
 
 

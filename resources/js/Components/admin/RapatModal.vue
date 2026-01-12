@@ -162,7 +162,7 @@
           </div>
 
           <!-- PKS Submission (if available) -->
-          <div v-if="pksSubmissions && pksSubmissions.length > 0">
+          <div v-if="type === 'pks' && pksSubmissions && pksSubmissions.length > 0">
             <InputLabel for="pks_submission_id" value="Pengajuan PKS Terkait *" />
             <select
               id="pks_submission_id"
@@ -181,6 +181,28 @@
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.pks_submission_id" />
+          </div>
+
+          <!-- MOU Submission (if available) -->
+          <div v-if="type === 'mou' && mouSubmissions && mouSubmissions.length > 0">
+            <InputLabel for="mou_id" value="Pengajuan MoU Terkait *" />
+            <select
+              id="mou_id"
+              v-model="form.mou_id"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+              :disabled="form.processing"
+              required
+            >
+              <option value="">Pilih pengajuan MoU</option>
+              <option
+                v-for="submission in filteredMouSubmissions"
+                :key="submission.id"
+                :value="submission.id"
+              >
+                {{ submission.title }}
+              </option>
+            </select>
+            <InputError class="mt-2" :message="form.errors.mou_id" />
           </div>
 
           <!-- Upload Dokumen PKS -->
@@ -270,7 +292,12 @@ const props = defineProps({
   onClose: Function,
   onCreate: Function,
   availableMitra: Array,
-  pksSubmissions: Array as () => Array<{id: number, title: string, user: {id: number, name: string}}>
+  pksSubmissions: Array as () => Array<{id: number, title: string, user: {id: number, name: string}}>,
+  mouSubmissions: Array as () => Array<{id: number, title: string, user: {id: number, name: string}}>,
+  type: {
+      type: String,
+      default: 'pks'
+  }
 })
 
 const emit = defineEmits(['created'])
@@ -287,7 +314,8 @@ const form = useForm({
   status: 'akan_datang',
   pks_document: null as File | null,
   invited_mitra: [] as number[],
-  pks_submission_id: '' as string | number
+  pks_submission_id: '' as string | number,
+  mou_id: '' as string | number
 })
 
 // Filtered mitra based on search
@@ -329,6 +357,19 @@ const filteredPksSubmissions = computed(() => {
   return props.pksSubmissions.filter(submission => submission.user.id === selectedMitraId)
 })
 
+// Filter MOU submissions based on selected mitra
+const filteredMouSubmissions = computed(() => {
+  if (!props.mouSubmissions) return []
+  
+  if (form.invited_mitra.length === 0) {
+    return []
+  }
+  
+  const selectedMitraId = form.invited_mitra[0]
+  
+  return props.mouSubmissions.filter(submission => submission.user.id === selectedMitraId)
+})
+
 // Toggle mitra selection (Enforce Single Selection)
 const toggleMitraSelection = (mitraId: number) => {
   // If clicked one is already selected, deselect it
@@ -339,6 +380,7 @@ const toggleMitraSelection = (mitraId: number) => {
     // Select the new one (replacing any existing)
     form.invited_mitra = [mitraId]
     form.pks_submission_id = '' // Reset PKS selection when partner changes
+    form.mou_id = '' // Reset MOU selection when partner changes
   }
 }
 
@@ -346,6 +388,7 @@ const toggleMitraSelection = (mitraId: number) => {
 const removeMitra = (index: number) => {
   form.invited_mitra = []
   form.pks_submission_id = ''
+  form.mou_id = ''
 }
 
 // Handle file change

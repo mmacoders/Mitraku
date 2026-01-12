@@ -161,8 +161,8 @@
             <InputError class="mt-2" :message="form.errors.status" />
           </div>
 
-          <!-- PKS Submission (if available) -->
-          <div v-if="pksSubmissions && pksSubmissions.length > 0">
+          <!-- PKS Submission (if PKS meeting) -->
+          <div v-if="!isMouMeeting && pksSubmissions && pksSubmissions.length > 0">
             <InputLabel for="pks_submission_id" value="Pengajuan PKS Terkait" />
             <select
               id="pks_submission_id"
@@ -180,6 +180,27 @@
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.pks_submission_id" />
+          </div>
+
+          <!-- MOU Submission (if MOU meeting) -->
+          <div v-if="isMouMeeting && mouSubmissions && mouSubmissions.length > 0">
+            <InputLabel for="mou_id" value="Pengajuan MoU Terkait" />
+            <select
+              id="mou_id"
+              v-model="form.mou_id"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+              :disabled="form.processing"
+            >
+              <option value="">Pilih pengajuan MoU</option>
+              <option
+                v-for="submission in filteredMouSubmissions"
+                :key="submission.id"
+                :value="submission.id"
+              >
+                {{ submission.title }}
+              </option>
+            </select>
+            <InputError class="mt-2" :message="form.errors.mou_id" />
           </div>
 
           <!-- Dokumen PKS (Existing) -->
@@ -303,6 +324,7 @@ const props = defineProps<{
     status: string
     pks_document_url?: string
     pks_submission_id?: number | null
+    mou_id?: number | null
     invited_mitra?: Array<{ id: number }>
   } | null
   availableMitra?: Array<{
@@ -326,6 +348,7 @@ const emit = defineEmits(['updated', 'close'])
 const fileInput = ref<HTMLInputElement | null>(null)
 const existingDocumentUrl = ref<string | null>(null)
 const searchMitra = ref('')
+const isMouMeeting = ref(false)
 
 // Form setup
 const form = useForm({
@@ -336,7 +359,8 @@ const form = useForm({
   status: 'akan_datang',
   pks_document: null as File | null,
   invited_mitra: [] as number[],
-  pks_submission_id: '' as string | number
+  pks_submission_id: '' as string | number,
+  mou_id: '' as string | number
 })
 
 // Filtered mitra based on search
@@ -371,16 +395,31 @@ const filteredPksSubmissions = computed(() => {
   return props.pksSubmissions.filter(submission => submission.user.id === selectedMitraId)
 })
 
+// Filter MOU submissions based on selected mitra
+const filteredMouSubmissions = computed(() => {
+  if (!props.mouSubmissions) return []
+  
+  if (form.invited_mitra.length === 0) {
+    return []
+  }
+  
+  const selectedMitraId = form.invited_mitra[0]
+  
+  return props.mouSubmissions.filter(submission => submission.user.id === selectedMitraId)
+})
+
 // Toggle mitra selection (Enforce Single Selection)
 const toggleMitraSelection = (mitraId: number) => {
   // If clicked one is already selected, deselect it
   if (form.invited_mitra.includes(mitraId)) {
     form.invited_mitra = []
     form.pks_submission_id = '' // Reset PKS when mitra removed
+    form.mou_id = '' // Reset MOU when mitra removed
   } else {
     // Select the new one (replacing any existing)
     form.invited_mitra = [mitraId]
     form.pks_submission_id = '' // Reset PKS when mitra changes
+    form.mou_id = '' // Reset MOU when mitra changes
   }
 }
 
@@ -411,8 +450,13 @@ watch(() => props.rapat, (newRapat) => {
     form.lokasi = newRapat.lokasi || ''
     form.deskripsi = newRapat.deskripsi || ''
     form.status = newRapat.status || 'akan_datang'
+    form.status = newRapat.status || 'akan_datang'
     form.pks_submission_id = newRapat.pks_submission_id || ''
+    form.mou_id = newRapat.mou_id || ''
     existingDocumentUrl.value = newRapat.pks_document_url || null
+    
+    // Determine meeting type
+    isMouMeeting.value = !!newRapat.mou_id
     
     // Populate invited mitra
     if (newRapat.invited_mitra) {
