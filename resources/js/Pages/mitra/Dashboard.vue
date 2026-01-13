@@ -525,6 +525,54 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
             <p class="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-line">{{ selectedMeeting.deskripsi }}</p>
           </div>
+          
+          <!-- Documents Section -->
+          <div v-if="selectedMeeting.pks_document_url || selectedMeeting.draft_document_url || selectedMeeting.signed_document_url" class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Dokumen Rapat</h4>
+            <div class="space-y-2">
+                <div v-if="selectedMeeting.pks_document_url" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center">
+                        <FileText class="h-5 w-5 text-blue-500 mr-2" />
+                        <div>
+                          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen Pendukung</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Materi / Undangan</p>
+                        </div>
+                    </div>
+                    <a :href="selectedMeeting.pks_document_url" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">
+                        <Download class="h-4 w-4 mr-1" />
+                        Unduh
+                    </a>
+                </div>
+                
+                <div v-if="selectedMeeting.draft_document_url" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center">
+                        <FileText class="h-5 w-5 text-yellow-500 mr-2" />
+                        <div>
+                          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Draft Dokumen</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Hasil Pembahasan</p>
+                        </div>
+                    </div>
+                    <a :href="selectedMeeting.draft_document_url" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">
+                        <Download class="h-4 w-4 mr-1" />
+                        Unduh
+                    </a>
+                </div>
+                
+                <div v-if="selectedMeeting.signed_document_url" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center">
+                        <CheckCircle class="h-5 w-5 text-green-500 mr-2" />
+                        <div>
+                          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen Final</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Sudah Ditandatangani</p>
+                        </div>
+                    </div>
+                    <a :href="selectedMeeting.signed_document_url" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">
+                        <Download class="h-4 w-4 mr-1" />
+                        Unduh
+                    </a>
+                </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end">

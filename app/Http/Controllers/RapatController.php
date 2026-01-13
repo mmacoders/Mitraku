@@ -85,7 +85,7 @@ class RapatController extends Controller
             ->get();
             
         // Also get pasca rapat data for the second tab
-        $pascaQuery = Rapat::with(['creator', 'pksSubmission'])
+        $pascaQuery = Rapat::with(['creator', 'pksSubmission', 'mou'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -133,7 +133,7 @@ class RapatController extends Controller
     private function handlePascaRapatTab(Request $request, User $user)
     {
         // Build query for rapat with status 'selesai'
-        $query = Rapat::with(['creator', 'pksSubmission'])
+        $query = Rapat::with(['creator', 'pksSubmission', 'mou'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -233,7 +233,7 @@ class RapatController extends Controller
         }
         
         // Build query for rapat with status 'selesai'
-        $query = Rapat::with(['creator', 'pksSubmission'])
+        $query = Rapat::with(['creator', 'pksSubmission', 'mou'])
             ->where('user_id', $user->id)
             ->where('status', 'selesai');
             
@@ -761,7 +761,7 @@ class RapatController extends Controller
                 $mou = Mou::find($rapat->mou_id);
                 if ($mou) {
                     $mou->update([
-                        'status' => 'disetujui',
+                        // 'status' => 'disetujui', // Disable auto-approve to allow manual decision with validity period
                         'document_path' => $signedDocumentPath,
                     ]);
                     

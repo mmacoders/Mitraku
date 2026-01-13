@@ -65,6 +65,14 @@
       @success="handlePksSuccess"
     />
 
+    <!-- MoU Status Modal -->
+    <EditMouStatusModal 
+      :show="showMouModal" 
+      :mou="selectedMouSubmission" 
+      @close="closeMouModal" 
+      @success="handleMouSuccess"
+    />
+
     <div class="py-6">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Main Content -->
@@ -322,6 +330,9 @@
                         PKS Terkait
                       </th>
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        MoU Terkait
+                      </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Tanggal Rapat
                       </th>
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -334,7 +345,7 @@
                         Dokumen Final
                       </th>
                       <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Keputusan PKS
+                        Keputusan
                       </th>
                       <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Aksi
@@ -350,6 +361,9 @@
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ rapat.pks_submission?.title || '-' }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ rapat.mou?.title || '-' }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ formatDate(rapat.tanggal_waktu) }}
@@ -450,35 +464,65 @@
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <template v-if="rapat.pks_submission">
-                          <template v-if="rapat.pks_submission.status === 'proses'">
-                            <button
-                              v-if="rapat.signed_document_path"
-                              @click="openPksModal(rapat.pks_submission)"
-                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
-                              <CheckCircle class="h-3 w-3 mr-1" />
-                              Ambil Keputusan
-                            </button>
-                            <span 
-                              v-else
-                              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                              Tunggu Dokumen Final
-                            </span>
-                          </template>
-                          <div v-else>
-                             <span 
-                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              :class="getPksStatusClass(rapat.pks_submission.status)"
-                            >
-                              {{ getPksStatusText(rapat.pks_submission.status) }}
-                            </span>
-                          </div>
-                        </template>
-                        <span v-else class="text-sm text-gray-400">
-                          -
-                        </span>
+                        <div class="space-y-4">
+                            <!-- PKS Decision -->
+                            <div v-if="rapat.pks_submission" class="flex flex-col items-start gap-1">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">PKS:</span>
+                                <template v-if="rapat.pks_submission.status === 'proses'">
+                                    <button
+                                    v-if="rapat.signed_document_path"
+                                    @click="openPksModal(rapat.pks_submission)"
+                                    class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    >
+                                    <CheckCircle class="h-3 w-3 mr-1" />
+                                    Ambil Keputusan
+                                    </button>
+                                    <span 
+                                    v-else
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                    >
+                                    Menunggu Final
+                                    </span>
+                                </template>
+                                <div v-else>
+                                    <span 
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    :class="getPksStatusClass(rapat.pks_submission.status)"
+                                    >
+                                    {{ getPksStatusText(rapat.pks_submission.status) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- MoU Decision -->
+                            <div v-if="rapat.mou" class="flex flex-col items-start gap-1">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">MoU:</span>
+                                <template v-if="rapat.mou.status === 'proses'">
+                                    <button
+                                    v-if="rapat.signed_document_path"
+                                    @click="openMouModal(rapat.mou)"
+                                    class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    >
+                                        <CheckCircle class="h-3 w-3 mr-1" />
+                                        Ambil Keputusan
+                                    </button>
+                                    <span 
+                                    v-else
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                    >
+                                    Menunggu Final
+                                    </span>
+                                </template>
+                                <div v-else>
+                                    <span 
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    :class="getPksStatusClass(rapat.mou.status)"
+                                    >
+                                    {{ getPksStatusText(rapat.mou.status) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -547,6 +591,7 @@ import RapatDetailModal from '@/Components/admin/RapatDetailModal.vue';
 import EditRapatModal from '@/Pages/admin/kelola-rapat/Edit.vue';
 import PostMeetingDocumentModal from '@/Components/admin/PostMeetingDocumentModal.vue';
 import EditPksStatusModal from '@/Components/admin/EditPksStatusModal.vue';
+import EditMouStatusModal from '@/Components/admin/EditMouStatusModal.vue';
 import { Eye, Edit3, Trash2, Upload, Calendar, CheckCircle } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -567,8 +612,10 @@ const showEditModal = ref(false);
 const showDetailModal = ref(false);
 const showProcessModal = ref(false);
 const showPksModal = ref(false);
+const showMouModal = ref(false);
 const selectedRapat = ref(null);
 const selectedPksSubmission = ref(null);
+const selectedMouSubmission = ref(null);
 const currentProcessType = ref('');
 const openedMenu = ref(null);
 const creationType = ref('pks'); // 'pks' or 'mou'
@@ -815,6 +862,27 @@ const closePksModal = () => {
 
 // Handle PKS success
 const handlePksSuccess = () => {
+  router.reload({
+    only: ['pascaRapat'],
+    preserveState: true,
+    preserveScroll: true
+  });
+};
+
+// Open MoU modal
+const openMouModal = (mou) => {
+  selectedMouSubmission.value = mou;
+  showMouModal.value = true;
+};
+
+// Close MoU modal
+const closeMouModal = () => {
+  showMouModal.value = false;
+  selectedMouSubmission.value = null;
+};
+
+// Handle MoU success
+const handleMouSuccess = () => {
   router.reload({
     only: ['pascaRapat'],
     preserveState: true,

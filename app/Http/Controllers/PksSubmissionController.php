@@ -122,13 +122,33 @@ class PksSubmissionController extends Controller
             ->paginate(10);
             
         // Get upcoming meetings for the mitra
-        $upcomingMeetings = Rapat::whereHas('invitedMitra', function($q) use ($user) {
-                $q->where('user_id', $user->id);
+        $upcomingMeetings = Rapat::where(function($query) use ($user) {
+                // Case 1: Explicitly invited
+                $query->whereHas('invitedMitra', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                // Case 2: Owner of the PKS Submission
+                ->orWhereHas('pksSubmission', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                // Case 3: Owner of the MOU Submission
+                ->orWhereHas('mou', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
             })
             ->where('status', 'akan_datang')
             ->where('tanggal_waktu', '>=', now())
             ->orderBy('tanggal_waktu', 'asc')
             ->get();
+
+        // Append document URLs
+        $upcomingMeetings->each(function ($meeting) {
+            $meeting->append([
+                'pks_document_url',
+                'draft_document_url',
+                'signed_document_url'
+            ]);
+        });
             
         // Get statistics for mitra dashboard
         $totalSubmissions = PksSubmission::where('user_id', $user->id)->count();

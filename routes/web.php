@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PksSubmissionController;
 use App\Http\Controllers\RapatController;
 use App\Http\Controllers\MitraController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Mitra\PksSubmissionController as MitraPksSubmissionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +113,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Notification Routes
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     
     // Debug route to check rapat data
     Route::get('/debug/rapat-data', function () {
